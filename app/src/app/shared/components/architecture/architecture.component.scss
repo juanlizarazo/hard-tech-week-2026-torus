@@ -1,0 +1,110 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.dt-architecture {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+
+.dt-architecture__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--dt-font);
+  overflow: visible;
+}
+
+.dt-architecture__svg--narrow {
+  display: none;
+  max-width: 480px;
+}
+
+.dt-architecture__stage {
+  font-size: 13px;
+  font-weight: 800;
+  fill: var(--dt-ink);
+}
+
+.dt-architecture__edge {
+  fill: none;
+  stroke: var(--dt-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.dt-architecture__arrow {
+  fill: var(--dt-muted);
+}
+
+.dt-architecture__box {
+  fill: var(--dt-panel);
+  stroke: var(--dt-line);
+  stroke-width: 1.5;
+}
+
+.dt-architecture__title {
+  font-size: 13px;
+  font-weight: 800;
+  fill: var(--dt-ink);
+}
+
+.dt-architecture__detail {
+  font-size: 11.5px;
+  fill: var(--dt-muted);
+}
+
+.dt-architecture__node--cloud .dt-architecture__box {
+  fill: var(--dt-rush-wash);
+  stroke: var(--dt-rush);
+}
+
+.dt-architecture__node--cloud .dt-architecture__detail {
+  fill: var(--dt-rush-ink);
+}
+
+.dt-architecture__node--store .dt-architecture__box {
+  fill: var(--dt-paper);
+  stroke: var(--dt-muted);
+}
+
+.dt-architecture__node--browser .dt-architecture__box {
+  fill: var(--dt-clear-wash);
+  stroke: var(--dt-clear-mark);
+}
+
+.dt-architecture__node--browser .dt-architecture__detail {
+  fill: var(--dt-clear);
+}
+
+.dt-architecture__node--screen .dt-architecture__box {
+  fill: var(--dt-ink);
+  stroke: var(--dt-ink);
+}
+
+.dt-architecture__node--screen .dt-architecture__title {
+  fill: var(--dt-panel);
+}
+
+.dt-architecture__node--screen .dt-architecture__detail {
+  fill: color-mix(in srgb, var(--dt-panel) 75%, transparent);
+}
+
+.dt-architecture__caption {
+  max-width: 70ch;
+  font-size: var(--dt-text-15);
+  color: var(--dt-muted);
+}
+
+@media (max-width: 759.98px) {
+  .dt-architecture__svg--wide {
+    display: none;
+  }
+
+  .dt-architecture__svg--narrow {
+    display: block;
+  }
+}

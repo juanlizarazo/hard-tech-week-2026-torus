@@ -97,19 +97,29 @@ export class RankSlopeComponent implements OnChanges {
 
   private _spreadLabels(lines: IRankSlopeLine[], anchor: 'averageY' | 'marginalY', target: 'averageLabelY' | 'marginalLabelY'): void {
     const ordered = [...lines].sort((first, second) => first[anchor] - second[anchor]);
+    const gap = rankSlopeLayout.LABEL_GAP;
+    const top = this.topY + rankSlopeLayout.LABEL_EDGE_PADDING;
+    const bottom = this.height - rankSlopeLayout.BOTTOM_PADDING - rankSlopeLayout.LABEL_EDGE_PADDING;
     let previous = -Infinity;
 
     for (const line of ordered) {
-      line[target] = Math.max(line[anchor], previous + rankSlopeLayout.LABEL_GAP);
+      line[target] = Math.max(line[anchor], previous + gap, top);
       previous = line[target];
     }
 
-    const overflow = previous - (this.height - rankSlopeLayout.BOTTOM_PADDING);
+    let next = Infinity;
 
-    if (overflow > 0) {
-      for (const line of ordered) {
-        line[target] -= overflow;
-      }
+    for (let i = ordered.length - 1; i >= 0; i--) {
+      const line = ordered[i];
+      line[target] = Math.min(line[target], next - gap, bottom);
+      next = line[target];
+    }
+
+    let floor = -Infinity;
+
+    for (const line of ordered) {
+      line[target] = Math.max(line[target], floor + gap, top);
+      floor = line[target];
     }
   }
 

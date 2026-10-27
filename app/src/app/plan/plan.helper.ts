@@ -8,7 +8,8 @@ import {
   ISiteArchetype,
   IStationAssets,
   ITariffSchedule,
-  TariffScheduleId
+  TariffScheduleId,
+  TariffSeason
 } from '@app/core/models';
 import { SiteGeneratorHelper, SitesHelper } from '@app/core/sites';
 import { TariffHelper, tariffSchedules } from '@app/core/tariff';
@@ -62,24 +63,30 @@ export class PlanHelper {
     return scheduleId === 'schedule-8' ? tariffSchedules.SCHEDULE_8 : tariffSchedules.SCHEDULE_6;
   }
 
-  public static hookNumbers(): IPlanHookNumbers {
-    const summer = tariffSchedules.SCHEDULE_8.seasons.summer;
-    const spread = summer.energyOnPeakPerKwh - summer.energyOffPeakPerKwh;
+  public static hookNumbers(season: TariffSeason = 'summer'): IPlanHookNumbers {
+    const rates = tariffSchedules.SCHEDULE_8.seasons[season];
+    const spread = rates.energyOnPeakPerKwh - rates.energyOffPeakPerKwh;
+    const equivalentKwh = Math.round(rates.demandRatePerKw / spread);
 
     return {
-      demandRateLabel: `$${summer.demandRatePerKw.toFixed(2)}`,
+      season,
+      demandRateLabel: `$${rates.demandRatePerKw.toFixed(2)}`,
       spreadLabel: `${(spread * 100).toFixed(1)}¢`,
-      equivalentKwh: Math.round(summer.demandRatePerKw / spread)
+      equivalentKwh,
+      roundedKwh: Math.round(equivalentKwh / 50) * 50
     };
   }
 
-  public static buildHook(): IPlanHook {
-    const numbers = PlanHelper.hookNumbers();
+  public static seasonOf(date: string): TariffSeason {
+    return TariffHelper.seasonOf(tariffSchedules.SCHEDULE_8, Number(date.slice(5, 7)));
+  }
+
+  public static buildHook(date: string): IPlanHook {
+    const numbers = PlanHelper.hookNumbers(PlanHelper.seasonOf(date));
 
     return {
-      title: `${numbers.demandRateLabel} vs ${numbers.spreadLabel}: one kW of summer on-peak demand costs as much as shifting ~${numbers.equivalentKwh} kWh`,
-      subtitle:
-        'Three clocks disagree on when to act: the bill (on-peak demand), the price (PACE EDAM) and the carbon (marginal CO2). The LP plans the Torus Station against all three, live.'
+      title: `${numbers.demandRateLabel} vs ${numbers.spreadLabel}`,
+      subtitle: `On Schedule 8 in ${PlanHelper.monthName(date)}, one kW of on-peak demand costs ${numbers.demandRateLabel} a month, and moving one kWh to a cheaper hour saves ${numbers.spreadLabel}: about ${PlanHelper.formatNumber(numbers.roundedKwh)} kWh of shifting per kW. The money is in the peak.`
     };
   }
 

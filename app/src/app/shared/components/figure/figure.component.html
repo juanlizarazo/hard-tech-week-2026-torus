@@ -1,6 +1,7 @@
 <div class="dt-figure" [class.dt-figure--small]="size === 'small'">
   <span class="dt-figure__value" [class.dt-figure__value--good]="tone === 'good'" [class.dt-figure__value--bad]="tone === 'bad'">{{ value }}</span>
   <span class="dt-figure__label">{{ label }}<ng-content select="[figure-term]"></ng-content></span>
+  <ng-content select="[figure-delta]"></ng-content>
   @if (detail) {
     <span class="dt-figure__detail">{{ detail }}</span>
   }

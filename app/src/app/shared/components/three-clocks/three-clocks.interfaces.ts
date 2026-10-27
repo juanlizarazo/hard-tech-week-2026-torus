@@ -18,6 +18,10 @@ export interface ILabeledRect extends IRect {
   label: string;
 }
 
+export interface IBillSegment extends ILabeledRect {
+  labelX: number;
+}
+
 export interface IHeatLaneView {
   lane: IClockLane;
   cells: IFilledRect[];
