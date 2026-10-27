@@ -1,0 +1,10 @@
+export const rankSlopeLayout = {
+  WIDTH: 420,
+  LEFT_X: 138,
+  RIGHT_X: 282,
+  TOP_Y: 52,
+  ROW_HEIGHT: 17,
+  BOTTOM_PADDING: 8,
+  DEFAULT_HEIGHT: 480,
+  HIGHLIGHT_COUNT: 3
+};

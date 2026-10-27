@@ -1,0 +1,124 @@
+<figure class="dt-rank-slope__figure">
+  <figcaption class="dt-rank-slope__title">Hour rank: average vs marginal CO2</figcaption>
+  @if (lines.length === 0) {
+    <p class="dt-rank-slope__empty">No hourly rank data to compare yet.</p>
+  } @else {
+    <ul class="dt-rank-slope__legend">
+      <li class="dt-rank-slope__legend-item">
+        <svg class="dt-rank-slope__legend-swatch" viewBox="0 0 24 12" aria-hidden="true">
+          <line x1="1" y1="6" x2="23" y2="6" class="dt-rank-slope__swatch-accent"></line>
+        </svg>
+        <span>Biggest rank change (labelled)</span>
+      </li>
+      <li class="dt-rank-slope__legend-item">
+        <svg class="dt-rank-slope__legend-swatch" viewBox="0 0 24 12" aria-hidden="true">
+          <line x1="1" y1="6" x2="23" y2="6" class="dt-rank-slope__swatch-muted"></line>
+        </svg>
+        <span>Other hours</span>
+      </li>
+    </ul>
+
+    <div class="dt-rank-slope__plot">
+      <svg
+        class="dt-rank-slope__svg"
+        [attr.viewBox]="'0 0 ' + width + ' ' + height"
+        preserveAspectRatio="xMidYMin meet"
+        role="img"
+        [attr.aria-label]="ariaSummary"
+        (pointerleave)="deactivate()"
+      >
+        <text class="dt-rank-slope__head" [attr.x]="leftX" y="16" text-anchor="middle">Average</text>
+        <text class="dt-rank-slope__head" [attr.x]="rightX" y="16" text-anchor="middle">Marginal</text>
+        <text class="dt-rank-slope__head-sub" [attr.x]="width / 2" y="34" text-anchor="middle">rank 1 = cleanest hour</text>
+
+        @for (line of lines; track line.hour) {
+          @if (!line.isHighlighted) {
+            <line
+              class="dt-rank-slope__line"
+              [class.dt-rank-slope__line--active]="line.hour === activeHour"
+              [attr.x1]="leftX"
+              [attr.y1]="line.averageY"
+              [attr.x2]="rightX"
+              [attr.y2]="line.marginalY"
+            ></line>
+            <text class="dt-rank-slope__rank" [attr.x]="leftX - 10" [attr.y]="line.averageY + 4" text-anchor="end">{{ line.averageRank }}</text>
+            <text class="dt-rank-slope__rank" [attr.x]="rightX + 10" [attr.y]="line.marginalY + 4" text-anchor="start">{{ line.marginalRank }}</text>
+          }
+        }
+
+        @for (line of lines; track line.hour) {
+          @if (line.isHighlighted) {
+            <line
+              class="dt-rank-slope__line dt-rank-slope__line--accent"
+              [attr.x1]="leftX"
+              [attr.y1]="line.averageY"
+              [attr.x2]="rightX"
+              [attr.y2]="line.marginalY"
+            ></line>
+            <circle class="dt-rank-slope__dot" [attr.cx]="leftX" [attr.cy]="line.averageY" r="4"></circle>
+            <circle class="dt-rank-slope__dot" [attr.cx]="rightX" [attr.cy]="line.marginalY" r="4"></circle>
+            <text class="dt-rank-slope__label" [attr.x]="leftX - 10" [attr.y]="line.averageY + 4" text-anchor="end">{{ line.hourLabel }} #{{ line.averageRank }}</text>
+            <text class="dt-rank-slope__label" [attr.x]="rightX + 10" [attr.y]="line.marginalY + 4" text-anchor="start">#{{ line.marginalRank }} {{ line.hourLabel }}</text>
+          }
+        }
+
+        @if (activeLine; as active) {
+          <line class="dt-rank-slope__line dt-rank-slope__line--hover" [attr.x1]="leftX" [attr.y1]="active.averageY" [attr.x2]="rightX" [attr.y2]="active.marginalY"></line>
+        }
+
+        @for (line of lines; track line.hour) {
+          <line
+            class="dt-rank-slope__hit"
+            role="img"
+            tabindex="0"
+            [attr.aria-label]="line.description"
+            [attr.x1]="leftX"
+            [attr.y1]="line.averageY"
+            [attr.x2]="rightX"
+            [attr.y2]="line.marginalY"
+            (pointerenter)="activate(line.hour)"
+            (pointerdown)="activate(line.hour)"
+            (focus)="activate(line.hour)"
+            (blur)="deactivate()"
+          ></line>
+        }
+      </svg>
+
+      @if (activeLine; as active) {
+        <div class="dt-rank-slope__tooltip" [style.top.%]="tooltipTopPercent">
+          <div class="dt-rank-slope__tooltip-title">{{ active.hourLabel }}</div>
+          <div class="dt-rank-slope__tooltip-row"><span>Average</span><span class="dt-rank-slope__tooltip-value">#{{ active.averageRank }}</span></div>
+          <div class="dt-rank-slope__tooltip-row"><span>Marginal</span><span class="dt-rank-slope__tooltip-value">#{{ active.marginalRank }}</span></div>
+          <div class="dt-rank-slope__tooltip-note">{{ active.changeText }}</div>
+        </div>
+      }
+    </div>
+
+    <details class="dt-rank-slope__table-details">
+      <summary class="dt-rank-slope__table-summary">View as table</summary>
+      <div class="dt-rank-slope__table-scroll">
+        <table class="dt-rank-slope__table">
+          <caption class="dt-rank-slope__visually-hidden">Average and marginal CO2 rank by hour</caption>
+          <thead>
+            <tr>
+              <th scope="col" class="dt-rank-slope__th">Hour</th>
+              <th scope="col" class="dt-rank-slope__th">Average rank</th>
+              <th scope="col" class="dt-rank-slope__th">Marginal rank</th>
+              <th scope="col" class="dt-rank-slope__th">Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of lines; track line.hour) {
+              <tr>
+                <th scope="row" class="dt-rank-slope__th dt-rank-slope__th--row">{{ line.hourLabel }}</th>
+                <td class="dt-rank-slope__td">{{ line.averageRank }}</td>
+                <td class="dt-rank-slope__td">{{ line.marginalRank }}</td>
+                <td class="dt-rank-slope__td">{{ formatChange(line.change) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </details>
+  }
+</figure>

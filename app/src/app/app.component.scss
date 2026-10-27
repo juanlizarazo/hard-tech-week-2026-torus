@@ -20,7 +20,7 @@
 }
 
 .shell__header {
-  background: #fff;
+  background: var(--dt-theme--card);
   border-bottom: 1px solid var(--dt-theme--border);
 }
 
@@ -50,7 +50,7 @@
 
 .shell__tagline {
   font-size: 0.8125rem;
-  color: #5b6573;
+  color: var(--dt-theme--muted);
 }
 
 .shell__nav {
@@ -74,9 +74,9 @@
   padding: 12px 16px;
   text-align: center;
   font-size: 0.75rem;
-  color: #5b6573;
+  color: var(--dt-theme--muted);
   border-top: 1px solid var(--dt-theme--border);
-  background: #fff;
+  background: var(--dt-theme--card);
 }
 
 @media (max-width: 599.98px) {
