@@ -1,0 +1,216 @@
+@use '../../../shared/styles/chart-tokens' as chart;
+
+@include chart.chart-tokens;
+
+.dt-component-bars__figure {
+  margin: 0;
+  padding: 16px;
+  background: var(--dt-viz-surface);
+  border: 1px solid var(--dt-viz-border);
+  border-radius: 12px;
+  color: var(--dt-viz-ink);
+  min-width: 0;
+}
+
+.dt-component-bars__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dt-component-bars__title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.dt-component-bars__toggle {
+  font: inherit;
+  font-size: 12px;
+  color: var(--dt-viz-ink);
+  background: transparent;
+  border: 1px solid var(--dt-viz-axis);
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--dt-viz-ink);
+    outline-offset: 1px;
+  }
+}
+
+.dt-component-bars__empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--dt-viz-muted);
+}
+
+.dt-component-bars__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  font-size: 13px;
+  color: var(--dt-viz-ink-secondary);
+}
+
+.dt-component-bars__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dt-component-bars__swatch {
+  width: 12px;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.dt-component-bars__group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  padding: 10px 0;
+  border-top: 1px solid var(--dt-viz-grid);
+}
+
+.dt-component-bars__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.dt-component-bars__label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dt-component-bars__chip {
+  max-width: 100%;
+  font-size: 11px;
+  color: var(--dt-viz-ink-secondary);
+  border: 1px solid var(--dt-viz-axis);
+  border-radius: 8px;
+  padding: 1px 6px;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+a.dt-component-bars__chip:hover,
+a.dt-component-bars__chip:focus-visible {
+  color: var(--dt-viz-ink);
+  border-color: var(--dt-viz-ink-secondary);
+}
+
+.dt-component-bars__plot {
+  min-width: 0;
+  padding-right: 64px;
+}
+
+.dt-component-bars__plot--signed {
+  padding-left: 64px;
+}
+
+.dt-component-bars__axis {
+  position: relative;
+  display: grid;
+  gap: 2px;
+}
+
+.dt-component-bars__zero {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--dt-viz-axis);
+}
+
+.dt-component-bars__row {
+  position: relative;
+  height: 14px;
+}
+
+.dt-component-bars__bar {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  min-width: 2px;
+  border-radius: 0 4px 4px 0;
+}
+
+.dt-component-bars__value {
+  position: absolute;
+  top: 0;
+  font-size: 11px;
+  line-height: 14px;
+  white-space: nowrap;
+  color: var(--dt-viz-ink);
+}
+
+.dt-component-bars__value--neg {
+  text-align: right;
+}
+
+.dt-component-bars__table-wrap {
+  overflow-x: auto;
+}
+
+.dt-component-bars__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th,
+  td {
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--dt-viz-grid);
+  }
+
+  th {
+    font-weight: 600;
+  }
+}
+
+.dt-component-bars__num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.dt-component-bars__visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .dt-component-bars__group {
+    grid-template-columns: 180px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dt-component-bars__meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dt-component-bars__row {
+    height: 18px;
+  }
+
+  .dt-component-bars__value {
+    font-size: 12px;
+    line-height: 18px;
+  }
+}

@@ -1,27 +1,225 @@
-<dt-screen-toolbar title="Backtest" subtitle="How the plan would have performed against a naive shaver and a perfect-foresight oracle.">
+<dt-screen-toolbar
+  title="Backtest"
+  subtitle="July 2026 on a simulated site: what the Torus Station would have saved, bill line by bill line."
+>
   <dt-simulated-badge></dt-simulated-badge>
 </dt-screen-toolbar>
 
-@if (state$ | async; as state) {
-  @switch (state.status) {
+@if (controls$ | async; as controls) {
+  <div class="dt-backtest__controls">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dt-backtest__site">
+      <mat-label>Simulated site</mat-label>
+      <mat-select [value]="controls.siteId" (selectionChange)="onSiteChange($event.value)">
+        @for (site of sites; track site.id) {
+          <mat-option [value]="site.id">{{ site.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-button-toggle-group
+      class="dt-backtest__schedule"
+      aria-label="Tariff schedule"
+      [value]="controls.scheduleId"
+      (change)="onScheduleChange($event.value)"
+    >
+      @for (option of scheduleOptions; track option.id) {
+        <mat-button-toggle [value]="option.id">{{ option.label }}</mat-button-toggle>
+      }
+    </mat-button-toggle-group>
+  </div>
+}
+
+@if (viewModel$ | async; as viewModel) {
+  @switch (viewModel.state.status) {
     @case ('loading') {
       <mat-card class="dt-card" appearance="outlined">
-        <mat-card-content class="screen__state-content">
+        <mat-card-content class="dt-backtest__state-content">
           <mat-spinner diameter="28"></mat-spinner>
-          <span>Loading…</span>
+          <span>{{ loadingMessage }}</span>
         </mat-card-content>
       </mat-card>
     }
     @case ('error') {
-      <dt-alert-banner [message]="state.errorMessage"></dt-alert-banner>
+      <dt-alert-banner [message]="viewModel.state.errorMessage"></dt-alert-banner>
     }
-    @default {
-      <mat-card class="dt-card screen__placeholder" appearance="outlined">
-        <mat-card-content class="screen__state-content">
-          <mat-icon aria-hidden="true">history</mat-icon>
-          <span>July 2026 backtest arrives in phase 04.</span>
+    @case ('empty') {
+      <mat-card class="dt-card" appearance="outlined">
+        <mat-card-content class="dt-backtest__state-content">
+          <mat-icon aria-hidden="true">inventory_2</mat-icon>
+          <span>{{ emptyMessage }}</span>
         </mat-card-content>
       </mat-card>
+    }
+    @case ('ready') {
+      @if (viewModel.model; as model) {
+        @if (viewModel.state.result; as result) {
+          <mat-card class="dt-card dt-backtest__section dt-backtest__lead" appearance="outlined">
+            <mat-card-content>
+              <div class="dt-backtest__lead-head">
+                <p class="dt-backtest__label">July 2026 result</p>
+                <dt-simulated-badge></dt-simulated-badge>
+              </div>
+              <h2 class="dt-backtest__headline">{{ model.lead }}</h2>
+              <p class="dt-backtest__hint">
+                Compared with {{ result.baseline.strategy.label.toLowerCase() }} at {{ result.summary.siteName }}. The naive
+                shaver discharges above {{ formatNumber(result.summary.naiveTargetKw) }} kW and does not read prices or
+                forecasts. Source: {{ result.sources.tariff.label }}.
+              </p>
+            </mat-card-content>
+          </mat-card>
+
+          <div class="dt-backtest__tiles">
+            @for (tile of model.tiles; track tile.label) {
+              <mat-card class="dt-card" appearance="outlined">
+                <mat-card-content>
+                  <p class="dt-backtest__label">{{ tile.label }}</p>
+                  <p class="dt-backtest__value" [class.dt-backtest__value--pending]="tile.value.startsWith('pending')">
+                    {{ tile.value }}
+                  </p>
+                  <p class="dt-backtest__hint">{{ tile.hint }}</p>
+                  @if (tile.source.url) {
+                    <a class="dt-backtest__chip" [href]="tile.source.url" target="_blank" rel="noopener noreferrer" [title]="tile.source.note || tile.source.label">{{ tile.source.kind }} · {{ tile.source.label }}</a>
+                  } @else {
+                    <span class="dt-backtest__chip" [title]="tile.source.note || tile.source.label">{{ tile.source.kind }} · {{ tile.source.label }}</span>
+                  }
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+
+          <mat-card class="dt-card dt-backtest__section" appearance="outlined">
+            <mat-card-content>
+              <div class="dt-backtest__section-head">
+                <h2 class="dt-backtest__heading">The month, day by day</h2>
+                <dt-simulated-badge></dt-simulated-badge>
+              </div>
+              <p class="dt-backtest__hint">
+                Each bar is the day's highest billed-demand interval with no storage. The outlined day set the month's
+                peak. Pick a day to see it below.
+              </p>
+              <dt-month-calendar
+                [cells]="model.calendarCells"
+                [monthLabel]="model.monthLabel"
+                [peakLabel]="model.peakLabel"
+                (daySelected)="onDaySelected($event)"
+              ></dt-month-calendar>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="dt-card dt-backtest__section" appearance="outlined">
+            <mat-card-content>
+              <h2 class="dt-backtest__heading">Where the dollars came from</h2>
+              <p class="dt-backtest__hint">
+                Savings against no storage, by bill line. Each line carries its tariff source.
+              </p>
+              <dt-component-bars [groups]="model.barGroups" [strategyLegend]="model.legend"></dt-component-bars>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="dt-card dt-backtest__section" appearance="outlined">
+            <mat-card-content>
+              <div class="dt-backtest__section-head">
+                <h2 class="dt-backtest__heading">Cycles: Spin takes the spikes, Pulse holds the energy</h2>
+                <dt-simulated-badge></dt-simulated-badge>
+              </div>
+              <p class="dt-backtest__hint">
+                Equivalent full cycles over July, with the share of rated cycle life used. Cycle life is an unverified
+                assumption from the research notes.
+              </p>
+              <div class="dt-backtest__cycles">
+                @for (row of model.cycleRows; track row.strategyId) {
+                  <div class="dt-backtest__cycle">
+                    <p class="dt-backtest__cycle-name">{{ row.strategyLabel }}</p>
+                    <div class="dt-backtest__cycle-row">
+                      <span class="dt-backtest__cycle-label">Pulse</span>
+                      <span class="dt-backtest__cycle-track" aria-hidden="true">
+                        <span class="dt-backtest__cycle-fill dt-backtest__cycle-fill--pulse" [style.width.%]="barWidth(row.pulsePercentOfLife)"></span>
+                      </span>
+                      <span class="dt-backtest__cycle-text">
+                        {{ row.pulseCycles.toFixed(1) }} cycles, {{ row.pulsePercentOfLife.toFixed(2) }}% of {{ formatNumber(result.summary.pulseCycleLife) }}
+                      </span>
+                    </div>
+                    <div class="dt-backtest__cycle-row">
+                      <span class="dt-backtest__cycle-label">Spin</span>
+                      <span class="dt-backtest__cycle-track" aria-hidden="true">
+                        <span class="dt-backtest__cycle-fill dt-backtest__cycle-fill--spin" [style.width.%]="barWidth(row.spinPercentOfLife)"></span>
+                      </span>
+                      <span class="dt-backtest__cycle-text">
+                        {{ row.spinCycles.toFixed(1) }} cycles, {{ row.spinPercentOfLife.toFixed(2) }}% of {{ formatNumber(result.summary.spinCycleLife) }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="dt-card dt-backtest__section" appearance="outlined">
+            <mat-card-content>
+              <div class="dt-backtest__section-head">
+                <h2 class="dt-backtest__heading">{{ model.dayCharts.dateLabel }} up close</h2>
+                <dt-simulated-badge></dt-simulated-badge>
+              </div>
+              <p class="dt-backtest__hint">
+                Day peak with no storage {{ formatNumber(model.dayCharts.dayPeakKw) }} kW. Source: simulated site, seed
+                {{ result.summary.seed }}.
+              </p>
+              <h3 class="dt-backtest__subheading">Load before and grid draw after</h3>
+              <dt-hour-chart
+                title="Site load and grid draw"
+                yLabel="kW"
+                [series]="model.dayCharts.load.series"
+                [bands]="model.dayCharts.load.bands"
+                [highlight]="model.dayCharts.load.highlight"
+                [xLabels]="model.dayCharts.xLabels"
+                [valueFormat]="kilowattFormat"
+              ></dt-hour-chart>
+              <h3 class="dt-backtest__subheading">Spin and Pulse dispatch</h3>
+              <dt-hour-chart
+                title="Spin and Pulse dispatch"
+                yLabel="kW, discharge above zero"
+                [series]="model.dayCharts.dispatch.series"
+                [bands]="model.dayCharts.dispatch.bands"
+                [highlight]="model.dayCharts.dispatch.highlight"
+                [xLabels]="model.dayCharts.xLabels"
+                [valueFormat]="kilowattFormat"
+              ></dt-hour-chart>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-expansion-panel class="dt-backtest__audit">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Sources and assumptions</mat-panel-title>
+              <mat-panel-description>{{ model.sourceRows.length }} entries</mat-panel-description>
+            </mat-expansion-panel-header>
+            <div class="dt-backtest__table-wrap">
+              <table class="dt-backtest__table">
+                <thead>
+                  <tr>
+                    <th class="dt-backtest__cell dt-backtest__cell--head" scope="col">Source</th>
+                    <th class="dt-backtest__cell dt-backtest__cell--head" scope="col">Kind</th>
+                    <th class="dt-backtest__cell dt-backtest__cell--head" scope="col">Note</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (source of model.sourceRows; track source.id) {
+                    <tr>
+                      <td class="dt-backtest__cell">
+                        @if (source.url) {
+                          <a [href]="source.url" target="_blank" rel="noopener noreferrer">{{ source.label }}</a>
+                        } @else {
+                          {{ source.label }}
+                        }
+                      </td>
+                      <td class="dt-backtest__cell">{{ source.kind }}</td>
+                      <td class="dt-backtest__cell">{{ source.note || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </mat-expansion-panel>
+        }
+      }
     }
   }
 }
