@@ -106,19 +106,23 @@ describe('July 2026 LP strategies sanity checks', () => {
       let result: IBacktestResult;
       let rolling: IBacktestStrategyResult;
       let oracle: IBacktestStrategyResult;
+      let detour: IBacktestStrategyResult;
 
-      it('runs the rolling LP and the oracle', async () => {
+      it('runs DETOUR, the rolling LP with a perfect load forecast and the oracle', async () => {
         result = await BacktestRunnerHelper.run(input, [
           ...strategies,
+          LpStrategyHelper.detour(solver),
           LpStrategyHelper.rollingLp(solver),
           LpStrategyHelper.oracle(solver),
         ]);
-        rolling = result.strategies.find((entry) => entry.strategy.role === 'realistic')!;
+        rolling = result.strategies.find((entry) => entry.strategy.role === 'perfect-load')!;
+        detour = result.lead;
         oracle = result.oracle!;
         expect(result.lead.strategy.role).toBe('realistic');
         expect(oracle.strategy.role).toBe('oracle');
         expect(rolling.captureRate).not.toBeNull();
-      }, 120000);
+        expect(detour.captureRate).not.toBeNull();
+      }, 240000);
 
       it('keeps both LPs inside SOC, power, ramp and the Wattsmart reserve', () => {
         const { spin, pulse } = input.assets;
@@ -143,7 +147,7 @@ describe('July 2026 LP strategies sanity checks', () => {
             previousNet = net;
 
             if (input.rushHourMask[index]) {
-              expect(interval.pulseSocKwh - pulseMinKwh + interval.spinSocKwh).toBeGreaterThanOrEqual(
+              expect(interval.pulseSocKwh - pulseMinKwh).toBeGreaterThanOrEqual(
                 input.wattsmartReserveKwh - epsilon,
               );
             }
@@ -151,6 +155,25 @@ describe('July 2026 LP strategies sanity checks', () => {
 
           expect(strategyResult.wattsmart.minimumHeldKwh).toBeGreaterThanOrEqual(input.wattsmartReserveKwh - epsilon);
         }
+      });
+
+      it('keeps DETOUR with a forecast inside power, SOC and the Wattsmart reserve on the real load', () => {
+        const { spin, pulse } = input.assets;
+        const pulseMinKwh = pulse.minSocFraction * pulse.energyKwh;
+
+        detour.intervals.forEach((interval: IPlanInterval, index: number) => {
+          expect(interval.loadKw).toBe(input.loadKw[index]);
+          expect(interval.spinDischargeKw).toBeLessThanOrEqual(spin.powerKw + epsilon);
+          expect(interval.pulseDischargeKw).toBeLessThanOrEqual(pulse.powerKw + epsilon);
+          expect(interval.pulseChargeKw).toBeLessThanOrEqual(pulse.powerKw + epsilon);
+          expect(interval.spinSocKwh).toBeGreaterThanOrEqual(-epsilon);
+          expect(interval.spinSocKwh).toBeLessThanOrEqual(spin.energyKwh + epsilon);
+          expect(interval.pulseSocKwh).toBeGreaterThanOrEqual(pulseMinKwh - epsilon);
+          expect(interval.pulseSocKwh).toBeLessThanOrEqual(pulse.maxSocFraction * pulse.energyKwh + epsilon);
+          expect(interval.gridKw).toBeGreaterThanOrEqual(-epsilon);
+          expect(Math.abs(interval.loadKw - interval.gridKw - (interval.spinDischargeKw - interval.spinChargeKw) - (interval.pulseDischargeKw - interval.pulseChargeKw))).toBeLessThanOrEqual(epsilon);
+        });
+        expect(detour.bill.determinants.demandKw).toBeLessThanOrEqual(result.baseline.bill.determinants.demandKw + epsilon);
       });
 
       it('never sets an LP billed demand peak or bill above the no-storage baseline', () => {

@@ -5,4 +5,5 @@ export type ProvenanceKind =
   | 'rmp-tariff'
   | 'torus-spec'
   | 'assumption'
-  | 'simulated';
+  | 'simulated'
+  | 'derived';

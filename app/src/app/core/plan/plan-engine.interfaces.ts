@@ -1,4 +1,4 @@
-import { IInterval, IPlanRequest, IRushHourWindow, IStationAssets, ITariffSchedule } from '../models';
+import { IInterval, ILpStats, IPlanRequest, IRushHourWindow, IStationAssets, ITariffSchedule } from '../models';
 
 export interface ILpInput {
   request: IPlanRequest;
@@ -18,6 +18,7 @@ export interface ILpInput {
 export interface ILpModel {
   lpText: string;
   columnNames: string[];
+  stats: ILpStats;
 }
 
 export interface ILpTerm {

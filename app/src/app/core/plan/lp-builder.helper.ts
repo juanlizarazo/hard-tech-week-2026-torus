@@ -166,7 +166,7 @@ export class LpBuilderHelper {
       );
     }
 
-    lines.push('', `\\ Wattsmart reserve: stored energy above the Pulse floor >= ${LpBuilderHelper.formatNumber(request.wattsmartReserveKwh)} kWh in rush hour`);
+    lines.push('', `\\ Wattsmart reserve: Pulse energy above its floor >= ${LpBuilderHelper.formatNumber(request.wattsmartReserveKwh)} kWh in rush hour`);
 
     for (let t = 0; t < intervalCount && hasReserve; t++) {
       if (!input.rushHourMask[t]) {
@@ -176,22 +176,29 @@ export class LpBuilderHelper {
       lines.push(
         ...LpBuilderHelper.formatRow(
           `res_${t}`,
-          [
-            { coefficient: 1, variable: `sp_${t}` },
-            { coefficient: 1, variable: `sf_${t}` },
-          ],
+          [{ coefficient: 1, variable: `sp_${t}` }],
           '>=',
           request.wattsmartReserveKwh + pulseMinSocKwh,
         ),
       );
     }
 
-    lines.push('', '\\ Terminal SOC: end the horizon at least as full as it started');
+    lines.push(
+      '',
+      request.terminalPulseSocKwh === undefined
+        ? '\\ Terminal SOC: end the horizon at least as full as it started'
+        : '\\ Terminal SOC: Pulse ends the day recharged for tomorrow, Spin at least as full as it started',
+    );
 
     if (intervalCount > 0) {
       const lastIndex = intervalCount - 1;
       lines.push(
-        ...LpBuilderHelper.formatRow('term_pulse', [{ coefficient: 1, variable: `sp_${lastIndex}` }], '>=', request.initialPulseSocKwh),
+        ...LpBuilderHelper.formatRow(
+          'term_pulse',
+          [{ coefficient: 1, variable: `sp_${lastIndex}` }],
+          '>=',
+          request.terminalPulseSocKwh ?? request.initialPulseSocKwh,
+        ),
         ...LpBuilderHelper.formatRow('term_spin', [{ coefficient: 1, variable: `sf_${lastIndex}` }], '>=', request.initialSpinSocKwh),
       );
     }
@@ -218,7 +225,27 @@ export class LpBuilderHelper {
     columnNames.push('D', 'Df');
     lines.push('', 'End', '');
 
-    return { lpText: lines.join('\n'), columnNames };
+    return {
+      lpText: lines.join('\n'),
+      columnNames,
+      stats: {
+        intervalCount,
+        variableCount: columnNames.length,
+        constraintCount: LpBuilderHelper.countConstraints(lines),
+        solveMs: 0,
+      },
+    };
+  }
+
+  public static countConstraints(lines: string[]): number {
+    const start = lines.indexOf('Subject To');
+    const end = lines.indexOf('Bounds');
+
+    if (start < 0 || end < start) {
+      return 0;
+    }
+
+    return lines.slice(start + 1, end).filter((line: string) => /^ \w+:/.test(line)).length;
   }
 
   public static formatNumber(value: number): string {

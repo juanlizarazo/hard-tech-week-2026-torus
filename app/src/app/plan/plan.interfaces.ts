@@ -79,6 +79,7 @@ export interface IPlanViewModel {
   maxReserveKwh: number;
   solveLabel: string;
   answer: string;
+  lpStatsLine: string;
   billTableCaption: string;
   notices: IPlanNotices;
 }

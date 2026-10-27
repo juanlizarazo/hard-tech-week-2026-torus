@@ -103,7 +103,7 @@ export class BacktestRunnerHelper {
     const lmpByHour = new Map<number, number | null>();
 
     for (const hour of priceMonth?.hours ?? []) {
-      lmpByHour.set(Date.parse(hour.utcStart), hour.lmp);
+      lmpByHour.set(Date.parse(`${hour.utcStart.slice(0, 13)}:00:00Z`), hour.lmp);
     }
 
     const hourMs = 3600000;
@@ -143,14 +143,6 @@ export class BacktestRunnerHelper {
 
       if (!window) {
         return false;
-      }
-
-      if (window.isAssumption) {
-        const fallbackStart = backtestSettings.FALLBACK_RUSH_HOUR_START;
-
-        return (
-          interval.localHour >= fallbackStart && interval.localHour < fallbackStart + backtestSettings.RUSH_HOUR_BLOCK_HOURS
-        );
       }
 
       const startMs = Date.parse(interval.startUtc);

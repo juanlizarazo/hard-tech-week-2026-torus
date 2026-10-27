@@ -10,6 +10,7 @@ import {
 } from './backtest.constants';
 import {
   IBacktestBillComponentDefinition,
+  IBacktestComparisonRow,
   IBacktestCycleRow,
   IBacktestDayCharts,
   IBacktestTile,
@@ -31,6 +32,8 @@ export class BacktestHelper {
       answer: BacktestHelper.answerSentence(result),
       leadTiles: tiles.slice(0, 4),
       secondaryTiles: tiles.slice(4),
+      comparisonRows: BacktestHelper.comparisonRows(result),
+      valueNotice: BacktestHelper.valueNotice(result),
       monthLabel: backtestScreenSettings.MONTH_LABEL,
       peakLabel: BacktestHelper.peakLabel(result.baseline),
       calendarNotice: BacktestHelper.calendarNotice(result),
@@ -64,21 +67,62 @@ export class BacktestHelper {
   }
 
   public static answerSentence(result: IBacktestResult): string {
-    const total = result.lead.savings.total;
+    const lead = result.lead;
+    const total = lead.savings.total;
     const megawatts = BacktestHelper.formatMegawatts(result.summary.nominalPeakKw);
     const scheduleName = result.summary.scheduleName.split(' (')[0];
-    const site = `a simulated ${megawatts} ${scheduleName} site`;
-    const leadName = BacktestHelper.strategyName(result.lead);
+    const siteNoun = BacktestHelper.siteNoun(result.summary.siteName);
+    const leadName = BacktestHelper.strategyName(lead);
 
     if (total <= 0) {
-      return `Not this time: planning one day ahead, ${leadName} did not lower the July bill on ${site}.`;
+      return `Not this time: planning one day ahead on a load forecast, ${leadName} did not lower the July bill on a simulated ${megawatts} ${scheduleName} ${siteNoun}. ${BacktestHelper.co2Clause(result)}`;
     }
 
-    const capture = result.lead.captureRate;
+    const demandShare = BacktestHelper.formatNumber((lead.savings.demand / total) * 100);
+    const capture = lead.captureRate;
     const captureText =
-      capture === null ? '' : ` That is a ${BacktestHelper.formatNumber(capture * 100)}% capture rate against ${backtestStrategyNames.oracle}.`;
+      capture === null ? '' : `, ${BacktestHelper.formatNumber(capture * 100)}% of the ${backtestStrategyNames.oracle.toLowerCase()} optimum`;
+    const leadSentence = `${BacktestHelper.formatMoney(total)} saved on a simulated ${megawatts} ${scheduleName} ${siteNoun}, ${demandShare}% from the demand charge${captureText}, with ${BacktestHelper.formatNumber(lead.wattsmart.minimumHeldKwh)} kWh held for Wattsmart.`;
 
-    return `Yes. Planning one day ahead with only what was known the afternoon before, ${leadName} would have cut the July bill on ${site} by ${BacktestHelper.formatMoney(total)}, mostly by flattening the peaks that set the demand charge.${captureText}`;
+    return [leadSentence, BacktestHelper.shaverClause(result), BacktestHelper.co2Clause(result)].filter(Boolean).join(' ');
+  }
+
+  public static siteNoun(siteName: string): string {
+    return siteName.replace(/^Simulated\s+/, '').replace(/\s*\(.*\)$/, '').toLowerCase();
+  }
+
+  public static shaverClause(result: IBacktestResult): string {
+    const shaver = result.shaver;
+    const lead = result.lead;
+    const leadName = BacktestHelper.strategyName(lead);
+    const shaverName = backtestStrategyNames.heuristic.toLowerCase();
+
+    if (!shaver || shaver.savings.total <= lead.savings.total) {
+      return '';
+    }
+
+    const weight = `$${result.summary.co2WeightPerKg.toFixed(2)}/kg`;
+
+    if (lead.value.total > shaver.value.total) {
+      return `The ${shaverName} saved more on the bill alone (${BacktestHelper.formatMoney(shaver.savings.total)}), but counting carbon at ${weight} and machine wear, ${leadName} is worth ${BacktestHelper.formatMoney(lead.value.total)} to its ${BacktestHelper.formatMoney(shaver.value.total)}.`;
+    }
+
+    return `The ${shaverName} did better here (${BacktestHelper.formatMoney(shaver.savings.total)} on the bill, ${BacktestHelper.formatMoney(shaver.value.total)} counting carbon and wear): a day-ahead forecast misses this site's short spikes.`;
+  }
+
+  public static co2Clause(result: IBacktestResult): string {
+    const netKg = result.lead.traffic.netKgCo2Change;
+    const leadName = BacktestHelper.strategyName(result.lead);
+
+    if (netKg > 0.5) {
+      return `CO2 rose ${BacktestHelper.formatNumber(netKg)} kg net over the month, mostly battery losses; raise the CO2 weight dial on the Plan to trade bill savings for carbon.`;
+    }
+
+    if (netKg < -0.5) {
+      return `${leadName} also cut CO2 by ${BacktestHelper.formatNumber(-netKg)} kg net.`;
+    }
+
+    return '';
   }
 
   public static tiles(result: IBacktestResult): IBacktestTile[] {
@@ -86,9 +130,11 @@ export class BacktestHelper {
     const total = lead.savings.total;
     const demandShare = total > 0 ? (lead.savings.demand / total) * 100 : 0;
     const capture = lead.captureRate;
-    const shaver = result.strategies.find((entry: IBacktestStrategyResult) => entry.strategy.role === 'heuristic');
+    const shaver = result.shaver;
+    const perfectLoad = result.perfectLoad;
     const leadName = BacktestHelper.strategyName(lead);
     const oracleName = backtestStrategyNames.oracle;
+    const netKg = lead.traffic.netKgCo2Change;
 
     return [
       {
@@ -105,7 +151,7 @@ export class BacktestHelper {
         value: `${BacktestHelper.formatNumber(demandShare)}%`,
         hint: `${leadName} cut billed demand from ${BacktestHelper.formatNumber(result.baseline.bill.determinants.demandKw)} kW to ${BacktestHelper.formatNumber(lead.bill.determinants.demandKw)} kW.`,
         tone: 'neutral',
-        source: null,
+        source: result.sources.tariff,
       },
       {
         id: 'capture',
@@ -114,17 +160,25 @@ export class BacktestHelper {
         hint:
           capture === null
             ? `${oracleName} could not be solved for this site.`
-            : `${leadName}'s share of the ${result.oracle ? BacktestHelper.formatMoney(result.oracle.savings.total) : ''} ${oracleName} saved.`,
+            : `${leadName}'s share of the ${result.oracle ? BacktestHelper.formatMoney(result.oracle.savings.total) : ''} ${oracleName.toLowerCase()} saved.`,
         tone: 'neutral',
-        source: null,
+        source: result.sources.oracle,
       },
       {
         id: 'wattsmart',
         label: 'Held for Wattsmart',
         value: `${BacktestHelper.formatNumber(lead.wattsmart.minimumHeldKwh)} kWh`,
-        hint: `The least energy kept in reserve during any rush hour. Committed ${BacktestHelper.formatNumber(lead.wattsmart.committedKwh)} kWh.`,
+        hint: `The least Pulse energy above its floor in any rush hour. Committed ${BacktestHelper.formatNumber(lead.wattsmart.committedKwh)} kWh.`,
         tone: 'neutral',
         source: result.sources.reserve,
+      },
+      {
+        id: 'co2',
+        label: 'Net CO2 change',
+        value: `${BacktestHelper.formatSigned(netKg)} kg`,
+        hint: netKg > 0.5 ? 'Battery losses add CO2; raise the CO2 weight on the Plan to push charging into cleaner hours.' : 'Marginal CO2 over the month, battery losses included.',
+        tone: netKg < -0.5 ? 'good' : netKg > 0.5 ? 'bad' : 'neutral',
+        source: result.sources.carbon,
       },
       {
         id: 'shaver',
@@ -135,22 +189,62 @@ export class BacktestHelper {
         source: result.sources.naiveTarget,
       },
       {
+        id: 'perfect-load',
+        label: 'With a perfect load forecast',
+        value: perfectLoad ? BacktestHelper.formatMoney(perfectLoad.savings.total) : 'Not run',
+        hint:
+          perfectLoad && perfectLoad.captureRate !== null
+            ? `${BacktestHelper.formatNumber(perfectLoad.captureRate * 100)}% capture if ${leadName} knew each day's load in advance.`
+            : 'The same planner, told the real load in advance.',
+        tone: 'neutral',
+        source: result.sources.site,
+      },
+      {
         id: 'moved',
         label: 'Moved out of rush hour',
         value: `${BacktestHelper.formatNumber(lead.traffic.avoidedKwh)} kWh`,
         hint: 'Grid draw shifted out of the rush-hour block over the month.',
         tone: 'neutral',
-        source: result.sources.site,
-      },
-      {
-        id: 'co2',
-        label: 'CO2 kept out of rush hour',
-        value: `${BacktestHelper.formatNumber(lead.traffic.avoidedKgCo2)} kg`,
-        hint: `Net change over the month ${BacktestHelper.formatSigned(lead.traffic.netKgCo2Change)} kg, battery losses included.`,
-        tone: 'neutral',
-        source: result.sources.carbon,
+        source: result.sources.rushHour,
       },
     ];
+  }
+
+  public static comparisonRows(result: IBacktestResult): IBacktestComparisonRow[] {
+    return result.strategies.map((entry: IBacktestStrategyResult) => ({
+      strategyId: entry.strategy.id,
+      strategyLabel: BacktestHelper.strategyName(entry),
+      color: BacktestHelper.strategyColor(entry),
+      isLead: entry.strategy.id === result.lead.strategy.id,
+      billSavings: entry.savings.total,
+      captureRate: entry.captureRate,
+      netKgCo2: entry.traffic.netKgCo2Change,
+      carbonValue: entry.value.carbonValue,
+      wearCost: entry.value.wearCost,
+      totalValue: entry.value.total,
+    }));
+  }
+
+  public static valueNotice(result: IBacktestResult): string {
+    const lead = result.lead;
+    const shaver = result.shaver;
+    const leadName = BacktestHelper.strategyName(lead);
+    const weight = `$${result.summary.co2WeightPerKg.toFixed(2)}/kg`;
+    const basis = `Total value is the bill saving, plus CO2 avoided at ${weight}, minus machine wear.`;
+
+    if (!shaver) {
+      return basis;
+    }
+
+    if (lead.savings.total >= shaver.savings.total) {
+      return `${basis} ${leadName} beats the ${backtestStrategyNames.heuristic.toLowerCase()} on the bill alone here.`;
+    }
+
+    if (lead.value.total >= shaver.value.total) {
+      return `${basis} ${leadName} prices carbon and wear, so it can lose on the bill alone and still come out ahead in total.`;
+    }
+
+    return `${basis} On this site and rate plan the ${backtestStrategyNames.heuristic.toLowerCase()} wins on both: a day-ahead load forecast cannot see its short spikes coming.`;
   }
 
   public static calendarNotice(result: IBacktestResult): string {

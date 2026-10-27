@@ -74,6 +74,13 @@ export interface IBacktestTraffic {
   netKgCo2Change: number;
 }
 
+export interface IBacktestValue {
+  billSavings: number;
+  carbonValue: number;
+  wearCost: number;
+  total: number;
+}
+
 export interface IBacktestStrategyResult {
   strategy: Pick<IBacktestStrategy, 'id' | 'label' | 'description' | 'role'>;
   intervals: IPlanInterval[];
@@ -84,6 +91,7 @@ export interface IBacktestStrategyResult {
   cycles: IBacktestCycles;
   wattsmart: IBacktestWattsmart;
   traffic: IBacktestTraffic;
+  value: IBacktestValue;
   captureRate: number | null;
 }
 
@@ -113,6 +121,7 @@ export interface IBacktestInputSummary {
   seed: number;
   pulseCycleLife: number;
   spinCycleLife: number;
+  co2WeightPerKg: number;
 }
 
 export interface IBacktestSources {
@@ -122,6 +131,8 @@ export interface IBacktestSources {
   reserve: IProvenance;
   rushHour: IProvenance;
   naiveTarget: IProvenance;
+  loadForecast: IProvenance;
+  oracle: IProvenance;
 }
 
 export interface IBacktestSnapshotSources {
@@ -138,6 +149,8 @@ export interface IBacktestResult {
   baseline: IBacktestStrategyResult;
   strategies: IBacktestStrategyResult[];
   oracle: IBacktestStrategyResult | null;
+  perfectLoad: IBacktestStrategyResult | null;
+  shaver: IBacktestStrategyResult | null;
   lead: IBacktestStrategyResult;
   days: IBacktestDay[];
   provenance: IProvenance[];
@@ -146,4 +159,37 @@ export interface IBacktestResult {
 
 export interface ILpSolver {
   solve(input: ILpInput): Promise<IPlanResult>;
+}
+
+export interface IReplayState {
+  pulseSocKwh: number;
+  spinSocKwh: number;
+  pulseNetKw: number;
+  billedPeakKw: number;
+  billedLoadPeakKw: number;
+  facilitiesPeakKw: number;
+}
+
+export interface IReplayDayInput {
+  assets: IStationAssets;
+  loadKw: number[];
+  planned: IPlanInterval[];
+  billedMask: boolean[];
+  rushHourMask: boolean[];
+  wattsmartReserveKwh: number;
+  stepHours: number;
+  state: IReplayState;
+}
+
+export interface IReplayDayResult {
+  intervals: IPlanInterval[];
+  state: IReplayState;
+}
+
+export interface IReplayLimits {
+  spinDischargeMaxKw: number;
+  spinChargeMaxKw: number;
+  pulseChargeMaxKw: number;
+  pulseLowestNetKw: number;
+  pulseHighestNetKw: number;
 }

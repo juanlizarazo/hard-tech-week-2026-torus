@@ -93,10 +93,25 @@ export interface IBacktestDayCharts {
   dayPeakKw: number;
 }
 
+export interface IBacktestComparisonRow {
+  strategyId: string;
+  strategyLabel: string;
+  color: string;
+  isLead: boolean;
+  billSavings: number;
+  captureRate: number | null;
+  netKgCo2: number;
+  carbonValue: number;
+  wearCost: number;
+  totalValue: number;
+}
+
 export interface IBacktestViewModel {
   answer: string;
   leadTiles: IBacktestTile[];
   secondaryTiles: IBacktestTile[];
+  comparisonRows: IBacktestComparisonRow[];
+  valueNotice: string;
   monthLabel: string;
   peakLabel: string;
   calendarNotice: string;

@@ -43,7 +43,7 @@ export const forecastProvenance = {
   },
   NAIVE: {
     id: 'seasonal-naive-168h',
-    label: 'Seasonal naive (same hour, last week)',
+    label: 'Same hour last week',
     kind: 'simulated' as const,
     url: '',
   },

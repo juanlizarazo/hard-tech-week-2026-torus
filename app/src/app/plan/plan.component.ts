@@ -203,7 +203,11 @@ export class PlanComponent {
     const site = SitesHelper.getArchetype(siteId);
 
     if (site) {
-      this._update({ siteId: site.id, scheduleId: site.scheduleId, wattsmartReserveKwh: 0 });
+      this._update({
+        siteId: site.id,
+        scheduleId: site.scheduleId,
+        wattsmartReserveKwh: PlanHelper.defaultReserveKwh(SitesHelper.getAssets(site.id) as IStationAssets)
+      });
     }
   }
 

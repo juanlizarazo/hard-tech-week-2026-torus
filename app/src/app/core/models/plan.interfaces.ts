@@ -13,6 +13,7 @@ export interface IPlanRequest {
   initialSpinSocKwh: number;
   initialPulseSocKwh: number;
   initialPulseNetKw?: number;
+  terminalPulseSocKwh?: number;
 }
 
 export interface IPlanInterval {
@@ -46,9 +47,37 @@ export interface IPlanMetrics {
   trafficAvoidedKwh: number;
   rushHourWindows: IRushHourWindow[];
   wattsmartHeldKwh: number;
+  rushHourPulseMinKwh: number;
+  spinBurstCount: number;
   spinThroughputKwh: number;
   pulseThroughputKwh: number;
   objectiveValue: number;
+  value: IPlanValue;
+}
+
+export interface IPlanValue {
+  baselinePeakKw: number;
+  plannedPeakKw: number;
+  peakCutKw: number;
+  baselineFacilitiesKw: number;
+  plannedFacilitiesKw: number;
+  facilitiesCutKw: number;
+  demandRatePerKw: number;
+  facilitiesRatePerKw: number;
+  demandWorthPerMonth: number;
+  facilitiesWorthPerMonth: number;
+  worthPerMonth: number;
+  baselineEnergyCost: number;
+  plannedEnergyCost: number;
+  energyCostChange: number;
+  co2ChangeKg: number;
+}
+
+export interface ILpStats {
+  intervalCount: number;
+  variableCount: number;
+  constraintCount: number;
+  solveMs: number;
 }
 
 export interface IPlanResult {
@@ -60,6 +89,7 @@ export interface IPlanResult {
   plannedBill: IBillBreakdown;
   lpText: string;
   solveMs: number;
+  lpStats: ILpStats;
   metrics?: IPlanMetrics;
   errorMessage?: string;
 }

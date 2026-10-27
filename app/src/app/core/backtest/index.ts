@@ -5,3 +5,5 @@ export * from './backtest-metrics.helper';
 export * from './backtest-runner.helper';
 export * from './lp-strategy.helper';
 export * from './naive-shaver.helper';
+export * from './plan-replay.helper';
+export * from './site-load-forecast.helper';

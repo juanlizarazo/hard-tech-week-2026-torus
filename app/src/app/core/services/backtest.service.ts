@@ -21,6 +21,7 @@ export class BacktestService {
   public readonly strategies: IBacktestStrategy[] = [
     NaiveShaverHelper.noStorage,
     NaiveShaverHelper.naiveShaver,
+    LpStrategyHelper.detour(this._planSolverService),
     LpStrategyHelper.rollingLp(this._planSolverService),
     LpStrategyHelper.oracle(this._planSolverService),
   ];

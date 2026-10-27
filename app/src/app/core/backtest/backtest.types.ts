@@ -1,1 +1,1 @@
-export type BacktestStrategyRole = 'baseline' | 'heuristic' | 'realistic' | 'oracle';
+export type BacktestStrategyRole = 'baseline' | 'heuristic' | 'realistic' | 'perfect-load' | 'oracle';
