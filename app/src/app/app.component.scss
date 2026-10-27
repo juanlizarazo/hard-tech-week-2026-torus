@@ -20,7 +20,7 @@
 }
 
 .shell__header {
-  background: #fff;
+  background: var(--dt-theme--card, #fff);
   border-bottom: 1px solid var(--dt-theme--border);
 }
 
@@ -76,7 +76,7 @@
   font-size: 0.75rem;
   color: var(--dt-theme--muted, #5b6573);
   border-top: 1px solid var(--dt-theme--border);
-  background: #fff;
+  background: var(--dt-theme--card, #fff);
 }
 
 @media (max-width: 599.98px) {

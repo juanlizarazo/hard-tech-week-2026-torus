@@ -27,7 +27,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input() public highlight: IHourChartHighlight | null = null;
   @Input() public xLabels: string[] = [];
   @Input() public yLabel = '';
-  @Input() public valueFormat: (value: number) => string = (value: number): string => value.toFixed(0);
+  @Input() public valueFormat: (value: number) => string = (value) => value.toFixed(0);
   @Input() public title = '';
   @Input() public dividerIndices: number[] = [];
   @Input() public estimateFromIndex: number | null = null;
@@ -119,7 +119,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     this._buildLegend();
     this._buildTable();
     this._buildSummary();
-    this.dividers = this.dividerIndices.map((index: number): number => this._xAt(index - 0.5));
+    this.dividers = this.dividerIndices.map((index) => this._xAt(index - 0.5));
     this.highlightRect = this._buildHighlight();
     this.hoverIndex = null;
   }
@@ -174,7 +174,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     this.tooltipTitle = this._rowLabel(index);
     this.tooltipLeftPercent = (this._xAt(index) / this.width) * 100;
     this.tooltipFlip = index > (this._pointCount() - 1) / 2;
-    const bandRows = this.bands.map((band: IHourChartBand): IHourChartTooltipRow => {
+    const bandRows = this.bands.map((band) => {
       const lower = this._valueAt(band.lower, index);
       const upper = this._valueAt(band.upper, index);
 
@@ -186,7 +186,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
         text: this._bandText(lower, upper, 'no data')
       };
     });
-    const lineRows = this.series.map((line: IHourChartSeries): IHourChartTooltipRow => {
+    const lineRows = this.series.map((line) => {
       const value = this._valueAt(line.values, index);
 
       return {
@@ -221,8 +221,8 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   private _pointCount(): number {
     const lengths = [
       this.xLabels.length,
-      ...this.series.map((line: IHourChartSeries): number => line.values.length),
-      ...this.bands.map((band: IHourChartBand): number => band.upper.length)
+      ...this.series.map((line) => line.values.length),
+      ...this.bands.map((band) => band.upper.length)
     ];
 
     return Math.max(0, ...lengths);
@@ -325,7 +325,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   private _niceStep(rawStep: number): number {
     const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
     const residual = rawStep / magnitude;
-    const niceResidual = hourChartTicks.Y_NICE_RESIDUALS.find((candidate: number): boolean => residual <= candidate);
+    const niceResidual = hourChartTicks.Y_NICE_RESIDUALS.find((candidate) => residual <= candidate);
 
     return (niceResidual ?? hourChartTicks.Y_NICE_FALLBACK) * magnitude;
   }
@@ -334,7 +334,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     const count = this._pointCount();
     const maxCount = this.width < hourChartLayout.NARROW_WIDTH ? hourChartTicks.X_MAX_COUNT_NARROW : hourChartTicks.X_MAX_COUNT_WIDE;
     const step =
-      hourChartTicks.X_STEP_CANDIDATES.find((candidate: number): boolean => count / candidate <= maxCount) ?? hourChartTicks.X_FALLBACK_STEP;
+      hourChartTicks.X_STEP_CANDIDATES.find((candidate) => count / candidate <= maxCount) ?? hourChartTicks.X_FALLBACK_STEP;
     const ticks: IHourChartTick[] = [];
 
     for (let index = 0; index < count; index += step) {
@@ -399,7 +399,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
         path: this._segmentPath(line.values, Math.max(0, split - 1), count - 1)
       });
     }
-    this.linePaths = paths.filter((entry: IHourChartPath): boolean => entry.path !== '');
+    this.linePaths = paths.filter((entry) => entry.path !== '');
     this.bandPaths = this.bands.map(
       (band: IHourChartBand): IHourChartBandPath => ({ label: band.label, color: band.color, path: this._bandPath(band, count) })
     );
@@ -434,20 +434,20 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     );
     const bottom = [...run]
       .reverse()
-      .map((point: IHourChartBandPoint): string => `L${this._xAt(point.index).toFixed(1)} ${this._yAt(point.lower).toFixed(1)}`);
+      .map((point) => `L${this._xAt(point.index).toFixed(1)} ${this._yAt(point.lower).toFixed(1)}`);
 
     return `${top.join('')}${bottom.join('')}Z`;
   }
 
   private _buildLegend(): void {
     this.legendItems = [
-      ...this.series.map((line: IHourChartSeries): IHourChartLegendItem => ({
+      ...this.series.map((line) => ({
         label: line.label,
         color: line.color,
         dashArray: this._dashArray(line.style),
         isBand: false
       })),
-      ...this.bands.map((band: IHourChartBand): IHourChartLegendItem => ({
+      ...this.bands.map((band) => ({
         label: band.label,
         color: band.color,
         dashArray: hourChartDashPatterns.NONE,
@@ -460,18 +460,18 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     const count = this._pointCount();
 
     this.tableHeaders = [
-      ...this.series.map((line: IHourChartSeries): string => line.label),
-      ...this.bands.map((band: IHourChartBand): string => band.label)
+      ...this.series.map((line) => line.label),
+      ...this.bands.map((band) => band.label)
     ];
     const rows: IHourChartTableRow[] = [];
 
     for (let index = 0; index < count; index++) {
-      const lineCells = this.series.map((line: IHourChartSeries): string => {
+      const lineCells = this.series.map((line) => {
         const value = this._valueAt(line.values, index);
 
         return this._lineText(value, '-');
       });
-      const bandCells = this.bands.map((band: IHourChartBand): string => {
+      const bandCells = this.bands.map((band) => {
         const lower = this._valueAt(band.lower, index);
         const upper = this._valueAt(band.upper, index);
 
@@ -487,8 +487,8 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   }
 
   private _buildSummary(): void {
-    const parts = this.series.map((line: IHourChartSeries): string => {
-      const values = line.values.filter((value: number | null): value is number => value !== null);
+    const parts = this.series.map((line) => {
+      const values = line.values.filter((value) => value !== null);
 
       if (values.length === 0) {
         return `${line.label}: no data`;

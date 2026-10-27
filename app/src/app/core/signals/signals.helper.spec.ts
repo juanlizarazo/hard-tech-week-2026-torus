@@ -24,7 +24,7 @@ const hourlyFixture = (
   count: number,
   build: (index: number) => Partial<Detour.Firestore.Snapshot.IGridHour>,
 ): Detour.Firestore.Snapshot.IGridHour[] =>
-  Array.from({ length: count }, (_unused, index: number) =>
+  Array.from({ length: count }, (_unused, index) =>
     makeHour(startMs + index * 3_600_000, `2026-07-15T${pad(index % 24)}:00-06:00`, build(index)),
   );
 
@@ -65,12 +65,12 @@ describe('signals helpers', () => {
 
   it('breaks the difference chain at a utc gap', () => {
     const base = Date.parse('2026-07-15T00:00:00Z');
-    const hours = Array.from({ length: 120 }, (_unused, index: number) =>
+    const hours = Array.from({ length: 120 }, (_unused, index) =>
       makeHour(base + index * 3_600_000, `2026-07-${pad(15 + Math.floor(index / 24))}T${pad(index % 24)}:00-06:00`, {
         fuelMw: { COL: 100 + index * 10 + ((index * index) % 11) * 7, NG: 100 },
       }),
     );
-    const withGap = hours.filter((_hour, index: number) => index !== 58);
+    const withGap = hours.filter((_hour, index) => index !== 58);
     const full = EmissionsHelper.marginalSeries(EmissionsHelper.buildRows(hours), 'fossil-generation');
     const gapped = EmissionsHelper.marginalSeries(EmissionsHelper.buildRows(withGap), 'fossil-generation');
     const countAt = (series: typeof full, hour: number): number | undefined =>

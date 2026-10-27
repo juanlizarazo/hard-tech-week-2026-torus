@@ -1,31 +1,36 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin, map, of, shareReplay, switchMap } from 'rxjs';
-import { IAverageEmissionsPoint, IForecastScore, IMarginalEmissionsSeries } from '../models';
+import { Observable, defer, finalize, forkJoin, map, of, shareReplay, switchMap } from 'rxjs';
 import { EmissionsHelper } from '../signals/emissions.helper';
 import { ForecastScoreHelper } from '../signals/forecast-score.helper';
+import { LoadingService } from './loading.service';
 import { SnapshotService } from './snapshot.service';
 
 @Injectable({ providedIn: 'root' })
 export class GridSignalsService {
   private readonly _snapshotService = inject(SnapshotService);
+  private readonly _loadingService = inject(LoadingService);
 
-  public readonly history$: Observable<Detour.Firestore.Snapshot.IGridHour[]> = this._snapshotService.manifest$.pipe(
-    switchMap((manifest) => {
-      if (!manifest || manifest.gridMonths.length === 0) {
-        return of([]);
-      }
+  public readonly history$: Observable<Detour.Firestore.Snapshot.IGridHour[]> = defer(() => {
+    this._loadingService.show();
 
-      return forkJoin(manifest.gridMonths.map((entry) => this._snapshotService.getGridMonth(entry.month)));
-    }),
-    map((months) =>
-      months
-        .flatMap((month) => (month ? month.hours : []))
-        .sort((first, second) => first.utcHourEnding.localeCompare(second.utcHourEnding))
-    ),
-    shareReplay(1)
-  );
+    return this._snapshotService.manifest$.pipe(
+      switchMap((manifest) => {
+        if (!manifest || manifest.gridMonths.length === 0) {
+          return of([]);
+        }
 
-  public readonly marginalEmissions$: Observable<IMarginalEmissionsSeries[]> = this.history$.pipe(
+        return forkJoin(manifest.gridMonths.map((entry) => this._snapshotService.getGridMonth(entry.month)));
+      }),
+      map((months) =>
+        months
+          .flatMap((month) => (month ? month.hours : []))
+          .sort((first, second) => first.utcHourEnding.localeCompare(second.utcHourEnding))
+      ),
+      finalize(() => this._loadingService.hide())
+    );
+  }).pipe(shareReplay(1));
+
+  public readonly marginalEmissions$ = this.history$.pipe(
     map((hours) => {
       const rows = EmissionsHelper.buildRows(hours);
 
@@ -34,17 +39,17 @@ export class GridSignalsService {
     shareReplay(1)
   );
 
-  public readonly averageEmissions$: Observable<IAverageEmissionsPoint[]> = this.history$.pipe(
+  public readonly averageEmissions$ = this.history$.pipe(
     map((hours) => EmissionsHelper.averageIntensity(EmissionsHelper.buildRows(hours))),
     shareReplay(1)
   );
 
-  public readonly forecastScore$: Observable<IForecastScore> = this.history$.pipe(
+  public readonly forecastScore$ = this.history$.pipe(
     map((hours) => ForecastScoreHelper.score(hours)),
     shareReplay(1)
   );
 
-  public readonly targetPriceHours$: Observable<Detour.Firestore.Snapshot.IPriceHour[]> = this._snapshotService.manifest$.pipe(
+  public readonly targetPriceHours$ = this._snapshotService.manifest$.pipe(
     switchMap((manifest) => {
       if (!manifest) {
         return of(null);

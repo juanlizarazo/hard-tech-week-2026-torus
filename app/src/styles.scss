@@ -14,6 +14,7 @@
   --dt-theme--error-bg: #fdecec;
   --dt-theme--surface: #f7f8fa;
   --dt-theme--border: #e2e5ea;
+  --dt-theme--card: #ffffff;
   --dt-theme--muted: #5b6573;
 }
 
@@ -42,4 +43,10 @@ body {
   font-family: Inter, 'Helvetica Neue', sans-serif;
   background: var(--dt-theme--surface);
   color: var(--dt-theme--primary);
+}
+
+.dt-card {
+  background: var(--dt-theme--card);
+  border: 1px solid var(--dt-theme--border);
+  border-radius: 12px;
 }
