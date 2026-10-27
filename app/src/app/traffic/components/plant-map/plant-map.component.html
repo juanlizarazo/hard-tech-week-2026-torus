@@ -1,0 +1,216 @@
+@if (viewModel$ | async; as viewModel) {
+  <dt-chart-frame title="Where the power comes from" [notice]="viewModel.state.data?.notice ?? ''">
+    @switch (viewModel.state.status) {
+      @case ('loading') {
+        <div class="dt-state" role="status">
+          <mat-spinner diameter="20"></mat-spinner>
+          <span>Placing PACE's power plants…</span>
+        </div>
+      }
+      @case ('error') {
+        <dt-alert-banner [message]="viewModel.state.errorMessage"></dt-alert-banner>
+      }
+      @case ('empty') {
+        <p class="dt-state">The fuel mix for the last two weeks isn't in this snapshot yet, so the map has nothing to light up.</p>
+      }
+      @case ('ready') {
+        @if (viewModel.state.data; as data) {
+          @if (viewModel.hourView; as hourView) {
+            <div class="plant-map">
+              <div class="plant-map__map">
+                <svg
+                  class="plant-map__svg"
+                  [attr.viewBox]="'0 0 ' + width + ' ' + data.height"
+                  role="img"
+                  [attr.aria-label]="
+                    'Map of ' + data.plantCount + ' power plants in the PACE area across Utah, Wyoming and Idaho. ' + hourView.summary + '.'
+                  "
+                >
+                  <defs>
+                    <clipPath id="plant-map-clip">
+                      <rect x="0" y="0" [attr.width]="width" [attr.height]="data.height"></rect>
+                    </clipPath>
+                  </defs>
+                  <g clip-path="url(#plant-map-clip)">
+                    @for (state of data.statePaths; track state.code) {
+                      <path class="plant-map__state" [class.plant-map__state--pace]="state.isPace" [attr.d]="state.path"></path>
+                    }
+                  </g>
+                  @for (stateLabel of data.stateLabelMarks; track stateLabel.label) {
+                    <text class="plant-map__state-label" [attr.x]="stateLabel.x" [attr.y]="stateLabel.y" text-anchor="middle">
+                      {{ stateLabel.label }}
+                    </text>
+                  }
+                  <g class="plant-map__plants">
+                    @for (plant of data.plantMarks; track plant.id) {
+                      <circle
+                        class="plant-map__plant"
+                        [attr.cx]="plant.x"
+                        [attr.cy]="plant.y"
+                        [attr.r]="plant.radius"
+                        [attr.fill]="plant.color"
+                        [attr.fill-opacity]="hourView.opacityByFuel[plant.fuelKey]"
+                      >
+                        <title>{{ plant.title }}</title>
+                      </circle>
+                    }
+                  </g>
+                  @for (city of data.cityMarks; track city.label) {
+                    <g class="plant-map__city">
+                      <line
+                        class="plant-map__leader"
+                        [attr.x1]="city.x"
+                        [attr.y1]="city.y"
+                        [attr.x2]="city.leaderX"
+                        [attr.y2]="city.signY + 9"
+                      ></line>
+                      <rect class="plant-map__sign" [attr.x]="city.signX" [attr.y]="city.signY" [attr.width]="city.signWidth" height="18" rx="3"></rect>
+                      <text class="plant-map__sign-text" [attr.x]="city.signX + city.signWidth / 2" [attr.y]="city.signY + 13" text-anchor="middle">
+                        {{ city.label }}
+                      </text>
+                    </g>
+                  }
+                  @for (point of data.weatherMarks; track point.id) {
+                    <rect
+                      class="plant-map__weather"
+                      [attr.x]="point.x - 3.5"
+                      [attr.y]="point.y - 3.5"
+                      width="7"
+                      height="7"
+                      [attr.transform]="'rotate(45 ' + point.x + ' ' + point.y + ')'"
+                    >
+                      <title>{{ point.label }} weather forecast point (Open-Meteo)</title>
+                    </rect>
+                  }
+                  <g class="plant-map__site">
+                    <line class="plant-map__leader" [attr.x1]="data.siteMark.x" [attr.y1]="data.siteMark.y" [attr.x2]="data.siteMark.labelX" [attr.y2]="data.siteMark.labelY - 14"></line>
+                    <circle class="plant-map__pin" [attr.cx]="data.siteMark.x" [attr.cy]="data.siteMark.y" r="5"></circle>
+                    <circle class="plant-map__pin-dot" [attr.cx]="data.siteMark.x" [attr.cy]="data.siteMark.y" r="1.8"></circle>
+                    <text class="plant-map__site-label" [attr.x]="data.siteMark.labelX" [attr.y]="data.siteMark.labelY - 2" text-anchor="middle">
+                      {{ data.siteMark.label }}
+                    </text>
+                    <text class="plant-map__site-note" [attr.x]="data.siteMark.labelX" [attr.y]="data.siteMark.labelY + 12" text-anchor="middle">
+                      {{ data.siteMark.note }}
+                    </text>
+                  </g>
+                </svg>
+              </div>
+
+              <div class="plant-map__side">
+                <p class="plant-map__hour">
+                  <span class="plant-map__hour-label">{{ hourView.hourLabel }}</span>
+                  @if (hourView.isRush) {
+                    <span class="plant-map__rush-tag">Rush hour</span>
+                  }
+                </p>
+                <p class="plant-map__fossil">
+                  Coal and gas make <strong>{{ hourView.fossilPercent }}%</strong> of PACE's power in this hour.
+                </p>
+                <ul class="plant-map__shares" aria-label="Share of PACE generation by fuel in this hour">
+                  @for (row of hourView.rows; track row.fuel.key) {
+                    <li class="plant-map__share">
+                      <span class="plant-map__swatch" [style.background]="row.fuel.color"></span>
+                      <span class="plant-map__share-label">{{ row.fuel.label }}</span>
+                      <span class="plant-map__bar" aria-hidden="true">
+                        <span class="plant-map__bar-fill" [style.width.%]="row.sharePercent" [style.background]="row.fuel.color"></span>
+                      </span>
+                      <span class="plant-map__share-value">{{ row.sharePercent }}%</span>
+                    </li>
+                  }
+                </ul>
+                <p class="plant-map__key">
+                  <span class="plant-map__key-item"><span class="plant-map__key-circles" aria-hidden="true"></span>Circle size: plant capacity</span>
+                  <span class="plant-map__key-item"><span class="plant-map__key-fade" aria-hidden="true"></span>Brightness: that fuel's share now</span>
+                  @if (data.weatherMarks.length > 0) {
+                    <span class="plant-map__key-item"><span class="plant-map__key-diamond" aria-hidden="true"></span>Weather forecast point</span>
+                  }
+                </p>
+                <p class="dt-hint">
+                  Average of {{ data.mix.dayCount }} days of EIA hourly fuel totals, {{ data.mix.startDate }} to {{ data.mix.endDate }}.
+                </p>
+              </div>
+            </div>
+
+            <div class="plant-map__scrubber">
+              <button
+                type="button"
+                class="plant-map__play"
+                [attr.aria-label]="isPlaying ? 'Pause the day' : 'Play the day hour by hour'"
+                [attr.aria-pressed]="isPlaying"
+                (click)="onTogglePlay(hourView.hour)"
+              >
+                <svg class="plant-map__play-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  @if (isPlaying) {
+                    <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"></path>
+                  } @else {
+                    <path d="M8 5v14l11-7z"></path>
+                  }
+                </svg>
+              </button>
+              <div class="plant-map__track-wrap">
+                <svg
+                  class="plant-map__rush-band"
+                  aria-hidden="true"
+                  preserveAspectRatio="none"
+                  [style.--band-left]="viewModel.rushTrack.leftPercent"
+                  [style.--band-width]="viewModel.rushTrack.widthPercent"
+                >
+                  <rect width="100%" height="100%" fill="url(#dt-rush-stripes)"></rect>
+                </svg>
+                <input
+                  class="plant-map__range"
+                  type="range"
+                  min="0"
+                  max="23"
+                  step="1"
+                  [value]="hourView.hour"
+                  aria-label="Hour of day"
+                  [attr.aria-valuetext]="hourView.summary"
+                  (input)="onHourInput($event)"
+                />
+                <div class="plant-map__ticks" aria-hidden="true">
+                  @for (tick of tickHours; track tick) {
+                    <span class="plant-map__tick" [style.--tick]="tick / 23 * 100">{{ tickLabel(tick) }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        }
+      }
+    }
+
+    <div how-to-read>
+      <p class="dt-hint">
+        Every circle is a power plant that reports to the <strong>PACE</strong> balancing area, sized by its nameplate capacity and coloured by fuel.
+        Plants that burn two fuels, like Jim Bridger, show one circle per fuel.
+      </p>
+      <ul class="dt-list">
+        <li>Drag the hour slider, or press Play, to step through an average day. Each fuel's circles brighten with that fuel's share of PACE generation in that hour.</li>
+        <li>Brown circles are coal (dark) and gas (light). Yellow is solar, blue is wind, teal is hydro, grey is everything else.</li>
+        <li>Orange stripes on the slider: PACE's rush hour.</li>
+        <li>Green signs are Wasatch Front cities. Diamonds are the three weather points our load forecast reads. The pin is the simulated airport, at an illustrative location.</li>
+      </ul>
+      <p class="dt-hint"><strong>Honesty note:</strong> {{ honestyNote }} The brightness of a fuel is the same for all of its plants.</p>
+      @if (viewModel.state.data; as data) {
+        <ul class="dt-list">
+          @for (capacity of data.capacities; track capacity.fuel.key) {
+            <li>{{ capacity.fuel.label }}: {{ capacity.plantCount }} plants, {{ capacity.capacityMw | number: '1.0-0' }} MW nameplate</li>
+          }
+        </ul>
+        @for (note of data.excluded; track note) {
+          <p class="dt-hint">Left off the map: {{ note }}.</p>
+        }
+        @if (data.offMapPlants.length > 0) {
+          <p class="dt-hint">Outside the frame: {{ data.offMapPlants.join('; ') }}.</p>
+        }
+        <div class="plant-map__sources">
+          <dt-source-chip [label]="'EIA-860M operating generator capacity, ' + data.period" [url]="data.sourceUrl"></dt-source-chip>
+          <dt-source-chip label="Hourly generation by fuel, PACE" kind="eia-930" [url]="eia930Url"></dt-source-chip>
+          <dt-source-chip [label]="data.statesSourceLabel" [url]="data.statesSourceUrl"></dt-source-chip>
+        </div>
+        <p class="dt-hint">Plant list pulled {{ data.pulledAt }} and bundled with the app, so the map works offline.</p>
+      }
+    </div>
+  </dt-chart-frame>
+}
