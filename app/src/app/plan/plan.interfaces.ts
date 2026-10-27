@@ -4,7 +4,8 @@ import {
   IRushHourWindow,
   ISiteArchetype,
   ProvenanceKind,
-  TariffScheduleId
+  TariffScheduleId,
+  TariffSeason
 } from '@app/core/models';
 import { ISiteLoadStats } from '@app/core/sites';
 import { PeakSoFarMode, PlanDateMode } from './plan.types';
@@ -94,13 +95,38 @@ export interface IPlanHook {
 }
 
 export interface IPlanHookNumbers {
+  season: TariffSeason;
   demandRateLabel: string;
   spreadLabel: string;
   equivalentKwh: number;
+  roundedKwh: number;
 }
 
 export interface IPlanNotices {
   clocks: string;
   load: string;
   dispatch: string;
+}
+
+export interface IPlanParsedValue {
+  amount: number;
+  unit: string;
+  isMoney: boolean;
+}
+
+export interface IPlanTileDelta {
+  text: string;
+  direction: 'up' | 'down';
+}
+
+export interface IPlanDeltaState {
+  deltas: Record<string, IPlanTileDelta>;
+  isUnchanged: boolean;
+}
+
+export interface IPlanTryChip {
+  id: string;
+  label: string;
+  effect: string;
+  changes: Partial<IPlanControls>;
 }

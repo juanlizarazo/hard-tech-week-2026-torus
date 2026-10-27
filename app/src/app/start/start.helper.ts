@@ -3,6 +3,7 @@ import { PlanEngineHelper, placeholderMefSeries } from '@app/core/plan';
 import { SitesHelper } from '@app/core/sites';
 import { TariffHelper } from '@app/core/tariff';
 import { TimeLabelHelper } from '@app/shared/helpers/time-label.helper';
+import { IPlanningDay } from '@app/shared/helpers/day-relation.interfaces';
 import { PlanHelper } from '../plan/plan.helper';
 import { startSettings } from './start.constants';
 import { IStartPreview } from './start.interfaces';
@@ -50,6 +51,19 @@ export class StartHelper {
       carbonCaption: mef === placeholderMefSeries ? 'Extra CO2 per MWh (placeholder), darker is dirtier' : 'Extra CO2 from one more MWh, darker is dirtier',
       mefIsPlaceholder: mef === placeholderMefSeries
     };
+  }
+
+  public static seasonBridge(day: IPlanningDay): string {
+    if (!day.targetDate) {
+      return '';
+    }
+
+    const season = PlanHelper.seasonOf(day.targetDate);
+    const rates = PlanHelper.hookNumbers(season);
+    const [year, month] = day.targetDate.split('-').map(Number);
+    const monthName = new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'long' });
+
+    return `${day.name} is ${monthName}, so ${season} rates apply: ${rates.demandRateLabel} per kW.`;
   }
 
   public static dateLabel(localDate: string): string {
