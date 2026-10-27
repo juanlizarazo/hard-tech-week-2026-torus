@@ -11,16 +11,16 @@
 
 ## CSS Theme Variables
 
-Use CSS variables defined in `styles.scss` for consistent theming. Swap the colors per project; keep the names.
+Use CSS variables defined in `styles.scss` for consistent theming. The palette follows the traffic metaphor: asphalt primary, green for clear roads and savings, amber for building congestion, red for rush hour.
 
 ```scss
-var(--app-theme--primary, #15445b)      // Primary brand color
-var(--app-theme--tertiary, #32a32f)     // Success/positive color (green)
-var(--app-theme--tertiary-bg, #e8f5e9)  // Success background (light green)
-var(--app-theme--accent, #d97706)       // Accent/warning color (orange)
-var(--app-theme--error, #d32f2f)        // Error color (red)
-var(--app-theme--error-dark, #ba1a1a)   // Dark error color
-var(--app-theme--error-bg, #ffebee)     // Error background (light red)
-var(--app-theme--surface, #fafafa)      // Card/surface background (light gray)
-var(--app-theme--border, #e0e0e0)       // Border color (gray)
+var(--dt-theme--primary, #1f2a37)      // Primary brand color (asphalt)
+var(--dt-theme--tertiary, #1f9d55)     // Clear road / savings (green)
+var(--dt-theme--tertiary-bg, #e6f6ec)  // Clear road background (light green)
+var(--dt-theme--accent, #e3a008)       // Congestion building / warning (amber)
+var(--dt-theme--error, #d63c3c)        // Rush hour / error (red)
+var(--dt-theme--error-dark, #a82828)   // Dark error color
+var(--dt-theme--error-bg, #fdecec)     // Rush hour background (light red)
+var(--dt-theme--surface, #f7f8fa)      // Card/surface background (light gray)
+var(--dt-theme--border, #e2e5ea)       // Border color (gray)
 ```

@@ -73,11 +73,11 @@ Types are shared between frontend and backend using local virtual npm packages:
 When adding new Firestore collections:
 1. Add interface to `functions/lib/firestore/index.d.ts` (uses `@google-cloud/firestore` types)
 2. Add matching interface to `app/src/types/firestore.d.ts` (uses `firebase.firestore.Timestamp`)
-3. Use namespace pattern: `[ProductName].Firestore.[Feature].I[InterfaceName]`
+3. Use namespace pattern: `Detour.Firestore.[Feature].I[InterfaceName]`
 
 Example:
 ```typescript
-namespace ProductName.Firestore.User {
+namespace Detour.Firestore.User {
   export interface IUserProfile {
     id?: string;
     email: string;
