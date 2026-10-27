@@ -4,7 +4,6 @@ import { SimulatedBadgeComponent } from '@app/shared/components';
 import { ChartHelper } from '../chart.helper';
 import { chartColors } from '../chart.constants';
 import {
-  IChartMargins,
   IChartTooltip,
   IHourTick,
   ILinearScale,
@@ -30,7 +29,7 @@ export class DispatchChartComponent extends ResponsiveChartDirective implements 
 
   public readonly colors = chartColors;
   public viewHeight = 420;
-  public margins: IChartMargins = { top: 28, right: 12, bottom: 44, left: 48 };
+  public margins = { top: 28, right: 12, bottom: 44, left: 48 };
   public plotRight = 0;
   public powerTop = 0;
   public powerBottom = 0;

@@ -1,4 +1,7 @@
-export const chartTimeZone = 'America/Denver';
+export const chartSettings = {
+  TIME_ZONE: 'America/Denver',
+  KG_PER_KWH_TO_LB_PER_MWH: 2204.62
+};
 
 export const chartColors = {
   INK: '#1f2a37',
@@ -28,5 +31,3 @@ export const chartLayout = {
   NARROW_TICK_HOURS: 6,
   TICK_WIDTH_THRESHOLD: 720
 };
-
-export const kgPerKwhToLbPerMwh = 2204.62;

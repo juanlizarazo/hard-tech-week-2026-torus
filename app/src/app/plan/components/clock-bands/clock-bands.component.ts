@@ -2,7 +2,7 @@ import { Component, Input, OnChanges } from '@angular/core';
 import { IPlanInterval, IRushHourWindow, TariffScheduleId } from '@app/core/models';
 import { SimulatedBadgeComponent } from '@app/shared/components';
 import { ChartHelper } from '../chart.helper';
-import { chartColors, kgPerKwhToLbPerMwh } from '../chart.constants';
+import { chartColors, chartSettings } from '../chart.constants';
 import {
   IChartTooltip,
   IFilledRect,
@@ -44,11 +44,11 @@ export class ClockBandsComponent extends ResponsiveChartDirective implements OnC
   public rushLabelY = 18;
   public hourTicks: IHourTick[] = [];
   public rushRanges: IWindowRange[] = [];
-  public billLane: IClockLane = this._emptyLane('Bill clock');
+  public billLane = this._emptyLane('Bill clock');
   public billSegments: ILabeledRect[] = [];
   public isAllHoursDemand = false;
-  public priceView: IHeatLaneView = this._emptyHeatView('Price clock');
-  public carbonView: IHeatLaneView = this._emptyHeatView('Carbon clock');
+  public priceView = this._emptyHeatView('Price clock');
+  public carbonView = this._emptyHeatView('Carbon clock');
   public heatViews: IHeatLaneView[] = [];
   public placeholderX = 0;
   public placeholderY = 0;
@@ -109,7 +109,7 @@ export class ClockBandsComponent extends ResponsiveChartDirective implements OnC
       },
       {
         label: this.mefIsPlaceholder ? 'Marginal CO2 (placeholder)' : 'Marginal CO2',
-        value: `${Math.round(interval.marginalKgCo2PerKwh * kgPerKwhToLbPerMwh).toLocaleString('en-US')} lb/MWh`,
+        value: `${Math.round(interval.marginalKgCo2PerKwh * chartSettings.KG_PER_KWH_TO_LB_PER_MWH).toLocaleString('en-US')} lb/MWh`,
         swatch: ''
       }
     ];
@@ -194,7 +194,7 @@ export class ClockBandsComponent extends ResponsiveChartDirective implements OnC
     this.carbonView = this._buildHeatLane(
       lanes[2],
       xScale,
-      intervals.map((interval) => interval.marginalKgCo2PerKwh * kgPerKwhToLbPerMwh),
+      intervals.map((interval) => interval.marginalKgCo2PerKwh * chartSettings.KG_PER_KWH_TO_LB_PER_MWH),
       chartColors.CARBON_LOW,
       chartColors.CARBON_HIGH,
       (value) => Math.round(value).toLocaleString('en-US'),

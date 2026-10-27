@@ -3,7 +3,7 @@ import { IPlanInterval, IRushHourWindow } from '@app/core/models/plan.interfaces
 import { SimulatedBadgeComponent } from '@app/shared/components';
 import { ChartHelper } from '../chart.helper';
 import { chartColors } from '../chart.constants';
-import { IChartMargins, IChartTooltip, IHourTick, IValueTick, IWindowRange } from '../chart.interfaces';
+import { IChartTooltip, IHourTick, IValueTick, IWindowRange } from '../chart.interfaces';
 import { ResponsiveChartDirective } from '../responsive-chart.directive';
 
 @Component({
@@ -20,7 +20,7 @@ export class LoadChartComponent extends ResponsiveChartDirective implements OnCh
 
   public readonly colors = chartColors;
   public viewHeight = 300;
-  public margins: IChartMargins = { top: 28, right: 12, bottom: 44, left: 48 };
+  public margins = { top: 28, right: 12, bottom: 44, left: 48 };
   public plotRight = 0;
   public plotBottom = 0;
   public yTicks: IValueTick[] = [];

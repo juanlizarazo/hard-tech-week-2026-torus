@@ -20,17 +20,17 @@
     </mat-expansion-panel-header>
 
     <ng-template matExpansionPanelContent>
-    <div class="lp-text__toolbar">
-      <span class="lp-text__hint">Exactly what highs-js solved. Paste into any LP solver to check it.</span>
-      <button mat-stroked-button type="button" [disabled]="!lpText" (click)="onCopy($event)">
-        <div class="btn-content">
-          <mat-icon>{{ isCopied ? 'check' : 'content_copy' }}</mat-icon>
-          <span>{{ isCopied ? 'Copied' : copyFailed ? 'Copy failed' : 'Copy LP' }}</span>
-        </div>
-      </button>
-    </div>
+      <div class="lp-text__toolbar">
+        <span class="lp-text__hint">Exactly what highs-js solved. Paste into any LP solver to check it.</span>
+        <button mat-stroked-button type="button" [disabled]="!lpText" (click)="onCopy($event)">
+          <div class="btn-content">
+            <mat-icon>{{ isCopied ? 'check' : 'content_copy' }}</mat-icon>
+            <span>{{ isCopied ? 'Copied' : copyFailed ? 'Copy failed' : 'Copy LP' }}</span>
+          </div>
+        </button>
+      </div>
 
-    <pre class="lp-text__pre">{{ lpText }}</pre>
+      <pre class="lp-text__pre">{{ lpText }}</pre>
     </ng-template>
   </mat-expansion-panel>
 </mat-accordion>

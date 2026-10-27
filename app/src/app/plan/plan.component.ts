@@ -36,7 +36,7 @@ import {
   LoadChartComponent,
   LpTextComponent
 } from './components';
-import { IAssetRow, IPlanControls, IPlanDateContext, IPlanHook, IPlanSiteCard, IPlanSolveState } from './plan.interfaces';
+import { IAssetRow, IPlanControls, IPlanDateContext, IPlanSiteCard, IPlanSolveState } from './plan.interfaces';
 import { PeakSoFarMode, PlanDateMode } from './plan.types';
 import { PlanHelper } from './plan.helper';
 import { planBaseline, planDefaults } from './plan.constants';
@@ -68,13 +68,13 @@ export class PlanComponent {
   private readonly _snapshotService = inject(SnapshotService);
   private readonly _planSolverService = inject(PlanSolverService);
   private readonly _controls$ = new BehaviorSubject<IPlanControls>(PlanHelper.defaultControls());
-  private readonly _mef$: Observable<IMarginalEmissionsSeries> = of(placeholderMefSeries);
+  private readonly _mef$ = of(placeholderMefSeries);
   private _lastState: IPlanSolveState | null = null;
 
-  public readonly hook: IPlanHook = PlanHelper.buildHook();
+  public readonly hook = PlanHelper.buildHook();
   public readonly siteCards: IPlanSiteCard[] = PlanHelper.buildSiteCards();
   public readonly defaults = planDefaults;
-  public controls: IPlanControls = this._controls$.value;
+  public controls = this._controls$.value;
   public spinRows: IAssetRow[] = [];
   public pulseRows: IAssetRow[] = [];
   public maxReserveKwh = 0;
@@ -123,6 +123,7 @@ export class PlanComponent {
         startWith<IPlanSolveState>({ status: 'solving', viewModel: null, errorMessage: '' })
       )
     ),
+    startWith<IPlanSolveState>({ status: 'solving', viewModel: null, errorMessage: '' }),
     map((state: IPlanSolveState) => this._keepLastViewModel(state)),
     shareReplay(1)
   );

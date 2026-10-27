@@ -10,11 +10,11 @@ import {
   IValueTick,
   IWindowRange
 } from './chart.interfaces';
-import { chartLayout, chartTimeZone } from './chart.constants';
+import { chartLayout, chartSettings } from './chart.constants';
 
 export class ChartHelper {
   private static readonly _partsFormatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: chartTimeZone,
+    timeZone: chartSettings.TIME_ZONE,
     hourCycle: 'h23',
     hour: 'numeric',
     minute: 'numeric',

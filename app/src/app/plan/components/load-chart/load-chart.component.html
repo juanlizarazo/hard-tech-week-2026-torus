@@ -19,7 +19,7 @@
   @if (showDemand) {
     <li class="chart__legend-item">
       <span class="chart__key chart__key--dash load-chart__key-demand"></span>
-      On-peak demand (D)
+      Billed demand (D)
     </li>
   }
 </ul>
@@ -100,7 +100,7 @@
           [attr.y]="demandY - 6"
           text-anchor="end"
         >
-          {{ demandLabel || 'On-peak demand' }}
+          {{ demandLabel || 'Billed demand' }}
         </text>
       }
 

@@ -275,8 +275,8 @@ export class PlanEngineHelper {
 
   private static billFor(input: ILpInput, horizonKw: number[]): IBillBreakdown {
     const month = input.request.date.slice(0, 7);
-    const intervals: IInterval[] = [...input.monthToDateIntervals];
-    const loadKw: number[] = [...input.monthToDateLoadKw];
+    const intervals = [...input.monthToDateIntervals];
+    const loadKw = [...input.monthToDateLoadKw];
 
     for (let t = 0; t < input.intervals.length; t++) {
       if (input.intervals[t].localDate.slice(0, 7) === month) {

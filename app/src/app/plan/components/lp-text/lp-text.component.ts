@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -11,6 +11,8 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './lp-text.component.scss'
 })
 export class LpTextComponent implements OnChanges, OnDestroy {
+  private readonly _changeDetector = inject(ChangeDetectorRef);
+
   @Input({ required: true }) public lpText = '';
   @Input() public solveMs: number | null = null;
 
@@ -43,10 +45,12 @@ export class LpTextComponent implements OnChanges, OnDestroy {
     }
 
     this._clearTimer();
+    this._changeDetector.detectChanges();
     this._copiedTimer = setTimeout(() => {
       this.isCopied = false;
       this.copyFailed = false;
       this._copiedTimer = null;
+      this._changeDetector.detectChanges();
     }, 2000);
   }
 
