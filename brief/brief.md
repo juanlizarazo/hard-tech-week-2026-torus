@@ -1,7 +1,5 @@
 # Hard Tech Week 2026 Hackathon — Working Context
 
-<!-- AGENTS.md points here; agents read it before building any feature. Official bounty card: brief/torus-bounty.md. Deep research: research/. -->
-
 **Event:** Hard Tech Hackathon, Hard Tech Week 2026 (47G + Utah Tech Week) · kickoff Mon Oct 26 4–5 PM, build Mon–Wed · Aernata, 250 E 200 S Ste 320, Salt Lake City
 **Format:** Solo · ~42 build hours · present to sponsor judges Wed Oct 28 5–6 PM (one-on-one per the talk; no official time limit published — target under 5 minutes) · winners announced Thu Oct 29, 9:15 AM, Zero Gravity Summit main stage
 **Event judges (kickoff deck):** Ryan Byrd (former CTO of Entrata, Aptive and Pattern) · Angela Smith (COO, Nucleus Fund) · Nicole Witmyer (Strategic Events Leader, Torus) · Scott Holley (Executive Director, Lassonde Center, U of U) · Tanner Potter (Partner, Kickstart). "Each sponsor defines what winning looks like" — the Torus bounty is judged by Torus. Don't assume a grid engineer is in the room: the insight has to land for a non-specialist too
@@ -93,8 +91,6 @@ No files provided. The card suggests EIA · CAISO · ERCOT · Open-Meteo · Elec
 5. **4:30–5:00, close.** "This is the planning layer that sits on top of Lattice's real-time control." Show the generated LP text and architecture for 10 seconds each.
 
 ## 8. AI approach
-
-<!-- See rules/ai.md -->
 
 The forecast, the emission factor, the tariff engine and the optimization are all deterministic code. Do not say "AI-powered." An LLM sits at the edges only:
 
