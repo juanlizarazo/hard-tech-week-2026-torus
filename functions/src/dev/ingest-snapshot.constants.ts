@@ -30,6 +30,25 @@ export const ingestConstants = {
   FIRESTORE_DOCUMENT_LIMIT_BYTES: 1024 * 1024,
   DEFAULT_OUTPUT_DIRECTORY: `${scratchDirectory}/ingest-dry`,
   CACHE_DIRECTORY: `${scratchDirectory}/ingest-cache`,
+  OPEN_METEO_URL: 'https://previous-runs-api.open-meteo.com/v1/forecast',
+  OPEN_METEO_MODEL: 'best_match',
+  OPEN_METEO_CHUNK_DAYS: 90,
+  OPEN_METEO_DELAY_MS: 1200,
+  OPEN_METEO_MAX_ATTEMPTS: 4,
+  OPEN_METEO_TEMPERATURE_VARIABLE: 'temperature_2m_previous_day1',
+  OPEN_METEO_TEMPERATURE_FALLBACK_VARIABLE: 'temperature_2m_previous_day0',
+  OPEN_METEO_GHI_VARIABLE: 'shortwave_radiation_previous_day1',
+  OPEN_METEO_GHI_FALLBACK_VARIABLE: 'shortwave_radiation_previous_day0',
+} as const;
+
+export const weatherPoints: Detour.Firestore.Snapshot.IWeatherPoint[] = [
+  { id: 'SALT_LAKE_CITY', label: 'Salt Lake City', lat: 40.7608, lon: -111.891 },
+  { id: 'OGDEN', label: 'Ogden', lat: 41.223, lon: -111.9738 },
+  { id: 'PROVO', label: 'Provo', lat: 40.2338, lon: -111.6585 },
+];
+
+export const weatherHourFlags = {
+  WEATHER_DAY0_FALLBACK: 'weather-day0',
 } as const;
 
 export const eiaRegionTypes = {

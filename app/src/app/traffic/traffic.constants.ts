@@ -30,3 +30,18 @@ export const trafficCalendar = {
   WEEKDAYS: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
   MONTHS: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
 };
+
+export const forecastMethodSteps = [
+  'Features: hour-of-day x weekday/weekend-or-holiday dummies, two annual sine/cosine harmonics, heating/cooling degree days and hinges by time-of-day block, population-weighted GHI, and demand lagged 48 and 168 hours — all known the morning before PACE publishes its own forecast.',
+  'Weather is Open-Meteo’s previous-runs day-ahead forecast (not observed weather), so the model only ever sees what was knowable the day before, at Salt Lake City, Ogden and Provo, weighted by county population.',
+  'A ridge regression (closed-form, L2-penalized) is scored out-of-sample with monthly blocked cross-validation: each month is predicted by a model fit on every other month, minus a 7-day buffer so the lag features cannot leak that month’s own actuals.',
+  'P10/P90 are the empirical 10th/90th percentile of the out-of-fold residual, by hour-of-day and season.',
+  'Caveat: the model sees later months’ actual load during cross-validation, never their weather; weather inputs are always forecasts, never observations.',
+];
+
+export const forecastLimitations = [
+  'Demand, not net load: the forecast targets the same quantity as PACE’s own day-ahead forecast. The load chart’s net-load line stays phase 03’s trailing-average estimate.',
+  'Three weather points stand in for the whole PACE footprint, weighted by county population, not by actual load share.',
+  'Monthly blocked cross-validation is an approximation of a true day-ahead backtest: later months’ load (never their weather) is visible during fitting.',
+  'A linear model with hand-picked features. It will miss non-linear effects a more complex model could capture.',
+];

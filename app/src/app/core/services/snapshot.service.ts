@@ -9,6 +9,7 @@ export class SnapshotService {
   private readonly _loadingService = inject(LoadingService);
   private readonly _gridMonthCache = new Map<string, Observable<Detour.Firestore.Snapshot.IGridMonth | null>>();
   private readonly _priceMonthCache = new Map<string, Observable<Detour.Firestore.Snapshot.IPriceMonth | null>>();
+  private readonly _weatherMonthCache = new Map<string, Observable<Detour.Firestore.Snapshot.IWeatherMonth | null>>();
 
   public readonly pointer$: Observable<Detour.Firestore.Snapshot.IPointer | null> = defer(() =>
     from(getDoc(doc(this._firestore, 'config/snapshot')))
@@ -33,6 +34,10 @@ export class SnapshotService {
 
   public getPriceMonth(month: string): Observable<Detour.Firestore.Snapshot.IPriceMonth | null> {
     return this._cached(this._priceMonthCache, month, 'priceMonths');
+  }
+
+  public getWeatherMonth(month: string): Observable<Detour.Firestore.Snapshot.IWeatherMonth | null> {
+    return this._cached(this._weatherMonthCache, month, 'weatherMonths');
   }
 
   private _cached<T>(cache: Map<string, Observable<T | null>>, month: string, collectionName: string): Observable<T | null> {

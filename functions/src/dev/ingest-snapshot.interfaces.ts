@@ -42,8 +42,18 @@ export interface IPlausibilityResult {
   filteredRows: number;
 }
 
+export interface IOpenMeteoResponse {
+  latitude: number;
+  longitude: number;
+  hourly: {
+    time: string[];
+    [variableName: string]: string[] | number[];
+  };
+}
+
 export interface IIngestResult {
   manifest: Detour.Firestore.Snapshot.IManifest;
   gridMonths: Detour.Firestore.Snapshot.IGridMonth[];
   priceMonths: Detour.Firestore.Snapshot.IPriceMonth[];
+  weatherMonths: Detour.Firestore.Snapshot.IWeatherMonth[];
 }

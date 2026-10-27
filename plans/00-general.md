@@ -6,12 +6,12 @@
 
 | # | Phase | Blocking? | Can run in parallel with | Plan file | Status |
 |---|-------|-----------|--------------------------|-----------|--------|
-| 00 | Angular skeleton + Firebase project (branch `chore/firebase-setup`, separate session) | Yes — 01 branches from it | — | — | In progress |
-| 01 | Foundation: frozen data snapshot, tariff engine, seeded sites, shared types, three routes | **Yes — everything after it waits on this** | — | `phase-01-foundation.md` | Not started |
+| 00 | Angular skeleton + Firebase project (branch `chore/firebase-setup`, separate session) | Yes — 01 branches from it | — | — | Done |
+| 01 | Foundation: frozen data snapshot, tariff engine, seeded sites, shared types, three routes | **Yes — everything after it waits on this** | — | `phase-01-foundation.md` | Done |
 | 02 | LP engine + Plan ("Three Clocks") screen | No | 03, 04 | `phase-02-plan.md` | Done |
-| 03 | Grid signals (marginal CO2, PACE forecast score) + Traffic Report screen | No | 02, 04 | `phase-03-traffic.md` | In progress |
+| 03 | Grid signals (marginal CO2, PACE forecast score) + Traffic Report screen | No | 02, 04 | `phase-03-traffic.md` | Done |
 | 04 | Month backtest + Backtest screen | No | 02, 03 (rolling LP and oracle plug in once 02 merges) | `phase-04-backtest.md` | Done |
-| 05 | Stretch: our own PACE net-load forecast vs PACE's day-ahead forecast | No — only if the demo path works end to end by hour 24 | 04 (starts after 03 merges, same screen) | `phase-05-forecast.md` | Not started |
+| 05 | Stretch: our own PACE net-load forecast vs PACE's day-ahead forecast | No — stretch | — (01–04 merged) | `phase-05-forecast.md` | In progress |
 | 06 | Last mile: re-freeze tomorrow, audit, persona reviews, UI polish, rehearsal | — | — | — | Not started |
 
 ### Phase scope
@@ -20,7 +20,7 @@
 - **02 LP + Plan.** LP text generated in TypeScript and solved in the browser with highs-js, 48 hours in 15-minute steps: tariff energy, on-peak demand with peak-so-far, marginal CO2, Spin/Pulse degradation, battery ramp limit, Wattsmart reserve, terminal SOC. Plan screen: the hook sentence as the header, site load before and after, Spin vs Pulse stacked, the three clocks as labeled bands on one chart, sliders for CO2 weight, Wattsmart reserve and Schedule 6/8 with live re-solve, the traffic-avoided number, a date picker (real tomorrow, July 2026 peak day), and a view of the generated LP text. *Traces to:* demo 1:30–3:30 and 4:30 close; creativity (planning layer for Torus hardware); clarity (flywheel takes short spikes, battery holds the reserve).
 - **03 Signals + Traffic Report.** Siler-Evans first-difference MEF by hour × season with confidence intervals, run both ways (Δ fossil generation and Δ demand) with the gap shown as the import band. PACE's own DF scored against actuals over the snapshot window (MAPE, peak-hour under-forecast rate). Traffic Report: tomorrow's PACE load and net load with PACE's DF overlay, EDAM day-ahead price, MEF by hour with its interval, the rush-hour band where stress, price and carbon coincide, and a marginal-vs-average hour ranking. *Traces to:* demo 0:30–1:30; clarity (marginal vs average rank hours differently); execution (forecast error vs PACE's DF).
 - **04 Backtest.** July 2026, three strategies: naive threshold shaver, rolling daily LP with peak-so-far, perfect-foresight monthly oracle. Capture rate. Screen: month calendar with the 15-minute interval that set the peak, $ by component, capture rate, cycles on Pulse vs Spin, kWh held for Wattsmart, traffic avoided. Produces the lead number. Built first against 01's contracts with the naive shaver; the LP strategies drop in when 02 merges. *Traces to:* demo 3:30–4:30; execution (honest benchmark: capture rate vs oracle); Torus's own open question (the dollar value of a unit).
-- **05 Forecast (stretch).** Ridge net-load forecast with P10/P90 from empirical residual quantiles, trained on Open-Meteo previous-run forecasts (not observed weather), scored against PACE's DF and a seasonal naive. Added to the Traffic Report. *Traces to:* execution ("forecast error vs PACE's own day-ahead forecast"). If cut, 03's PACE-DF score still covers the benchmark line.
+- **05 Forecast (stretch).** Ridge regression forecast of PACE demand (the same quantity as PACE's DF), scored out-of-sample with monthly blocked CV (7-day buffer against lag leakage) and P10/P90 from empirical residual quantiles, trained on Open-Meteo previous-run forecasts (not observed weather, patched into the existing frozen snapshot rather than re-pulled). Scored against PACE's DF and a seasonal naive (same hour last week) on phase 03's window, added to the Traffic Report. *Traces to:* execution ("forecast error vs PACE's own day-ahead forecast"). If cut, 03's PACE-DF score still covers the benchmark line.
 - **06 Last mile.** Wednesday ~1:30 p.m.: re-run the ingest for tomorrow's DF and EDAM prices, redeploy, keep the Tuesday snapshot as the fallback. Requirements audit in a fresh session (`prompts/05-audit.md`), persona reviews including Torus (`prompts/06-persona-review.md`), 2–3 hours of UI polish, phones not broken, README with live link and demo flow, architecture view for the close. Rehearse under 5 minutes with the "likely Torus questions" from the research as the Q&A drill. *Traces to:* execution and the demo path.
 
 **Cross-cutting:** every $, kW and CO2 figure shows its source (tariff line, EIA series, constraint or labeled assumption). Every synthetic chart carries the SIMULATED badge. Every screen shows the snapshot pull date. Nothing on the demo path calls an upstream API.
@@ -36,7 +36,7 @@ Pulled once by the ingest script, frozen, pull date shown on every screen. Free 
 | EIA-930 (API v2, free key) | PACE demand, day-ahead forecast, net generation, total interchange | 2 years hourly, plus tomorrow's DF | 03 Traffic, 03 DF score, 05 forecast, backtest calendar context |
 | EIA-930 (API v2) | PACE generation by fuel type | 2 years hourly | 03 MEF regression, Traffic net load |
 | CAISO OASIS (no auth) | PACE EDAM day-ahead price (`ELAP_PACE-APND`), 31-day chunks | May 1, 2026 → tomorrow | 03 Traffic price curve, 04 backtest stress overlay |
-| Open-Meteo (no auth) | Previous-runs day-ahead temperature and GHI, 3–5 Wasatch Front points | 2 years hourly | 05 forecast only — drop from 01 if it runs long and pull it in 05 |
+| Open-Meteo (no auth) | Previous-runs day-ahead temperature and GHI, 3 Wasatch Front points | 2 years hourly | Pulled in 05 into the existing snapshot (`--weather-only` patch), `weatherPulledAt` in the manifest |
 | RMP Utah price summary (Sept 25, 2026) | Schedules 6 and 8 base rates and on-peak windows | — | 01 tariff engine (labeled "base rates, riders excluded") |
 | Seeded generator | Three site archetypes, Spin/Pulse parameters | July 2026 and the demo day | 02, 04 (labeled SIMULATED, seed 42) |
 

@@ -1,10 +1,22 @@
-import { IForecastScore } from '../models';
+import { IForecastScore, IProvenance } from '../models';
 import { IScoredHour } from './signals.interfaces';
 import { signalsConfig } from './signals.constants';
 
 export class ForecastScoreHelper {
   public static score(hours: Detour.Firestore.Snapshot.IGridHour[]): IForecastScore {
-    const scored = ForecastScoreHelper._scoredHours(hours);
+    return ForecastScoreHelper.scorePoints(ForecastScoreHelper._scoredHours(hours), [
+      {
+        id: 'eia930-day-ahead-forecast',
+        label: 'EIA-930 day-ahead demand forecast (DF) vs actual demand (D), PACE',
+        kind: 'eia-930',
+        url: 'https://www.eia.gov/opendata/browser/electricity/rto/region-data',
+        seriesId: 'DF,D',
+        note: `Hours flagged ${signalsConfig.EXCLUDED_FORECAST_FLAGS.join(', ')} are excluded from scoring`,
+      },
+    ]);
+  }
+
+  public static scorePoints(scored: IScoredHour[], provenance: IProvenance[]): IForecastScore {
     const byDate = new Map<string, IScoredHour[]>();
 
     for (const hour of scored) {
@@ -33,16 +45,7 @@ export class ForecastScoreHelper {
       daysScored: peakHours.length,
       startDate: dates[0] ?? '',
       endDate: dates[dates.length - 1] ?? '',
-      provenance: [
-        {
-          id: 'eia930-day-ahead-forecast',
-          label: 'EIA-930 day-ahead demand forecast (DF) vs actual demand (D), PACE',
-          kind: 'eia-930',
-          url: 'https://www.eia.gov/opendata/browser/electricity/rto/region-data',
-          seriesId: 'DF,D',
-          note: `Hours flagged ${signalsConfig.EXCLUDED_FORECAST_FLAGS.join(', ')} are excluded from scoring`,
-        },
-      ],
+      provenance,
     };
   }
 

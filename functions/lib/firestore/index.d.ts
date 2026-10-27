@@ -43,6 +43,11 @@ declare global {
       dayAheadForecastSource: 'eia-930' | 'caiso-oasis';
       filteredRows: number;
       sources: IProvenance[];
+      weatherMonths?: IMonthEntry[];
+      weatherPulledAt?: Timestamp;
+      weatherRange?: { start: string; end: string };
+      weatherPoints?: IWeatherPoint[];
+      weatherModel?: string;
     }
 
     interface IGridHour {
@@ -74,6 +79,26 @@ declare global {
     interface IPriceMonth {
       month: string;
       hours: IPriceHour[];
+    }
+
+    interface IWeatherPoint {
+      id: string;
+      label: string;
+      lat: number;
+      lon: number;
+    }
+
+    interface IWeatherHour {
+      utcHourEnding: string;
+      localHourStart: string;
+      temperatureC: Record<string, number | null>;
+      ghiWm2: Record<string, number | null>;
+      flags: string[];
+    }
+
+    interface IWeatherMonth {
+      month: string;
+      hours: IWeatherHour[];
     }
   }
 }

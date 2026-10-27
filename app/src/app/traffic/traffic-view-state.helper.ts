@@ -1,8 +1,31 @@
 import { Observable, catchError, combineLatest, map, of, startWith } from 'rxjs';
-import { ITrafficViewSources, ITrafficViewState } from './traffic.interfaces';
+import { ILoadForecast } from '@app/core/models';
+import { IForecastViewState, ITrafficViewSources, ITrafficViewState } from './traffic.interfaces';
 import { TrafficHelper } from './traffic.helper';
 
 export class TrafficViewStateHelper {
+  public static forecastFromSources(forecast$: Observable<ILoadForecast | null>): Observable<IForecastViewState> {
+    return forecast$.pipe(
+      map((forecast): IForecastViewState => {
+        if (!forecast) {
+          return { status: 'empty', forecast: null, errorMessage: '' };
+        }
+
+        return { status: 'ready', forecast, errorMessage: '' };
+      }),
+      catchError((error: unknown) => {
+        console.error('Failed to build the load forecast', error);
+
+        return of<IForecastViewState>({
+          status: 'error',
+          forecast: null,
+          errorMessage: 'We could not build our forecast from the snapshot weather. The rest of the Traffic Report is unaffected.',
+        });
+      }),
+      startWith<IForecastViewState>({ status: 'loading', forecast: null, errorMessage: '' }),
+    );
+  }
+
   public static fromSources(sources: ITrafficViewSources): Observable<ITrafficViewState> {
     return combineLatest([
       sources.manifest$,

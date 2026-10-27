@@ -85,8 +85,18 @@
   text-decoration: none;
 }
 
-.dt-traffic__audit {
+.dt-traffic__audit,
+.dt-traffic__forecast-method {
   margin-bottom: 16px;
+}
+
+.dt-traffic__table--forecast {
+  min-width: 480px;
+
+  .dt-traffic__cell {
+    padding: 8px 8px 8px 0;
+    white-space: nowrap;
+  }
 }
 
 .dt-traffic__table-wrap {

@@ -1,15 +1,18 @@
-import { gridHourFlags, ingestConstants, oasisPriceFieldByDataItem } from './ingest-snapshot.constants';
+import { gridHourFlags, ingestConstants, oasisPriceFieldByDataItem, weatherHourFlags } from './ingest-snapshot.constants';
 import {
   IEiaFuelRow,
   IEiaRegionRow,
   IOasisChunk,
   IOasisCsvRow,
+  IOpenMeteoResponse,
   IPlausibilityResult,
   ISeriesGapReport,
 } from './ingest-snapshot.interfaces';
 
 type GridHour = Detour.Firestore.Snapshot.IGridHour;
 type PriceHour = Detour.Firestore.Snapshot.IPriceHour;
+type WeatherHour = Detour.Firestore.Snapshot.IWeatherHour;
+type WeatherPoint = Detour.Firestore.Snapshot.IWeatherPoint;
 
 const millisecondsPerHour = 3_600_000;
 const millisecondsPerDay = 24 * millisecondsPerHour;
@@ -363,6 +366,70 @@ export class IngestSnapshotHelper {
     }
 
     return report;
+  }
+
+  public static buildDateChunks(startDate: string, endDate: string, chunkDays: number): { start: string; end: string }[] {
+    const chunks: { start: string; end: string }[] = [];
+    let chunkStartMs = Date.parse(`${startDate}T00:00:00Z`);
+    const endMs = Date.parse(`${endDate}T00:00:00Z`);
+
+    while (chunkStartMs <= endMs) {
+      const chunkEndMs = Math.min(chunkStartMs + (chunkDays - 1) * millisecondsPerDay, endMs);
+      chunks.push({
+        start: new Date(chunkStartMs).toISOString().slice(0, 10),
+        end: new Date(chunkEndMs).toISOString().slice(0, 10),
+      });
+      chunkStartMs = chunkEndMs + millisecondsPerDay;
+    }
+
+    return chunks;
+  }
+
+  public static buildWeatherHours(responses: IOpenMeteoResponse[], points: WeatherPoint[]): WeatherHour[] {
+    const hoursByKey = new Map<string, WeatherHour>();
+
+    responses.forEach((response, responseIndex) => {
+      const point = points[responseIndex];
+      const hourly = response.hourly;
+
+      hourly.time.forEach((isoTime, timeIndex) => {
+        const utcKey = `${isoTime.slice(0, 10)}T${isoTime.slice(11, 13)}`;
+        const utcMs = Date.parse(`${isoTime}:00Z`);
+        let hour = hoursByKey.get(utcKey);
+
+        if (!hour) {
+          hour = {
+            utcHourEnding: utcKey,
+            localHourStart: IngestSnapshotHelper.toLocalIso(utcMs),
+            temperatureC: {},
+            ghiWm2: {},
+            flags: [],
+          };
+          hoursByKey.set(utcKey, hour);
+        }
+
+        const temperatureDay1 = IngestSnapshotHelper._numberAt(hourly, ingestConstants.OPEN_METEO_TEMPERATURE_VARIABLE, timeIndex);
+        const temperatureDay0 = IngestSnapshotHelper._numberAt(hourly, ingestConstants.OPEN_METEO_TEMPERATURE_FALLBACK_VARIABLE, timeIndex);
+        const ghiDay1 = IngestSnapshotHelper._numberAt(hourly, ingestConstants.OPEN_METEO_GHI_VARIABLE, timeIndex);
+        const ghiDay0 = IngestSnapshotHelper._numberAt(hourly, ingestConstants.OPEN_METEO_GHI_FALLBACK_VARIABLE, timeIndex);
+        const usedFallback = (temperatureDay1 === null && temperatureDay0 !== null) || (ghiDay1 === null && ghiDay0 !== null);
+
+        hour.temperatureC[point.id] = temperatureDay1 ?? temperatureDay0;
+        hour.ghiWm2[point.id] = ghiDay1 ?? ghiDay0;
+
+        if (usedFallback && !hour.flags.includes(weatherHourFlags.WEATHER_DAY0_FALLBACK)) {
+          hour.flags.push(weatherHourFlags.WEATHER_DAY0_FALLBACK);
+        }
+      });
+    });
+
+    return [...hoursByKey.values()].sort((first, second) => first.utcHourEnding.localeCompare(second.utcHourEnding));
+  }
+
+  private static _numberAt(hourly: IOpenMeteoResponse['hourly'], variableName: string, index: number): number | null {
+    const series = hourly[variableName];
+
+    return Array.isArray(series) ? IngestSnapshotHelper.parseNumber(series[index] as string | number | null) : null;
   }
 
   public static parseArguments(argumentList: string[], defaultOutputDirectory: string): { isDryRun: boolean; outputDirectory: string } {
