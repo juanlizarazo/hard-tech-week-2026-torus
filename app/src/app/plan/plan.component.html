@@ -106,7 +106,7 @@
                     (valueChange)="onReserveChange($event)"
                   />
                 </mat-slider>
-                <span class="plan__dial-hint">Kept in the station through rush hour for a grid call. More reserve, less saving.</span>
+                <span class="plan__dial-hint">Kept in Pulse through rush hour for a grid call. More reserve, less saving.</span>
               </div>
 
               <hr class="plan__dials-rule" />
@@ -191,6 +191,9 @@
                       </dt-figure>
                     }
                   </div>
+                  @if (viewModel.lpStatsLine) {
+                    <p class="dt-hint plan__lp-stats">{{ viewModel.lpStatsLine }}</p>
+                  }
 
                   <dt-chart-frame title="Three clocks over the 48 hours" [notice]="viewModel.notices.clocks" [simulated]="true">
                     <dt-three-clocks
@@ -254,7 +257,7 @@
                   </dt-chart-frame>
 
                   <section class="dt-section" aria-labelledby="plan-bill-title">
-                    <h2 class="dt-section__title" id="plan-bill-title">The bill, line by line</h2>
+                    <h2 class="dt-section__title" id="plan-bill-title">What the plan changes on the bill</h2>
                     <p class="dt-hint">
                       {{ viewModel.billTableCaption }}
                       Base rates only, <dt-term key="RIDERS">riders</dt-term> excluded.
@@ -278,18 +281,15 @@
                               <td class="dt-table__cell dt-table__cell--num" [class.plan__saving]="line.change < 0">{{ line.change | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
                             </tr>
                           }
-                          <tr class="plan__bill-total">
-                            <td class="dt-table__cell">Total</td>
-                            <td class="dt-table__cell dt-table__cell--num">{{ viewModel.result.baselineBill.total | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
-                            <td class="dt-table__cell dt-table__cell--num">{{ viewModel.result.plannedBill.total | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
-                            <td class="dt-table__cell dt-table__cell--num plan__saving">{{ viewModel.result.plannedBill.total - viewModel.result.baselineBill.total | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
-                          </tr>
                         </tbody>
                       </table>
                     </div>
                   </section>
 
                   <dt-under-the-hood description="The LP that was solved and the Torus Station behind it">
+                    @if (viewModel.lpStatsLine) {
+                      <p class="dt-hint plan__lp-stats">{{ viewModel.lpStatsLine }}</p>
+                    }
                     <dt-lp-text [lpText]="viewModel.result.lpText" [solveMs]="viewModel.result.solveMs"></dt-lp-text>
 
                     <div class="plan__assets">

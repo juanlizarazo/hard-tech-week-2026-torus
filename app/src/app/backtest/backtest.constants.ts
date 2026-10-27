@@ -20,6 +20,7 @@ export const backtestStrategyNames: Record<BacktestStrategyRole, string> = {
   baseline: 'No storage',
   heuristic: 'Simple shaver',
   realistic: 'DETOUR',
+  'perfect-load': 'DETOUR with a perfect load forecast',
   oracle: 'Perfect hindsight',
 };
 
@@ -27,6 +28,7 @@ export const backtestStrategyColors: Record<BacktestStrategyRole, string> = {
   baseline: 'var(--dt-theme--chart-muted-line)',
   heuristic: 'var(--dt-muted)',
   realistic: 'var(--dt-clear-mark)',
+  'perfect-load': 'var(--dt-clear)',
   oracle: 'var(--dt-ink)',
 };
 

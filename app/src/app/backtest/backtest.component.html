@@ -88,7 +88,17 @@
               </div>
               <div class="dt-figures dt-figures--secondary">
                 @for (tile of model.secondaryTiles; track tile.id) {
-                  <dt-figure size="small" [value]="tile.value" [label]="tile.label" [detail]="tile.hint"></dt-figure>
+                  <dt-figure size="small" [value]="tile.value" [label]="tile.label" [detail]="tile.hint" [tone]="tile.tone">
+                    @if (tile.source; as source) {
+                      <dt-source-chip
+                        figure-source
+                        [label]="source.label"
+                        [kind]="source.kind"
+                        [url]="source.url"
+                        [note]="source.note ?? ''"
+                      ></dt-source-chip>
+                    }
+                  </dt-figure>
                 }
               </div>
               <p class="dt-hint">
@@ -96,6 +106,46 @@
                 The <dt-term key="DEMAND_CHARGE">demand charge</dt-term> and the
                 <dt-term key="WATTSMART">Wattsmart</dt-term> reserve are explained under each word.
               </p>
+            </section>
+
+            <section class="dt-section" aria-labelledby="backtest-compare-title">
+              <h2 class="dt-section__title" id="backtest-compare-title">Every strategy, bill and total value</h2>
+              <p class="dt-section__lede">{{ model.valueNotice }}</p>
+              <div class="dt-table-wrap">
+                <table class="dt-table">
+                  <caption class="cdk-visually-hidden">July savings by strategy: bill only and total value</caption>
+                  <thead>
+                    <tr>
+                      <th class="dt-table__cell dt-table__cell--head" scope="col">Strategy</th>
+                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Bill saved</th>
+                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Capture rate</th>
+                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Net CO2</th>
+                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Carbon value</th>
+                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Wear</th>
+                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Total value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of model.comparisonRows; track row.strategyId) {
+                      <tr>
+                        <th class="dt-table__cell" scope="row">
+                          @if (row.isLead) {
+                            <strong>{{ row.strategyLabel }}</strong>
+                          } @else {
+                            {{ row.strategyLabel }}
+                          }
+                        </th>
+                        <td class="dt-table__cell dt-table__cell--num">{{ formatMoney(row.billSavings) }}</td>
+                        <td class="dt-table__cell dt-table__cell--num">{{ row.captureRate === null ? '—' : formatNumber(row.captureRate * 100) + '%' }}</td>
+                        <td class="dt-table__cell dt-table__cell--num">{{ formatNumber(row.netKgCo2) }} kg</td>
+                        <td class="dt-table__cell dt-table__cell--num">{{ formatMoney(row.carbonValue) }}</td>
+                        <td class="dt-table__cell dt-table__cell--num">{{ formatMoney(-row.wearCost) }}</td>
+                        <td class="dt-table__cell dt-table__cell--num">{{ formatMoney(row.totalValue) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
             </section>
 
             <section class="dt-section" aria-labelledby="backtest-month-title">
@@ -233,7 +283,9 @@
                   <li>The simulated site ({{ result.summary.siteName }}, seed {{ result.summary.seed }}) runs every 15 minutes of {{ model.monthLabel }} on {{ result.summary.scheduleName }}.</li>
                   <li>No storage is the bill with the Torus Station switched off.</li>
                   <li>The {{ model.shaverName.toLowerCase() }} discharges whenever load passes {{ formatNumber(result.summary.naiveTargetKw) }} kW and recharges below it. It reads no prices or forecasts.</li>
-                  <li>{{ model.leadName }} re-solves the <dt-term key="LP">LP</dt-term> each afternoon for the next day, using only data known then, and carries its state of charge from day to day.</li>
+                  <li>{{ model.leadName }} re-solves the <dt-term key="LP">LP</dt-term> each afternoon for the next day on a load forecast: for each 15 minutes, the highest load on the same weekday over the last four weeks. Prices and carbon are known a day ahead.</li>
+                  <li>It then runs that plan against the real load with a live cap. When the site would pass the plan's peak or the month's peak so far, Pulse ramps up within its limits and Spin covers the rest, without touching the Wattsmart reserve. If stored energy runs short, the planned discharge is cut. State of charge carries from day to day.</li>
+                  <li>{{ model.leadName }} with a perfect load forecast is the same planner told each day's real load in advance, with no live cap. It shows what forecast error costs.</li>
                   <li>{{ model.oracleName }} solves the whole month at once with the real loads. No real controller can match it; it is the ceiling for the capture rate.</li>
                   <li>Bills use base rates only. Riders are excluded.</li>
                 </ul>
