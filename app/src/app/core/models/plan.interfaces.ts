@@ -12,6 +12,7 @@ export interface IPlanRequest {
   peakSoFarAllHoursKw: number;
   initialSpinSocKwh: number;
   initialPulseSocKwh: number;
+  initialPulseNetKw?: number;
 }
 
 export interface IPlanInterval {

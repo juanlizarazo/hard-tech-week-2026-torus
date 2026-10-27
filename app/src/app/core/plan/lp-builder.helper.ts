@@ -110,6 +110,15 @@ export class LpBuilderHelper {
       lines.push('\\ (ramp limit is at least twice rated power: no ramp rows)');
     }
 
+    if (hasRampRows && intervalCount > 0 && request.initialPulseNetKw !== undefined) {
+      const terms: ILpTerm[] = [
+        { coefficient: 1, variable: 'pd_0' },
+        { coefficient: -1, variable: 'pc_0' },
+      ];
+      lines.push(...LpBuilderHelper.formatRow('rampup_0', terms, '<=', request.initialPulseNetKw + rampLimitKw));
+      lines.push(...LpBuilderHelper.formatRow('rampdn_0', terms, '>=', request.initialPulseNetKw - rampLimitKw));
+    }
+
     for (let t = 1; t < intervalCount && hasRampRows; t++) {
       const terms: ILpTerm[] = [
         { coefficient: 1, variable: `pd_${t}` },

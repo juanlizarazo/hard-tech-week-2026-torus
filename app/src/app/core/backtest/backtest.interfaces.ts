@@ -3,11 +3,13 @@ import {
   IInterval,
   IMarginalEmissionsSeries,
   IPlanInterval,
+  IPlanResult,
   IProvenance,
   ISiteArchetype,
   IStationAssets,
   ITariffSchedule,
 } from '../models';
+import { ILpInput } from '../plan/plan-engine.interfaces';
 import { BacktestStrategyRole } from './backtest.types';
 
 export interface IBacktestInput {
@@ -140,4 +142,8 @@ export interface IBacktestResult {
   days: IBacktestDay[];
   provenance: IProvenance[];
   sources: IBacktestSources;
+}
+
+export interface ILpSolver {
+  solve(input: ILpInput): Promise<IPlanResult>;
 }

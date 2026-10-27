@@ -3,4 +3,5 @@ export * from './backtest.interfaces';
 export * from './backtest.types';
 export * from './backtest-metrics.helper';
 export * from './backtest-runner.helper';
+export * from './lp-strategy.helper';
 export * from './naive-shaver.helper';
