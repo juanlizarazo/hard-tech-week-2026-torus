@@ -1,6 +1,5 @@
 import { AfterViewInit, Component, ElementRef, Input, NgZone, OnChanges, OnDestroy, inject } from '@angular/core';
 import {
-  HourChartLineStyle,
   IHourChartBand,
   IHourChartBandPath,
   IHourChartHighlight,
@@ -11,6 +10,7 @@ import {
   IHourChartTick,
   IHourChartTooltipRow
 } from './hour-chart.interfaces';
+import { HourChartLineStyle } from './hour-chart.types';
 
 @Component({
   selector: 'dt-hour-chart',

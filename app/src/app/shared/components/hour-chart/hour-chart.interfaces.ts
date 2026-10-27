@@ -1,4 +1,4 @@
-export type HourChartLineStyle = 'solid' | 'dashed' | 'dotted';
+import { HourChartLineStyle } from './hour-chart.types';
 
 export interface IHourChartSeries {
   label: string;

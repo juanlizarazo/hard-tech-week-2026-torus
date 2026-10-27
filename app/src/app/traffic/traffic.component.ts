@@ -59,8 +59,4 @@ export class TrafficComponent {
   public absoluteValue(value: number): number {
     return Math.abs(value);
   }
-
-  public hourWindowLabel(startHour: number, endHourExclusive: number): string {
-    return `${TrafficHelper.hourLabel(startHour)}–${TrafficHelper.hourLabel(endHourExclusive % 24)}`;
-  }
 }
