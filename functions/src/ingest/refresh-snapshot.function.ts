@@ -12,9 +12,9 @@ export const refreshSnapshot = onSchedule(
   {
     schedule: '0 15 * * *',
     timeZone: ingestConstants.TIMEZONE,
-    retryCount: 3,
-    minBackoffSeconds: 600,
-    maxBackoffSeconds: 600,
+    retryCount: 5,
+    minBackoffSeconds: 900,
+    maxBackoffSeconds: 900,
     timeoutSeconds: 540,
     memory: '1GiB',
     secrets: [eiaApiKey],

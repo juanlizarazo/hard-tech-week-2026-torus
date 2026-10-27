@@ -50,10 +50,17 @@ async function main(): Promise<void> {
   } else if (command === 'unpin') {
     await storeService.unpin();
     console.log('Unpinned');
+  } else if (command === 'promote') {
+    if (!argument) {
+      throw new Error('Usage: snapshot:promote <snapshotId>');
+    }
+
+    await storeService.promote(argument);
+    console.log(`Promoted ${argument}`);
   } else if (command === 'rollback') {
     console.log(`Rolled back to ${await storeService.rollback()}`);
   } else if (command !== 'status') {
-    throw new Error(`Unknown command ${command}; use status, pin [id], unpin or rollback`);
+    throw new Error(`Unknown command ${command}; use status, pin [id], unpin, promote <id> or rollback`);
   }
 
   await printStatus();

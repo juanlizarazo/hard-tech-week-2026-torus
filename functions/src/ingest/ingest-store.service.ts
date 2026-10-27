@@ -148,6 +148,15 @@ export class IngestStoreService {
     return targetSnapshotId;
   }
 
+  public async promote(snapshotId: string): Promise<void> {
+    const pointer = await this.readPointer();
+    const lastGoodSnapshotIds = [snapshotId, ...IngestSnapshotHelper.resolveLastGoodIds(pointer)]
+      .filter((candidateId, index, candidateIds) => candidateIds.indexOf(candidateId) === index)
+      .slice(0, ingestConstants.LAST_GOOD_SNAPSHOT_LIMIT);
+
+    await this.setCurrent(snapshotId, lastGoodSnapshotIds);
+  }
+
   public async setCurrent(snapshotId: string, lastGoodSnapshotIds: string[]): Promise<void> {
     const pointer = await this.readPointer();
 
