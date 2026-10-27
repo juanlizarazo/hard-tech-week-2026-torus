@@ -8,6 +8,7 @@
 - `[SCSS-04]` Tablet breakpoint: `max-width: 959.98px`
 - `[SCSS-05]` Use flexbox and grid for layouts
 - `[SCSS-06]` Standard border-radius: `12px` for cards, `8px` for smaller elements
+- `[SCSS-07]` Tailwind (v3) is available for layout and spacing utilities in templates. Theme colors are mapped in `app/tailwind.config.js` (`text-asphalt`, `bg-clear-bg`, `text-congestion`, `text-rush`, `bg-surface`, `border-line`). Use component SCSS for anything Tailwind makes awkward, such as Material overrides
 
 ## CSS Theme Variables
 
