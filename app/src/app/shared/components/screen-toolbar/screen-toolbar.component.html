@@ -1,18 +1,18 @@
-<div class="dt-page-header screen-toolbar">
-  <div class="dt-page-header-left screen-toolbar__left">
+<div class="dt-page-header dt-screen-toolbar">
+  <div class="dt-page-header-left dt-screen-toolbar__left">
     @if (showBack) {
       <button mat-icon-button type="button" aria-label="Go back" (click)="onBack()">
         <mat-icon>arrow_back</mat-icon>
       </button>
     }
-    <div class="screen-toolbar__text">
-      <h1 class="dt-page-title screen-toolbar__title">{{ title }}</h1>
+    <div class="dt-screen-toolbar__text">
+      <h1 class="dt-page-title dt-screen-toolbar__title">{{ title }}</h1>
       @if (subtitle) {
-        <p class="dt-page-subtitle screen-toolbar__subtitle">{{ subtitle }}</p>
+        <p class="dt-page-subtitle dt-screen-toolbar__subtitle">{{ subtitle }}</p>
       }
     </div>
   </div>
-  <div class="screen-toolbar__actions">
+  <div class="dt-screen-toolbar__actions">
     <ng-content></ng-content>
   </div>
 </div>
