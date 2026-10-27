@@ -1,0 +1,77 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.lp-text__panel {
+  border: 1px solid var(--dt-theme--border);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.lp-text__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--dt-theme--primary);
+}
+
+.lp-text__icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+.lp-text__meta {
+  justify-content: flex-end;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.lp-text__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.lp-text__hint {
+  font-size: 0.8125rem;
+  color: #52514e;
+}
+
+.btn-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lp-text__pre {
+  max-height: 420px;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  border: 1px solid var(--dt-theme--border);
+  border-radius: 8px;
+  background: var(--dt-theme--surface);
+  color: var(--dt-theme--primary);
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre;
+  tab-size: 2;
+}
+
+@media (max-width: 599.98px) {
+  .lp-text__meta {
+    display: none;
+  }
+
+  .lp-text__pre {
+    max-height: 320px;
+    font-size: 11px;
+  }
+}

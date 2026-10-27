@@ -1,0 +1,36 @@
+<mat-accordion class="lp-text">
+  <mat-expansion-panel class="lp-text__panel">
+    <mat-expansion-panel-header class="lp-text__header">
+      <mat-panel-title class="lp-text__title">
+        <mat-icon class="lp-text__icon" aria-hidden="true">code</mat-icon>
+        Generated LP (CPLEX format)
+      </mat-panel-title>
+      <mat-panel-description class="lp-text__meta">
+        {{ lineCount | number }} lines
+        @if (variableCount) {
+          · {{ variableCount | number }} variables
+        }
+        @if (constraintCount) {
+          · {{ constraintCount | number }} constraints
+        }
+        @if (solveMs !== null && solveMs !== undefined) {
+          · solved in {{ solveMs | number: '1.0-0' }} ms
+        }
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <ng-template matExpansionPanelContent>
+    <div class="lp-text__toolbar">
+      <span class="lp-text__hint">Exactly what highs-js solved. Paste into any LP solver to check it.</span>
+      <button mat-stroked-button type="button" [disabled]="!lpText" (click)="onCopy($event)">
+        <div class="btn-content">
+          <mat-icon>{{ isCopied ? 'check' : 'content_copy' }}</mat-icon>
+          <span>{{ isCopied ? 'Copied' : copyFailed ? 'Copy failed' : 'Copy LP' }}</span>
+        </div>
+      </button>
+    </div>
+
+    <pre class="lp-text__pre">{{ lpText }}</pre>
+    </ng-template>
+  </mat-expansion-panel>
+</mat-accordion>

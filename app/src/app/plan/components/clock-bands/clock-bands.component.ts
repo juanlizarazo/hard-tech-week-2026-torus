@@ -1,0 +1,316 @@
+import { Component, Input, OnChanges } from '@angular/core';
+import { IPlanInterval, IRushHourWindow, TariffScheduleId } from '@app/core/models';
+import { SimulatedBadgeComponent } from '@app/shared/components';
+import { ChartHelper } from '../chart.helper';
+import { chartColors, kgPerKwhToLbPerMwh } from '../chart.constants';
+import {
+  IChartTooltip,
+  IFilledRect,
+  IHourTick,
+  ILinearScale,
+  ITooltipRow,
+  IWindowRange
+} from '../chart.interfaces';
+import { ResponsiveChartDirective } from '../responsive-chart.directive';
+import { IClockLane, IHeatLaneView, IHeatLegend, ILabeledRect } from './clock-bands.interfaces';
+
+@Component({
+  selector: 'dt-clock-bands',
+  imports: [SimulatedBadgeComponent],
+  templateUrl: './clock-bands.component.html',
+  styleUrl: './clock-bands.component.scss'
+})
+export class ClockBandsComponent extends ResponsiveChartDirective implements OnChanges {
+  private static _instanceCount = 0;
+
+  @Input({ required: true }) public intervals: IPlanInterval[] = [];
+  @Input() public rushHourWindows: IRushHourWindow[] = [];
+  @Input() public scheduleId: TariffScheduleId = 'schedule-8';
+  @Input() public billCaption = '';
+  @Input() public edamPricePerMwh: (number | null)[] = [];
+  @Input() public carbonCaption = 'Marginal CO2 (lb/MWh)';
+  @Input() public mefIsPlaceholder = false;
+
+  public readonly colors = chartColors;
+  public readonly idPrefix = `dt-clock-${ClockBandsComponent._instanceCount++}`;
+  public readonly stripHeight = 24;
+  public readonly legendWidth = 64;
+  public viewHeight = 300;
+  public plotLeft = 136;
+  public plotRight = 0;
+  public stripsTop = 0;
+  public stripsBottom = 0;
+  public axisY = 0;
+  public rushLabelY = 18;
+  public hourTicks: IHourTick[] = [];
+  public rushRanges: IWindowRange[] = [];
+  public billLane: IClockLane = this._emptyLane('Bill clock');
+  public billSegments: ILabeledRect[] = [];
+  public isAllHoursDemand = false;
+  public priceView: IHeatLaneView = this._emptyHeatView('Price clock');
+  public carbonView: IHeatLaneView = this._emptyHeatView('Carbon clock');
+  public heatViews: IHeatLaneView[] = [];
+  public placeholderX = 0;
+  public placeholderY = 0;
+  public hoverX = -1;
+  public tooltip: IChartTooltip | null = null;
+  public ariaLabel = '';
+
+  public get hatchFill(): string {
+    return `url(#${this.idPrefix}-hatch)`;
+  }
+
+  public get billHatchFill(): string {
+    return `url(#${this.idPrefix}-bill-hatch)`;
+  }
+
+  public get priceGradientFill(): string {
+    return `url(#${this.idPrefix}-price-gradient)`;
+  }
+
+  public get carbonGradientFill(): string {
+    return `url(#${this.idPrefix}-carbon-gradient)`;
+  }
+
+  public ngOnChanges(): void {
+    this.render();
+  }
+
+  public onPointerMove(event: PointerEvent): void {
+    const count = this.intervals.length;
+    const index = ChartHelper.pointerIndex(
+      event,
+      event.currentTarget as Element,
+      this.viewWidth,
+      this.plotLeft,
+      this.plotRight - this.plotLeft,
+      count
+    );
+
+    if (index < 0) {
+      this.onPointerLeave();
+
+      return;
+    }
+
+    const interval = this.intervals[index];
+    const xScale = ChartHelper.linearScale(0, count, this.plotLeft, this.plotRight);
+    const edam = this.edamPricePerMwh?.[index];
+    const rows: ITooltipRow[] = [
+      {
+        label: interval.isOnPeak ? 'On-peak energy' : 'Off-peak energy',
+        value: `$${interval.energyPricePerKwh.toFixed(4)}/kWh`,
+        swatch: interval.isOnPeak ? chartColors.RUSH : ''
+      },
+      {
+        label: 'EDAM day-ahead',
+        value: edam === null || edam === undefined ? 'not yet posted' : `$${edam.toFixed(2)}/MWh`,
+        swatch: ''
+      },
+      {
+        label: this.mefIsPlaceholder ? 'Marginal CO2 (placeholder)' : 'Marginal CO2',
+        value: `${Math.round(interval.marginalKgCo2PerKwh * kgPerKwhToLbPerMwh).toLocaleString('en-US')} lb/MWh`,
+        swatch: ''
+      }
+    ];
+    this.hoverX = ChartHelper.round(ChartHelper.scale(xScale, index + 0.5));
+    this.tooltip = ChartHelper.tooltip(
+      ChartHelper.formatLocalTime(interval.startUtc),
+      rows,
+      this.hoverX,
+      this.viewWidth
+    );
+  }
+
+  public onPointerLeave(): void {
+    this.hoverX = -1;
+    this.tooltip = null;
+  }
+
+  protected render(): void {
+    const intervals = this.intervals ?? [];
+    const narrow = this.isNarrow;
+    this.plotLeft = narrow ? 8 : 136;
+    this.plotRight = this.viewWidth - 12;
+    this.stripsTop = 28 + (narrow ? 18 : 0);
+    this.isAllHoursDemand = this.scheduleId === 'schedule-6';
+    this.rushLabelY = narrow ? 14 : this.stripsTop - 10;
+    this.onPointerLeave();
+
+    const laneHeight = narrow ? 92 : 64;
+    const lanes = [0, 1, 2].map((laneIndex) => this._layoutLane(laneIndex, laneHeight));
+    this.stripsBottom = lanes[2].stripY + this.stripHeight;
+    this.axisY = lanes[2].captionY + (narrow ? 34 : 18);
+    this.viewHeight = this.axisY + 34;
+
+    const billNote = this.isAllHoursDemand ? '' : 'On-peak demand + energy window';
+    lanes[0].title = 'Bill clock';
+    lanes[0].caption = [billNote, this.billCaption].filter((part) => !!part).join(' · ');
+    lanes[1].title = 'Price clock';
+    lanes[1].caption = 'PACE EDAM day-ahead price (CAISO OASIS)';
+    lanes[2].title = 'Carbon clock';
+    lanes[2].caption = this.carbonCaption;
+    this.billLane = lanes[0];
+    this.placeholderX = narrow ? lanes[2].titleX + 86 : lanes[2].titleX;
+    this.placeholderY = narrow ? lanes[2].titleY - 11 : lanes[2].titleY + 8;
+
+    if (intervals.length === 0) {
+      this.hourTicks = [];
+      this.rushRanges = [];
+      this.billSegments = [];
+      this.priceView = { ...this._emptyHeatView('Price clock'), lane: lanes[1] };
+      this.carbonView = { ...this._emptyHeatView('Carbon clock'), lane: lanes[2] };
+      this.heatViews = [];
+      this.ariaLabel = 'No plan intervals';
+
+      return;
+    }
+
+    const startUtcs = intervals.map((interval) => interval.startUtc);
+    const xScale = ChartHelper.linearScale(0, intervals.length, this.plotLeft, this.plotRight);
+    this.hourTicks = ChartHelper.hourTicks(startUtcs, xScale, ChartHelper.tickHoursForWidth(this.viewWidth));
+    this.rushRanges = ChartHelper.windowRanges(
+      startUtcs,
+      this.rushHourWindows ?? [],
+      xScale,
+      narrow ? 'Rush hour' : 'PACE rush hour · Wattsmart window'
+    );
+    this.billSegments = this._buildBillSegments(intervals, xScale, lanes[0]);
+
+    const prices = intervals.map((_, i) => {
+      const value = this.edamPricePerMwh?.[i];
+
+      return value === undefined ? null : value;
+    });
+    this.priceView = this._buildHeatLane(
+      lanes[1],
+      xScale,
+      prices,
+      chartColors.PRICE_LOW,
+      chartColors.PRICE_HIGH,
+      (value) => `$${Math.round(value)}`,
+      '/MWh'
+    );
+    this.carbonView = this._buildHeatLane(
+      lanes[2],
+      xScale,
+      intervals.map((interval) => interval.marginalKgCo2PerKwh * kgPerKwhToLbPerMwh),
+      chartColors.CARBON_LOW,
+      chartColors.CARBON_HIGH,
+      (value) => Math.round(value).toLocaleString('en-US'),
+      ' lb/MWh'
+    );
+    this.heatViews = [this.priceView, this.carbonView];
+    this.ariaLabel = `Three clocks over ${intervals.length} fifteen-minute intervals: bill on-peak windows, EDAM day-ahead price and marginal carbon, with the PACE rush hour marked`;
+  }
+
+  private _layoutLane(laneIndex: number, laneHeight: number): IClockLane {
+    const stripY = this.stripsTop + laneIndex * laneHeight;
+    const narrow = this.isNarrow;
+
+    return {
+      title: '',
+      caption: '',
+      titleX: narrow ? this.plotLeft : 0,
+      titleY: narrow ? stripY - 6 : stripY + 16,
+      stripY,
+      captionX: this.plotLeft,
+      captionY: stripY + this.stripHeight + 15
+    };
+  }
+
+  private _buildBillSegments(intervals: IPlanInterval[], xScale: ILinearScale, lane: IClockLane): ILabeledRect[] {
+    const runs = ChartHelper.runs(intervals.map((interval) => interval.isOnPeak));
+
+    return runs.map((run) => {
+      const x0 = ChartHelper.scale(xScale, run.startIndex);
+      const x1 = ChartHelper.scale(xScale, run.endIndex + 1);
+      const slice = intervals.slice(run.startIndex, run.endIndex + 1);
+      const averagePrice = slice.reduce((sum, interval) => sum + interval.energyPricePerKwh, 0) / slice.length;
+      const width = x1 - x0;
+
+      return {
+        x: ChartHelper.round(x0),
+        y: lane.stripY,
+        width: ChartHelper.round(width),
+        height: this.stripHeight,
+        label: width >= 72 ? `$${averagePrice.toFixed(4)}/kWh` : ''
+      };
+    });
+  }
+
+  private _buildHeatLane(
+    lane: IClockLane,
+    xScale: ILinearScale,
+    values: (number | null)[],
+    lowColor: string,
+    highColor: string,
+    formatter: (value: number) => string,
+    unit: string
+  ): IHeatLaneView {
+    const known = values.filter((value): value is number => value !== null && Number.isFinite(value));
+    const minimum = known.length ? Math.min(...known) : 0;
+    const maximum = known.length ? Math.max(...known) : 0;
+    const span = maximum - minimum;
+    const cells: IFilledRect[] = [];
+
+    for (let i = 0; i < values.length; i++) {
+      const value = values[i];
+
+      if (value === null || !Number.isFinite(value)) {
+        continue;
+      }
+
+      const x0 = ChartHelper.scale(xScale, i);
+      const x1 = ChartHelper.scale(xScale, i + 1);
+      cells.push({
+        x: ChartHelper.round(x0),
+        y: lane.stripY,
+        width: ChartHelper.round(x1 - x0 + 0.4),
+        height: this.stripHeight,
+        fill: ChartHelper.interpolateColor(lowColor, highColor, span > 0 ? (value - minimum) / span : 0.5)
+      });
+    }
+
+    const gaps: ILabeledRect[] = ChartHelper.runs(values.map((value) => value === null)).map((run) => {
+      const x0 = ChartHelper.scale(xScale, run.startIndex);
+      const width = ChartHelper.scale(xScale, run.endIndex + 1) - x0;
+
+      return {
+        x: ChartHelper.round(x0),
+        y: lane.stripY,
+        width: ChartHelper.round(width),
+        height: this.stripHeight,
+        label: width >= 96 ? 'not yet posted' : ''
+      };
+    });
+
+    return { lane, cells, gaps, legend: this._buildLegend(lane, known.length > 0, formatter(minimum), `${formatter(maximum)}${unit}`) };
+  }
+
+  private _buildLegend(lane: IClockLane, visible: boolean, minLabel: string, maxLabel: string): IHeatLegend {
+    const narrow = this.isNarrow;
+    const reservedRight = 76;
+
+    return {
+      visible,
+      x: narrow ? this.plotLeft + 40 : this.plotRight - reservedRight - this.legendWidth,
+      y: narrow ? lane.captionY + 10 : lane.captionY - 8,
+      minLabel,
+      maxLabel
+    };
+  }
+
+  private _emptyLane(title: string): IClockLane {
+    return { title, caption: '', titleX: 0, titleY: 0, stripY: 0, captionX: 0, captionY: 0 };
+  }
+
+  private _emptyHeatView(title: string): IHeatLaneView {
+    return {
+      lane: this._emptyLane(title),
+      cells: [],
+      gaps: [],
+      legend: { visible: false, x: 0, y: 0, minLabel: '', maxLabel: '' }
+    };
+  }
+}

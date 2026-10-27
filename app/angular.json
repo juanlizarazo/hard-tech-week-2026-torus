@@ -29,10 +29,22 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "highs.wasm",
+                "input": "node_modules/highs/build",
+                "output": "highs"
               }
             ],
             "styles": [
               "src/styles.scss"
+            ],
+            "externalDependencies": [
+              "node:module",
+              "node:fs",
+              "node:path",
+              "node:url",
+              "node:crypto"
             ]
           },
           "configurations": {

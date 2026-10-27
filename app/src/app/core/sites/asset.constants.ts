@@ -49,7 +49,7 @@ const sharedSources: Record<string, IProvenance> = {
   'pulse.dischargeEfficiency': buildAssumption('pulse-discharge-eff', 'Pulse discharge efficiency', 'Assumed 0.95 (about 90% round trip).'),
   'pulse.minSocFraction': buildAssumption('pulse-min-soc', 'Pulse minimum SOC', 'Assumed 10% reserve floor.'),
   'pulse.maxSocFraction': buildAssumption('pulse-max-soc', 'Pulse maximum SOC', 'Assumed 95% ceiling.'),
-  'pulse.rampLimitKwPerStep': buildAssumption('pulse-ramp', 'Pulse ramp limit', 'Assumed equal to rated power per 15-minute step (batteries ramp far faster than the interval).'),
+  'pulse.rampLimitKwPerStep': buildAssumption('pulse-ramp', 'Pulse ramp limit', 'Assumed 25% of rated power per 15-minute step: a smoothness limit so fast transients go to Spin (LFP cells can ramp faster, but smooth dispatch limits wear).'),
   'pulse.cycleLife': buildAssumption('pulse-cycle-life', 'Pulse cycle life', cycleLifeNote),
   'pulse.degradationCostPerKwh': buildAssumption('pulse-degradation', 'Pulse degradation cost', pulseDegradationNote),
 };
@@ -76,7 +76,7 @@ const buildAssets = (
     dischargeEfficiency: 0.95,
     minSocFraction: 0.1,
     maxSocFraction: 0.95,
-    rampLimitKwPerStep: pulsePowerKw,
+    rampLimitKwPerStep: pulsePowerKw * 0.25,
     cycleLife: 7500,
     degradationCostPerKwh: 0.0706,
   },

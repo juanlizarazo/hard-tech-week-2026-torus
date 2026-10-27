@@ -8,7 +8,7 @@
 |---|-------|-----------|--------------------------|-----------|--------|
 | 00 | Angular skeleton + Firebase project (branch `chore/firebase-setup`, separate session) | Yes — 01 branches from it | — | — | In progress |
 | 01 | Foundation: frozen data snapshot, tariff engine, seeded sites, shared types, three routes | **Yes — everything after it waits on this** | — | `phase-01-foundation.md` | Not started |
-| 02 | LP engine + Plan ("Three Clocks") screen | No | 03, 04 | `phase-02-plan.md` | Not started |
+| 02 | LP engine + Plan ("Three Clocks") screen | No | 03, 04 | `phase-02-plan.md` | In progress |
 | 03 | Grid signals (marginal CO2, PACE forecast score) + Traffic Report screen | No | 02, 04 | `phase-03-traffic.md` | Not started |
 | 04 | Month backtest + Backtest screen | No | 02, 03 (rolling LP and oracle plug in once 02 merges) | `phase-04-backtest.md` | Not started |
 | 05 | Stretch: our own PACE net-load forecast vs PACE's day-ahead forecast | No — only if the demo path works end to end by hour 24 | 04 (starts after 03 merges, same screen) | `phase-05-forecast.md` | Not started |
