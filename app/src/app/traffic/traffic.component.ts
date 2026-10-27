@@ -15,6 +15,7 @@ import {
   TermComponent,
   UnderTheHoodComponent
 } from '@app/shared/components';
+import { PlantMapComponent } from './components/plant-map/plant-map.component';
 import { RankSlopeComponent } from './components/rank-slope/rank-slope.component';
 import {
   forecastLimitations,
@@ -40,6 +41,7 @@ import { TrafficViewStateHelper } from './traffic-view-state.helper';
     FigureComponent,
     HourChartComponent,
     NextStopComponent,
+    PlantMapComponent,
     RankSlopeComponent,
     SourceChipComponent,
     TermComponent,

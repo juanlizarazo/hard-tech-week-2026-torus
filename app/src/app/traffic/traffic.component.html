@@ -105,6 +105,8 @@
                   </div>
                 </dt-chart-frame>
 
+<dt-plant-map [rush]="report.paceRush" [weatherPoints]="manifest.weatherPoints"></dt-plant-map>
+
                 <dt-chart-frame title="Carbon" [notice]="viewModel.notices?.carbon ?? ''">
                   <dt-source-chip frame-source [label]="carbonSource.label" [kind]="carbonSource.kind" [url]="carbonSource.url" [note]="carbonSource.note ?? ''"></dt-source-chip>
                   <div frame-controls class="dt-toggle-row">

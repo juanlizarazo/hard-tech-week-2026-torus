@@ -40,6 +40,14 @@ export class IngestSnapshotHelper {
     return timestamp.slice(0, 13);
   }
 
+  public static hourEndingKeyToLocalStart(utcHourEndingKey: string): string {
+    return IngestSnapshotHelper.toLocalIso(IngestSnapshotHelper.utcKeyToMilliseconds(utcHourEndingKey) - millisecondsPerHour);
+  }
+
+  public static hourStartKeyToHourEndingKey(utcHourStartKey: string): string {
+    return IngestSnapshotHelper.millisecondsToUtcKey(IngestSnapshotHelper.utcKeyToMilliseconds(utcHourStartKey) + millisecondsPerHour);
+  }
+
   public static toLocalIso(milliseconds: number): string {
     const parts: Record<string, string> = {};
 
@@ -122,7 +130,7 @@ export class IngestSnapshotHelper {
   public static createEmptyGridHour(utcKey: string): GridHour {
     return {
       utcHourEnding: utcKey,
-      localHourStart: IngestSnapshotHelper.toLocalIso(IngestSnapshotHelper.utcKeyToMilliseconds(utcKey)),
+      localHourStart: IngestSnapshotHelper.hourEndingKeyToLocalStart(utcKey),
       demandMw: null,
       dayAheadForecastMw: null,
       netGenerationMw: null,
@@ -245,7 +253,7 @@ export class IngestSnapshotHelper {
 
     for (const row of rows) {
       const forecastMw = IngestSnapshotHelper.parseNumber(row['MW']);
-      const utcKey = IngestSnapshotHelper.oasisTimestampToUtcKey(row['INTERVALSTARTTIME_GMT']);
+      const utcKey = IngestSnapshotHelper.hourStartKeyToHourEndingKey(IngestSnapshotHelper.oasisTimestampToUtcKey(row['INTERVALSTARTTIME_GMT']));
 
       if (forecastMw !== null && !forecastByKey.has(utcKey)) {
         forecastByKey.set(utcKey, forecastMw);
@@ -397,13 +405,12 @@ export class IngestSnapshotHelper {
 
       hourly.time.forEach((isoTime, timeIndex) => {
         const utcKey = `${isoTime.slice(0, 10)}T${isoTime.slice(11, 13)}`;
-        const utcMs = Date.parse(`${isoTime}:00Z`);
         let hour = hoursByKey.get(utcKey);
 
         if (!hour) {
           hour = {
             utcHourEnding: utcKey,
-            localHourStart: IngestSnapshotHelper.toLocalIso(utcMs),
+            localHourStart: IngestSnapshotHelper.hourEndingKeyToLocalStart(utcKey),
             temperatureC: {},
             ghiWm2: {},
             flags: [],
