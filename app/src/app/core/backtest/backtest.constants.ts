@@ -5,6 +5,8 @@ export const backtestSettings = {
   DEFAULT_SITE_ID: 'airport',
   NAIVE_TARGET_FRACTION: 0.8,
   WATTSMART_RESERVE_FRACTION: 0.25,
+  RUSH_HOUR_BLOCK_HOURS: 4,
+  FALLBACK_RUSH_HOUR_START: 17,
   INITIAL_PULSE_SOC_FRACTION: 0.5,
   INITIAL_SPIN_SOC_KWH: 0,
   KG_PER_KWH_PER_LB_PER_MWH: 0.45359237 / 1000,
@@ -32,6 +34,6 @@ export const backtestProvenance: Record<'NAIVE_TARGET' | 'WATTSMART_RESERVE' | '
     label: "Rush hour: each day's busiest 4-hour block of PACE demand",
     kind: 'assumption',
     url: '',
-    note: 'Same rule as the Plan screen. Falls back to 4-8 p.m. on days without PACE data.',
+    note: 'Same rule as the Plan screen. Falls back to 5-9 p.m. on days without PACE data.',
   },
 };

@@ -140,9 +140,22 @@ export class BacktestRunnerHelper {
 
     return intervals.map((interval: IInterval) => {
       const window = windowsByDate.get(interval.localDate);
+
+      if (!window) {
+        return false;
+      }
+
+      if (window.isAssumption) {
+        const fallbackStart = backtestSettings.FALLBACK_RUSH_HOUR_START;
+
+        return (
+          interval.localHour >= fallbackStart && interval.localHour < fallbackStart + backtestSettings.RUSH_HOUR_BLOCK_HOURS
+        );
+      }
+
       const startMs = Date.parse(interval.startUtc);
 
-      return !!window && startMs >= Date.parse(window.startUtc) && startMs < Date.parse(window.endUtc);
+      return startMs >= Date.parse(window.startUtc) && startMs < Date.parse(window.endUtc);
     });
   }
 }

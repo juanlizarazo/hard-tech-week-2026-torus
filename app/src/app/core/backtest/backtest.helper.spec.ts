@@ -4,6 +4,9 @@ import { siteArchetypes } from '../sites/sites.constants';
 import { tariffSchedules } from '../tariff/tariff.constants';
 import { TariffHelper } from '../tariff/tariff.helper';
 import { IBacktestInput, IBacktestResult } from './backtest.interfaces';
+import { BacktestViewStateHelper } from '../../backtest/backtest-view-state.helper';
+import { IBacktestControls, IBacktestViewState } from '../../backtest/backtest.interfaces';
+import { Observable, firstValueFrom, of, throwError } from 'rxjs';
 import { BacktestRunnerHelper } from './backtest-runner.helper';
 import { NaiveShaverHelper } from './naive-shaver.helper';
 
@@ -43,7 +46,7 @@ describe('July 2026 backtest sanity checks', () => {
 
       it('keeps the naive shaver inside power, SOC and ramp limits', () => {
         const { spin, pulse } = input.assets;
-        const floor = pulse.minSocFraction * pulse.energyKwh;
+        const floor = pulse.minSocFraction * pulse.energyKwh + input.wattsmartReserveKwh;
         const epsilon = 1e-6;
         let previousNet = 0;
 
@@ -63,7 +66,7 @@ describe('July 2026 backtest sanity checks', () => {
           previousNet = net;
         });
 
-        expect(result.lead.wattsmart.minimumHeldKwh).toBeGreaterThanOrEqual(0);
+        expect(result.lead.wattsmart.minimumHeldKwh).toBeGreaterThanOrEqual(input.wattsmartReserveKwh - 1e-6);
       });
 
       it('never sets a month peak above the no-storage baseline', () => {
@@ -82,4 +85,46 @@ describe('July 2026 backtest sanity checks', () => {
       });
     });
   }
+});
+
+describe('Backtest view states', () => {
+  const controls: IBacktestControls = { siteId: 'airport', scheduleId: 'schedule-8' };
+  const lastState = (stream: Observable<IBacktestViewState>): Promise<IBacktestViewState> =>
+    new Promise((resolve) => {
+      let latest: IBacktestViewState | null = null;
+      stream.subscribe({
+        next: (state) => (latest = state),
+        complete: () => resolve(latest as unknown as IBacktestViewState),
+      });
+    });
+
+  it('shows the empty state when the snapshot has no July grid month', async () => {
+    const sources = { manifest: null, gridMonth: null, priceMonth: null, marginalEmissions: null };
+    const state = await lastState(BacktestViewStateHelper.fromSources(of(sources), of(controls), () => throwError(() => new Error('unused'))));
+
+    expect(state.status).toBe('empty');
+  });
+
+  it('shows the error state when the run fails', async () => {
+    const sources = {
+      manifest: {} as Detour.Firestore.Snapshot.IManifest,
+      gridMonth,
+      priceMonth: null,
+      marginalEmissions: syntheticMef,
+    };
+    const state = await lastState(
+      BacktestViewStateHelper.fromSources(of(sources), of(controls), () => throwError(() => new Error('boom'))),
+    );
+
+    expect(state.status).toBe('error');
+    expect(state.errorMessage.length).toBeGreaterThan(0);
+  });
+
+  it('starts in the loading state', async () => {
+    const first = await firstValueFrom(
+      BacktestViewStateHelper.fromSources(of({ manifest: null, gridMonth: null, priceMonth: null, marginalEmissions: null }), of(controls), () => throwError(() => new Error('unused'))),
+    );
+
+    expect(first.status).toBe('loading');
+  });
 });
