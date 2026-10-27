@@ -1,7 +1,7 @@
 import { Timestamp } from 'firebase-admin/firestore';
 import { IngestFetchService } from './ingest-fetch.service';
 import { IngestStoreService } from './ingest-store.service';
-import { gridHourFlags, ingestConstants } from './ingest-snapshot.constants';
+import { gridHourFlags, ingestConstants, weatherPoints } from './ingest-snapshot.constants';
 import { IngestSnapshotHelper } from './ingest-snapshot.helper';
 import { IIngestResult } from './ingest-snapshot.interfaces';
 
@@ -9,8 +9,69 @@ process.env['GOOGLE_CLOUD_QUOTA_PROJECT'] = ingestConstants.PROJECT_ID;
 
 const hourMilliseconds = 3_600_000;
 
+async function fetchWeatherMonths(
+  fetchService: IngestFetchService,
+  startDate: string,
+  endDate: string,
+): Promise<Detour.Firestore.Snapshot.IWeatherMonth[]> {
+  const responses = await fetchService.fetchOpenMeteoRows(weatherPoints, startDate, endDate);
+  const weatherHours = IngestSnapshotHelper.buildWeatherHours(responses, weatherPoints);
+
+  return [...IngestSnapshotHelper.groupByMonth(weatherHours, (hour) => hour.localHourStart)].map(([month, hours]) => ({
+    month,
+    hours,
+  }));
+}
+
+async function runWeatherOnly(options: { isDryRun: boolean; outputDirectory: string }): Promise<void> {
+  const storeService = new IngestStoreService();
+  const manifest = await storeService.readCurrentManifest();
+
+  if (!manifest) {
+    throw new Error('No current snapshot manifest found; run a full ingest first');
+  }
+
+  const fetchService = new IngestFetchService();
+  const startDate = manifest.gridRange.start.slice(0, 10);
+  const endDate = manifest.targetDate;
+  const weatherMonths = await fetchWeatherMonths(fetchService, startDate, endDate);
+  const pulledAt = Timestamp.now();
+  const manifestPatch: Partial<Detour.Firestore.Snapshot.IManifest> = {
+    weatherMonths: weatherMonths.map((month) => ({ month: month.month, rowCount: month.hours.length })),
+    weatherPulledAt: pulledAt,
+    weatherRange: { start: startDate, end: endDate },
+    weatherPoints,
+    weatherModel: ingestConstants.OPEN_METEO_MODEL,
+  };
+
+  if (options.isDryRun) {
+    const result: IIngestResult = { manifest: { ...manifest, ...manifestPatch }, gridMonths: [], priceMonths: [], weatherMonths };
+    const sizesByFile = new IngestStoreService().writeDryRun(result, options.outputDirectory);
+
+    for (const [fileName, bytes] of Object.entries(sizesByFile)) {
+      if (bytes > ingestConstants.MONTH_SIZE_WARNING_BYTES) {
+        console.warn(`WARNING ${fileName} is ${bytes} bytes, approaching the 1 MiB Firestore limit`);
+      }
+    }
+
+    console.log(`Weather-only dry run written to ${options.outputDirectory}; ${weatherMonths.length} months, range ${startDate}..${endDate}`);
+
+    return;
+  }
+
+  await storeService.writeWeatherToSnapshot(manifest.id, weatherMonths, manifestPatch);
+  console.log(`Weather patched into snapshot ${manifest.id}: ${weatherMonths.length} months, range ${startDate}..${endDate}`);
+}
+
 async function main(): Promise<void> {
   const options = IngestSnapshotHelper.parseArguments(process.argv.slice(2), ingestConstants.DEFAULT_OUTPUT_DIRECTORY);
+
+  if (process.argv.includes('--weather-only')) {
+    await runWeatherOnly(options);
+
+    return;
+  }
+
   const now = new Date();
   const fetchService = new IngestFetchService();
 
@@ -70,6 +131,10 @@ async function main(): Promise<void> {
     ([month, hours]) => ({ month, hours }),
   );
 
+  const weatherStartDate = gridHours[0].utcHourEnding.slice(0, 10);
+  const weatherMonths = await fetchWeatherMonths(fetchService, weatherStartDate, targetDate);
+  const weatherPulledAt = Timestamp.now();
+
   const manifest: Detour.Firestore.Snapshot.IManifest = {
     id: IngestSnapshotHelper.buildSnapshotId(now),
     pulledAt: Timestamp.now(),
@@ -81,6 +146,11 @@ async function main(): Promise<void> {
     priceMonths: priceMonths.map((month) => ({ month: month.month, rowCount: month.hours.length })),
     dayAheadForecastSource: isTargetForecastFromOasis ? 'caiso-oasis' : 'eia-930',
     filteredRows,
+    weatherMonths: weatherMonths.map((month) => ({ month: month.month, rowCount: month.hours.length })),
+    weatherPulledAt,
+    weatherRange: { start: weatherStartDate, end: targetDate },
+    weatherPoints,
+    weatherModel: ingestConstants.OPEN_METEO_MODEL,
     sources: [
       {
         id: 'eia-region-data',
@@ -111,10 +181,18 @@ async function main(): Promise<void> {
         url: ingestConstants.OASIS_URL,
         seriesId: `SLD_FCST:DAM:${ingestConstants.OASIS_TAC_AREA}:SYS_FCST_DA_MW`,
       },
+      {
+        id: 'open-meteo-previous-runs',
+        label: 'Open-Meteo previous-runs day-ahead temperature and GHI for 3 Wasatch Front points',
+        kind: 'open-meteo',
+        url: ingestConstants.OPEN_METEO_URL,
+        seriesId: `${ingestConstants.OPEN_METEO_TEMPERATURE_VARIABLE},${ingestConstants.OPEN_METEO_GHI_VARIABLE}`,
+        note: `model ${ingestConstants.OPEN_METEO_MODEL}, points ${weatherPoints.map((point) => point.id).join('/')}`,
+      },
     ],
   };
 
-  const result: IIngestResult = { manifest, gridMonths, priceMonths };
+  const result: IIngestResult = { manifest, gridMonths, priceMonths, weatherMonths };
   const storeService = new IngestStoreService();
 
   if (options.isDryRun) {
@@ -131,7 +209,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  for (const month of [...gridMonths, ...priceMonths]) {
+  for (const month of [...gridMonths, ...priceMonths, ...weatherMonths]) {
     const bytes = Buffer.byteLength(JSON.stringify(month));
 
     if (bytes > ingestConstants.MONTH_SIZE_WARNING_BYTES) {

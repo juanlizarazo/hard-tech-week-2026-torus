@@ -5,11 +5,19 @@ import { resolve } from 'path';
 import { strFromU8, unzipSync } from 'fflate';
 import { eiaRegionTypes, ingestConstants } from './ingest-snapshot.constants';
 import { IngestSnapshotHelper } from './ingest-snapshot.helper';
-import { IEiaFuelRow, IEiaPage, IEiaRegionRow, IOasisChunk, IOasisCsvRow } from './ingest-snapshot.interfaces';
+import {
+  IEiaFuelRow,
+  IEiaPage,
+  IEiaRegionRow,
+  IOasisChunk,
+  IOasisCsvRow,
+  IOpenMeteoResponse,
+} from './ingest-snapshot.interfaces';
 
 export class IngestFetchService {
   private _apiKey: string | null = null;
   private _lastOasisRequestAt = 0;
+  private _lastOpenMeteoRequestAt = 0;
 
   public constructor() {
     mkdirSync(ingestConstants.CACHE_DIRECTORY, { recursive: true });
@@ -39,6 +47,99 @@ export class IngestFetchService {
     }
 
     return rows;
+  }
+
+  public async fetchOpenMeteoRows(
+    points: Detour.Firestore.Snapshot.IWeatherPoint[],
+    startDate: string,
+    endDate: string,
+  ): Promise<IOpenMeteoResponse[]> {
+    const dateChunks = IngestSnapshotHelper.buildDateChunks(startDate, endDate, ingestConstants.OPEN_METEO_CHUNK_DAYS);
+    const mergedByPoint: IOpenMeteoResponse[] = points.map((point) => ({
+      latitude: point.lat,
+      longitude: point.lon,
+      hourly: { time: [] },
+    }));
+
+    for (const dateChunk of dateChunks) {
+      const chunkResponses = await this._fetchOpenMeteoChunk(points, dateChunk.start, dateChunk.end);
+
+      chunkResponses.forEach((chunkResponse, pointIndex) => {
+        const merged = mergedByPoint[pointIndex];
+        merged.hourly.time.push(...chunkResponse.hourly.time);
+
+        for (const [variableName, values] of Object.entries(chunkResponse.hourly)) {
+          if (variableName === 'time') {
+            continue;
+          }
+
+          merged.hourly[variableName] = [...((merged.hourly[variableName] as number[]) ?? []), ...(values as number[])];
+        }
+      });
+    }
+
+    return mergedByPoint;
+  }
+
+  private async _fetchOpenMeteoChunk(
+    points: Detour.Firestore.Snapshot.IWeatherPoint[],
+    startDate: string,
+    endDate: string,
+  ): Promise<IOpenMeteoResponse[]> {
+    const parameters = new URLSearchParams({
+      latitude: points.map((point) => point.lat).join(','),
+      longitude: points.map((point) => point.lon).join(','),
+      start_date: startDate,
+      end_date: endDate,
+      timezone: 'GMT',
+      models: ingestConstants.OPEN_METEO_MODEL,
+      hourly: [
+        ingestConstants.OPEN_METEO_TEMPERATURE_VARIABLE,
+        ingestConstants.OPEN_METEO_TEMPERATURE_FALLBACK_VARIABLE,
+        ingestConstants.OPEN_METEO_GHI_VARIABLE,
+        ingestConstants.OPEN_METEO_GHI_FALLBACK_VARIABLE,
+      ].join(','),
+    });
+    const url = `${ingestConstants.OPEN_METEO_URL}?${parameters.toString()}`;
+    const cacheKey = `open-meteo-${url}`;
+    const cachedText = this._readCache(cacheKey, 'json');
+
+    if (cachedText !== null) {
+      return this._normalizeOpenMeteoResponse(JSON.parse(cachedText), points.length);
+    }
+
+    for (let attempt = 1; attempt <= ingestConstants.OPEN_METEO_MAX_ATTEMPTS; attempt++) {
+      await this._waitForOpenMeteoSlot(attempt > 1);
+
+      const response = await fetch(url);
+
+      if (response.ok) {
+        const text = await response.text();
+        this._writeCache(cacheKey, 'json', text);
+        console.log(`Open-Meteo ${startDate}..${endDate}: ${points.length} points`);
+
+        return this._normalizeOpenMeteoResponse(JSON.parse(text), points.length);
+      }
+
+      console.warn(`Open-Meteo request failed with HTTP ${response.status} (attempt ${attempt})`);
+    }
+
+    throw new Error(`Open-Meteo request failed after retries for ${startDate}..${endDate}`);
+  }
+
+  private _normalizeOpenMeteoResponse(parsed: unknown, pointCount: number): IOpenMeteoResponse[] {
+    return (pointCount > 1 ? (parsed as IOpenMeteoResponse[]) : [parsed as IOpenMeteoResponse]);
+  }
+
+  private async _waitForOpenMeteoSlot(isRetry: boolean): Promise<void> {
+    const requiredGap = isRetry ? ingestConstants.OPEN_METEO_DELAY_MS * 3 : ingestConstants.OPEN_METEO_DELAY_MS;
+    const remaining = this._lastOpenMeteoRequestAt + requiredGap - Date.now();
+
+    if (remaining > 0) {
+      await this._sleep(remaining);
+    }
+
+    this._lastOpenMeteoRequestAt = Date.now();
   }
 
   private async _fetchEiaDataset<TRow>(

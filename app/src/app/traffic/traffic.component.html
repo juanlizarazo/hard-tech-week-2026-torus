@@ -60,6 +60,8 @@
                 <p class="dt-traffic__hint">
                   The two earlier days are actuals. On {{ report.targetDateLabel }} the dashed line is PACE's forecast and
                   net load is our estimate (forecast minus the trailing 7-day average of wind and solar for each hour).
+                  Where a weather forecast is in the snapshot, the second dashed line and shaded band are our own ridge
+                  forecast and its P10–P90 range for that day.
                 </p>
 
                 <h3 class="dt-traffic__subheading">2. Price: EDAM day-ahead</h3>
@@ -129,6 +131,89 @@
                 </mat-card-content>
               </mat-card>
             </div>
+
+            @if (forecastViewModel$ | async; as forecastState) {
+              <mat-card class="dt-card dt-traffic__section" appearance="outlined">
+                <mat-card-content>
+                  <h2 class="dt-traffic__heading">Can we beat PACE's own forecast?</h2>
+                  @switch (forecastState.status) {
+                    @case ('loading') {
+                      <div class="dt-traffic__state-content">
+                        <mat-spinner diameter="20"></mat-spinner>
+                        <span>Fitting the ridge forecast…</span>
+                      </div>
+                    }
+                    @case ('error') {
+                      <dt-alert-banner [message]="forecastState.errorMessage"></dt-alert-banner>
+                    }
+                    @case ('empty') {
+                      <p class="dt-traffic__hint">This snapshot has no weather forecasts yet, so we have no forecast of our own to compare. Run the weather ingest to add one.</p>
+                    }
+                    @case ('ready') {
+                      @if (forecastState.forecast; as forecast) {
+                        <p class="dt-traffic__sentence">{{ forecastVerdict(forecast.comparison) }}</p>
+                        <div class="dt-traffic__table-wrap">
+                          <table class="dt-traffic__table dt-traffic__table--forecast">
+                            <thead>
+                              <tr>
+                                <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Forecast</th>
+                                <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">MAPE</th>
+                                <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Bias</th>
+                                <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Low at peak</th>
+                                <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Source</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (row of forecast.comparison; track row.id) {
+                                <tr>
+                                  <td class="dt-traffic__cell">{{ row.label }}</td>
+                                  <td class="dt-traffic__cell">{{ row.score.mapePercent | number: '1.1-1' }}%</td>
+                                  <td class="dt-traffic__cell">{{ row.score.biasPercent | number: '1.1-1' }}%</td>
+                                  <td class="dt-traffic__cell">{{ row.score.peakUnderForecastRate | number: '1.0-0' }}%</td>
+                                  <td class="dt-traffic__cell">
+                                    @if (row.provenance.url) {
+                                      <a class="dt-traffic__chip" [href]="row.provenance.url" target="_blank" rel="noopener noreferrer">{{ row.provenance.kind }}</a>
+                                    } @else {
+                                      <span class="dt-traffic__chip">{{ row.provenance.kind }}</span>
+                                    }
+                                  </td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
+                        <p class="dt-traffic__hint">
+                          Actual demand fell inside our P10–P90 band on {{ forecast.coveragePercent | number: '1.0-0' }}% of scored hours.
+                          Scored {{ forecast.hoursScored | number: '1.0-0' }} common hours over the phase 03 window ({{ forecast.comparison[0].score.startDate }} to {{ forecast.comparison[0].score.endDate }}).
+                          Weather pulled {{ forecast.weatherPulledAt | date: 'MMM d, y' }}.
+                        </p>
+                        <mat-expansion-panel class="dt-traffic__forecast-method">
+                          <mat-expansion-panel-header>
+                            <mat-panel-title>How our forecast is made</mat-panel-title>
+                          </mat-expansion-panel-header>
+                          <ol class="dt-traffic__list">
+                            @for (step of forecastMethodSteps; track step) {
+                              <li>{{ step }}</li>
+                            }
+                          </ol>
+                          <h3 class="dt-traffic__subheading">Limitations</h3>
+                          <ul class="dt-traffic__list">
+                            @for (limitation of forecastLimitations; track limitation) {
+                              <li>{{ limitation }}</li>
+                            }
+                          </ul>
+                          <p class="dt-traffic__hint">{{ forecast.featureCount }} input features, &lambda; = {{ forecast.lambda }}.</p>
+                          <p class="dt-traffic__hint">
+                            <a class="dt-traffic__chip" [href]="weatherWeightsProvenance.url" target="_blank" rel="noopener noreferrer">{{ weatherWeightsProvenance.kind }}</a>
+                            {{ weatherWeightsProvenance.note }}
+                          </p>
+                        </mat-expansion-panel>
+                      }
+                    }
+                  }
+                </mat-card-content>
+              </mat-card>
+            }
 
             <mat-card class="dt-card dt-traffic__section" appearance="outlined">
               <mat-card-content>

@@ -125,7 +125,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   }
 
   public onPointerMove(event: PointerEvent): void {
-    const svg = this._host.nativeElement.querySelector('svg');
+    const svg = this._host.nativeElement.querySelector('svg.dt-hour-chart__svg');
     const count = this._pointCount();
 
     if (!svg || count === 0) {

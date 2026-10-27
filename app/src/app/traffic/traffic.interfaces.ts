@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { MefSeason } from '@app/core/models/emissions.types';
-import { IAverageEmissionsPoint, IForecastScore, IMarginalEmissionsSeries } from '@app/core/models';
+import { IAverageEmissionsPoint, IForecastScore, ILoadForecast, IMarginalEmissionsSeries } from '@app/core/models';
 import { IHourChartBand, IHourChartHighlight, IHourChartSeries } from '@app/shared/components/hour-chart/hour-chart.interfaces';
 import { TrafficViewStatus } from './traffic.types';
 import { IRankSlopeRow } from './components/rank-slope/rank-slope.interfaces';
@@ -107,4 +107,10 @@ export interface ITrafficViewSources {
   marginalSeries$: Observable<IMarginalEmissionsSeries[]>;
   averagePoints$: Observable<IAverageEmissionsPoint[]>;
   score$: Observable<IForecastScore>;
+}
+
+export interface IForecastViewState {
+  status: TrafficViewStatus;
+  forecast: ILoadForecast | null;
+  errorMessage: string;
 }

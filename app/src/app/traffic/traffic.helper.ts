@@ -1,5 +1,5 @@
 import { EmissionsHelper, signalsConfig } from '@app/core';
-import { IMarginalEmissionsPoint, MefMethod, MefSeason } from '@app/core/models';
+import { IForecastComparisonRow, ILoadForecast, IMarginalEmissionsPoint, MefMethod, MefSeason } from '@app/core/models';
 import { TimeHelper } from '@app/core/helpers';
 import { IRankSlopeRow } from './components/rank-slope/rank-slope.interfaces';
 import { trafficCalendar, trafficClocks, trafficConfig } from './traffic.constants';
@@ -74,7 +74,7 @@ export class TrafficHelper {
     };
   }
 
-  public static charts(report: ITrafficReport): ITrafficCharts {
+  public static charts(report: ITrafficReport, forecast: ILoadForecast | null): ITrafficCharts {
     const label = 'Rush hour';
     const band = report.rushHour;
     const dayHighlight = band
@@ -98,6 +98,8 @@ export class TrafficHelper {
         : null,
     );
 
+    const forecastSeries = TrafficHelper._forecastSeries(report, forecast);
+
     return {
       load: {
         series: [
@@ -105,8 +107,11 @@ export class TrafficHelper {
           { label: 'Net load (actual)', values: report.load.actualNetLoadMw, style: 'solid', color: 'var(--dt-viz-3)' },
           { label: "PACE's day-ahead forecast", values: report.load.forecastMw, style: 'dashed', color: 'var(--dt-viz-2)' },
           { label: 'Net load (estimate)', values: report.load.estimatedNetLoadMw, style: 'dotted', color: 'var(--dt-viz-3)' },
+          ...(forecastSeries ? [{ label: 'Our forecast (ridge)', values: forecastSeries.p50, style: 'dashed' as const, color: 'var(--dt-viz-4)' }] : []),
         ],
-        bands: [],
+        bands: forecastSeries
+          ? [{ label: 'P10–P90 (ours)', lower: forecastSeries.p10, upper: forecastSeries.p90, color: 'var(--dt-viz-4)' }]
+          : [],
         highlight: loadHighlight,
         xLabels: report.load.xLabels,
         dividerIndices: report.load.dividerIndices,
@@ -431,6 +436,29 @@ export class TrafficHelper {
     return { headline, sentences };
   }
 
+  public static forecastVerdict(comparison: IForecastComparisonRow[]): string {
+    const ours = comparison.find((row) => row.id === 'detour-ridge-forecast');
+    const pace = comparison.find((row) => row.id === 'eia930-day-ahead-forecast');
+
+    if (!ours || !pace) {
+      return 'Not enough data to compare our forecast against PACE’s own.';
+    }
+
+    const diff = pace.score.mapePercent - ours.score.mapePercent;
+    const oursLabel = `${ours.score.mapePercent.toFixed(1)}%`;
+    const paceLabel = `${pace.score.mapePercent.toFixed(1)}%`;
+
+    if (diff > 0.05) {
+      return `We beat PACE's own forecast by ${diff.toFixed(1)} points of MAPE (${oursLabel} vs ${paceLabel}).`;
+    }
+
+    if (diff < -0.05) {
+      return `PACE's forecast beats ours by ${Math.abs(diff).toFixed(1)} points of MAPE (${paceLabel} vs ${oursLabel}).`;
+    }
+
+    return `We're about even with PACE's own forecast (${oursLabel} vs ${paceLabel} MAPE).`;
+  }
+
   public static peakMissLabel(meanPeakMissMw: number): string {
     return `${Math.round(Math.abs(meanPeakMissMw)).toLocaleString()} MW ${meanPeakMissMw < 0 ? 'above' : 'below'}`;
   }
@@ -470,5 +498,28 @@ export class TrafficHelper {
     const present = values.filter((value): value is number => value !== null);
 
     return present.length === 0 ? null : present.reduce((sum, value) => sum + value, 0) / present.length;
+  }
+
+  private static _forecastSeries(
+    report: ITrafficReport,
+    forecast: ILoadForecast | null,
+  ): { p10: (number | null)[]; p50: (number | null)[]; p90: (number | null)[] } | null {
+    if (!forecast || forecast.targetHours.length === 0) {
+      return null;
+    }
+
+    const length = report.load.xLabels.length;
+    const p10 = new Array<number | null>(length).fill(null);
+    const p50 = new Array<number | null>(length).fill(null);
+    const p90 = new Array<number | null>(length).fill(null);
+
+    for (const hour of forecast.targetHours) {
+      const index = report.load.targetStartIndex + hour.hour;
+      p10[index] = hour.p10Mw;
+      p50[index] = hour.p50Mw;
+      p90[index] = hour.p90Mw;
+    }
+
+    return { p10, p50, p90 };
   }
 }
