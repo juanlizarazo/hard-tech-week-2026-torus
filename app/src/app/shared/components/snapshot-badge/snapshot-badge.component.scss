@@ -5,7 +5,7 @@
   padding: 4px 10px;
   border-radius: 12px;
   border: 1px solid var(--dt-theme--border);
-  background: var(--dt-theme--card, #fff);
+  background: var(--dt-theme--card);
   color: var(--dt-theme--primary);
   font-size: 0.75rem;
   font-weight: 500;
@@ -13,7 +13,7 @@
 }
 
 .snapshot-badge--muted {
-  color: var(--dt-theme--muted, #5b6573);
+  color: var(--dt-theme--muted);
   background: var(--dt-theme--surface);
 }
 
@@ -25,5 +25,5 @@
 }
 
 .snapshot-badge--muted .snapshot-badge__icon {
-  color: var(--dt-theme--muted, #5b6573);
+  color: var(--dt-theme--muted);
 }

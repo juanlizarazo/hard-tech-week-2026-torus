@@ -23,3 +23,14 @@ export interface IScoredHour {
   demandMw: number;
   forecastMw: number;
 }
+
+export interface IRegressionSamples {
+  predictors: number[];
+  responses: number[];
+}
+
+export interface IIntensityTotals {
+  emissions: number;
+  generation: number;
+  count: number;
+}

@@ -100,11 +100,6 @@ export interface ITrafficCharts {
   carbon: ITrafficChart;
 }
 
-export interface ITrafficViewModel {
-  state: ITrafficViewState;
-  charts: ITrafficCharts | null;
-}
-
 export interface ITrafficViewSources {
   manifest$: Observable<Detour.Firestore.Snapshot.IManifest | null>;
   history$: Observable<Detour.Firestore.Snapshot.IGridHour[]>;

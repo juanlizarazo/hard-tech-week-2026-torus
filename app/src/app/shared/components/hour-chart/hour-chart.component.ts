@@ -98,8 +98,8 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
       return;
     }
 
-    this._resizeObserver = new ResizeObserver((): void => {
-      this._zone.run((): void => {
+    this._resizeObserver = new ResizeObserver(() => {
+      this._zone.run(() => {
         this._applySize();
         this.ngOnChanges();
       });
@@ -401,7 +401,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     }
     this.linePaths = paths.filter((entry) => entry.path !== '');
     this.bandPaths = this.bands.map(
-      (band: IHourChartBand): IHourChartBandPath => ({ label: band.label, color: band.color, path: this._bandPath(band, count) })
+      (band) => ({ label: band.label, color: band.color, path: this._bandPath(band, count) })
     );
   }
 
@@ -429,7 +429,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
 
   private _bandRunPath(run: IHourChartBandPoint[]): string {
     const top = run.map(
-      (point: IHourChartBandPoint, position: number): string =>
+      (point, position) =>
         `${position === 0 ? 'M' : 'L'}${this._xAt(point.index).toFixed(1)} ${this._yAt(point.upper).toFixed(1)}`
     );
     const bottom = [...run]

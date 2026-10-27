@@ -1,7 +1,7 @@
 import { IAverageEmissionsPoint, IMarginalEmissionsPoint, IMarginalEmissionsSeries, IProvenance } from '../models';
 import { MefMethod, MefSeason } from '../models/emissions.types';
 import { emissionFactors, mefSeasonMonths, signalsConfig } from './signals.constants';
-import { IEmissionsRow, IRegressionResult } from './signals.interfaces';
+import { IEmissionsRow, IIntensityTotals, IRegressionResult, IRegressionSamples } from './signals.interfaces';
 
 export class EmissionsHelper {
   private static readonly _hourMs = 3_600_000;
@@ -74,7 +74,7 @@ export class EmissionsHelper {
   }
 
   public static marginalSeries(rows: IEmissionsRow[], method: MefMethod): IMarginalEmissionsSeries {
-    const strata = new Map<string, { predictors: number[]; responses: number[] }>();
+    const strata = new Map<string, IRegressionSamples>();
 
     for (let i = 1; i < rows.length; i++) {
       const previous = rows[i - 1];
@@ -127,7 +127,7 @@ export class EmissionsHelper {
   }
 
   public static averageIntensity(rows: IEmissionsRow[]): IAverageEmissionsPoint[] {
-    const totals = new Map<string, { emissions: number; generation: number; count: number }>();
+    const totals = new Map<string, IIntensityTotals>();
 
     for (const row of rows) {
       if (row.emissionsLbPerHour === null || row.generationMw === null) {

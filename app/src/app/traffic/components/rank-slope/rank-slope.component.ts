@@ -22,7 +22,7 @@ export class RankSlopeComponent implements OnChanges {
   public ariaSummary = '';
 
   public get activeLine(): IRankSlopeLine | null {
-    return this.lines.find((line: IRankSlopeLine): boolean => line.hour === this.activeHour) ?? null;
+    return this.lines.find((line) => line.hour === this.activeHour) ?? null;
   }
 
   public get tooltipTopPercent(): number {
@@ -39,13 +39,13 @@ export class RankSlopeComponent implements OnChanges {
     this.height = this.topY + Math.max(this.rows.length, 1) * this.rowHeight + rankSlopeLayout.BOTTOM_PADDING;
 
     const biggestChanges = [...this.rows]
-      .sort((first: IRankSlopeRow, second: IRankSlopeRow): number =>
+      .sort((first, second) =>
         Math.abs(second.marginalRank - second.averageRank) - Math.abs(first.marginalRank - first.averageRank)
       )
       .slice(0, rankSlopeLayout.HIGHLIGHT_COUNT)
-      .map((row: IRankSlopeRow): number => row.hour);
+      .map((row) => row.hour);
 
-    this.lines = this.rows.map((row: IRankSlopeRow): IRankSlopeLine => {
+    this.lines = this.rows.map((row) => {
       const change = row.marginalRank - row.averageRank;
 
       return {
@@ -64,10 +64,10 @@ export class RankSlopeComponent implements OnChanges {
       };
     });
 
-    const highlighted = this.lines.filter((line: IRankSlopeLine): boolean => line.isHighlighted);
+    const highlighted = this.lines.filter((line) => line.isHighlighted);
     this.ariaSummary =
       'Slope chart of hourly CO2 rank, average versus marginal emissions, 1 is cleanest. Biggest changes: ' +
-      highlighted.map((line: IRankSlopeLine): string => `${line.hourLabel} ${line.averageRank} to ${line.marginalRank}`).join(', ');
+      highlighted.map((line) => `${line.hourLabel} ${line.averageRank} to ${line.marginalRank}`).join(', ');
   }
 
   public activate(hour: number): void {

@@ -19,15 +19,6 @@ const makeHour = (
   ...overrides,
 });
 
-const hourlyFixture = (
-  startMs: number,
-  count: number,
-  build: (index: number) => Partial<Detour.Firestore.Snapshot.IGridHour>,
-): Detour.Firestore.Snapshot.IGridHour[] =>
-  Array.from({ length: count }, (_unused, index) =>
-    makeHour(startMs + index * 3_600_000, `2026-07-15T${pad(index % 24)}:00-06:00`, build(index)),
-  );
-
 describe('signals helpers', () => {
   it('fits an exact line with ols', () => {
     const fit = EmissionsHelper.ols([1, 2, 3, 4], [5, 8, 11, 14]);
@@ -87,7 +78,7 @@ describe('signals helpers', () => {
     const dayOne = Date.parse('2026-07-15T06:00:00Z');
     const dayTwo = Date.parse('2026-07-16T06:00:00Z');
     const build = (date: string, startMs: number, forecastFactor: number): Detour.Firestore.Snapshot.IGridHour[] =>
-      Array.from({ length: 24 }, (_unused, hour: number) => {
+      Array.from({ length: 24 }, (_unused, hour) => {
         const demand = hour === 17 ? 1200 : 1000;
         const factor = hour === 17 ? forecastFactor : 1.1;
 

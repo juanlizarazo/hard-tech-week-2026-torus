@@ -9,7 +9,6 @@ import { GridSignalsService, SnapshotService, emissionFactors } from '@app/core'
 import { AlertBannerComponent, HourChartComponent, ScreenToolbarComponent } from '@app/shared/components';
 import { RankSlopeComponent } from './components/rank-slope/rank-slope.component';
 import { trafficLimitations, trafficMethodSteps } from './traffic.constants';
-import { ITrafficViewModel } from './traffic.interfaces';
 import { TrafficHelper } from './traffic.helper';
 import { TrafficViewStateHelper } from './traffic-view-state.helper';
 
@@ -49,7 +48,7 @@ export class TrafficComponent {
     averagePoints$: this._gridSignalsService.averageEmissions$,
     score$: this._gridSignalsService.forecastScore$
   }).pipe(
-    map((state): ITrafficViewModel => ({
+    map((state) => ({
       state,
       charts: state.report ? TrafficHelper.charts(state.report) : null
     }))
