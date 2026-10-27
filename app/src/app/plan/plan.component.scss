@@ -62,42 +62,8 @@
   color: var(--dt-muted);
 }
 
-.plan__select-wrap {
-  position: relative;
-  display: flex;
-}
-
 .plan__select {
   width: 100%;
-  min-height: 40px;
-  padding: 8px 36px 8px 12px;
-  border: 1px solid var(--dt-line);
-  border-radius: 8px;
-  background: var(--dt-panel);
-  color: var(--dt-ink);
-  font: inherit;
-  font-size: var(--dt-text-15);
-  font-weight: 600;
-  appearance: none;
-  cursor: pointer;
-
-  &:hover {
-    border-color: var(--dt-ink);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--dt-focus);
-    outline-offset: 2px;
-  }
-}
-
-.plan__select-icon {
-  position: absolute;
-  top: 50%;
-  right: 8px;
-  transform: translateY(-50%);
-  color: var(--dt-muted);
-  pointer-events: none;
 }
 
 .plan__dials-rule {

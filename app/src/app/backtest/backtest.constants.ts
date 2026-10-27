@@ -1,5 +1,6 @@
 import { TariffScheduleId } from '@app/core/models';
 import { BacktestStrategyRole } from '@app/core/backtest';
+import { IBacktestScheduleOption } from './backtest.interfaces';
 
 export const backtestScreenSettings = {
   DEFAULT_SCHEDULE_ID: 'schedule-8' as TariffScheduleId,
@@ -23,13 +24,19 @@ export const backtestStrategyNames: Record<BacktestStrategyRole, string> = {
 };
 
 export const backtestStrategyColors: Record<BacktestStrategyRole, string> = {
-  baseline: '#a3adb5',
+  baseline: 'var(--dt-theme--chart-muted-line)',
   heuristic: 'var(--dt-muted)',
   realistic: 'var(--dt-clear-mark)',
   oracle: 'var(--dt-ink)',
 };
 
-export const backtestScheduleOptions: { id: TariffScheduleId; label: string }[] = [
+export const backtestScheduleOptions: IBacktestScheduleOption[] = [
   { id: 'schedule-8', label: 'Schedule 8' },
   { id: 'schedule-6', label: 'Schedule 6' },
+];
+
+export const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+export const longMonthNames = [
+  'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December',
 ];

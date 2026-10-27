@@ -1,5 +1,6 @@
 import { gridHourFlags, ingestConstants, oasisPriceFieldByDataItem, weatherHourFlags } from './ingest-snapshot.constants';
 import {
+  IDateChunk,
   IEiaFuelRow,
   IEiaRegionRow,
   IOasisChunk,
@@ -11,8 +12,6 @@ import {
 
 type GridHour = Detour.Firestore.Snapshot.IGridHour;
 type PriceHour = Detour.Firestore.Snapshot.IPriceHour;
-type WeatherHour = Detour.Firestore.Snapshot.IWeatherHour;
-type WeatherPoint = Detour.Firestore.Snapshot.IWeatherPoint;
 
 const millisecondsPerHour = 3_600_000;
 const millisecondsPerDay = 24 * millisecondsPerHour;
@@ -372,8 +371,8 @@ export class IngestSnapshotHelper {
     return new Date(Date.parse(`${date}T00:00:00Z`) + days * millisecondsPerDay).toISOString().slice(0, 10);
   }
 
-  public static buildDateChunks(startDate: string, endDate: string, chunkDays: number): { start: string; end: string }[] {
-    const chunks: { start: string; end: string }[] = [];
+  public static buildDateChunks(startDate: string, endDate: string, chunkDays: number): IDateChunk[] {
+    const chunks: IDateChunk[] = [];
     let chunkStartMs = Date.parse(`${startDate}T00:00:00Z`);
     const endMs = Date.parse(`${endDate}T00:00:00Z`);
 
@@ -389,8 +388,8 @@ export class IngestSnapshotHelper {
     return chunks;
   }
 
-  public static buildWeatherHours(responses: IOpenMeteoResponse[], points: WeatherPoint[]): WeatherHour[] {
-    const hoursByKey = new Map<string, WeatherHour>();
+  public static buildWeatherHours(responses: IOpenMeteoResponse[], points: Detour.Firestore.Snapshot.IWeatherPoint[]): Detour.Firestore.Snapshot.IWeatherHour[] {
+    const hoursByKey = new Map<string, Detour.Firestore.Snapshot.IWeatherHour>();
 
     responses.forEach((response, responseIndex) => {
       const point = points[responseIndex];

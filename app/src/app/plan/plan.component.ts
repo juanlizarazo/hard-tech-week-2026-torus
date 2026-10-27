@@ -3,6 +3,7 @@ import { AsyncPipe, CurrencyPipe, DecimalPipe } from '@angular/common';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import {
   BehaviorSubject,
@@ -54,6 +55,7 @@ import { planBaseline, planDefaults } from './plan.constants';
     MatButtonToggleModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
     MatSliderModule,
     AlertBannerComponent,
     ChartFrameComponent,

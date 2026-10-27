@@ -1,4 +1,5 @@
 import { IPlanInterval, IRushHourWindow } from '@app/core/models';
+import { StartViewStatus } from './start.types';
 
 export interface IStartPreview {
   targetDate: string;
@@ -14,7 +15,7 @@ export interface IStartPreview {
 }
 
 export interface IStartViewState {
-  status: 'loading' | 'empty' | 'error' | 'ready';
+  status: StartViewStatus;
   preview: IStartPreview | null;
   errorMessage: string;
 }

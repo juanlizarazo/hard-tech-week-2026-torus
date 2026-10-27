@@ -12,6 +12,7 @@ import {
   ITrafficChart,
   ITrafficChartOptions,
   ITrafficCharts,
+  ITrafficForecastSeries,
   ITrafficHourValue,
   ITrafficNotices,
   ITrafficLoadWindow,
@@ -482,7 +483,7 @@ export class TrafficHelper {
   private static _forecastSeries(
     report: ITrafficReport,
     forecast: ILoadForecast | null,
-  ): { p10: (number | null)[]; p50: (number | null)[]; p90: (number | null)[] } | null {
+  ): ITrafficForecastSeries | null {
     if (!forecast || forecast.targetHours.length === 0) {
       return null;
     }

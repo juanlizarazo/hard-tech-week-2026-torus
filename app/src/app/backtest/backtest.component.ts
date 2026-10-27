@@ -20,7 +20,7 @@ import {
 } from '@app/shared/components';
 import { backtestScheduleOptions, backtestScreenSettings } from './backtest.constants';
 import { BacktestHelper } from './backtest.helper';
-import { IBacktestControls, IBacktestViewModel, IBacktestViewState } from './backtest.interfaces';
+import { IBacktestControls, IBacktestScreenModel, IBacktestViewState } from './backtest.interfaces';
 import { BacktestViewStateHelper } from './backtest-view-state.helper';
 import { ComponentBarsComponent, MonthCalendarComponent } from './components';
 
@@ -67,7 +67,7 @@ export class BacktestComponent {
     (sources, controls) => this._backtestService.run(sources, controls.siteId, controls.scheduleId)
   ).pipe(shareReplay({ bufferSize: 1, refCount: true }));
 
-  public readonly viewModel$: Observable<{ state: IBacktestViewState; model: IBacktestViewModel | null }> = combineLatest([
+  public readonly viewModel$: Observable<IBacktestScreenModel> = combineLatest([
     this.state$,
     this._selectedDate$
   ]).pipe(

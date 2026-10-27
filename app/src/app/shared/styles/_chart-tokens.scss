@@ -6,7 +6,7 @@
   --dt-viz-4: var(--dt-pulse, #6a4bd6);
   --dt-viz-band: var(--dt-rush, #f28500);
   --dt-viz-highlight: var(--dt-rush-stripes);
-  --dt-viz-muted-line: #a3adb5;
+  --dt-viz-muted-line: var(--dt-theme--chart-muted-line);
   --dt-viz-ink: var(--dt-ink, #1b2430);
   --dt-viz-ink-secondary: var(--dt-muted, #5a6672);
   --dt-viz-muted: var(--dt-muted, #5a6672);

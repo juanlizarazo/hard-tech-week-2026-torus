@@ -11,13 +11,13 @@
     @if (peakLabel) {
       <li class="dt-month-calendar__key">
         <span class="dt-month-calendar__key-dash" aria-hidden="true"></span>
-        <span>Month peak, no storage: <strong>{{ peakLabel }}</strong></span>
+        <span>Month peak, no storage: <strong class="dt-month-calendar__strong">{{ peakLabel }}</strong></span>
       </li>
     }
     @if (scale.leadMonthPeakKw > 0) {
       <li class="dt-month-calendar__key">
         <span class="dt-month-calendar__key-dash dt-month-calendar__key-dash--lead" aria-hidden="true"></span>
-        <span>Month peak, {{ scale.leadName }}: <strong>{{ formatKw(scale.leadMonthPeakKw) }}</strong></span>
+        <span>Month peak, {{ scale.leadName }}: <strong class="dt-month-calendar__strong">{{ formatKw(scale.leadMonthPeakKw) }}</strong></span>
       </li>
     }
   </ul>

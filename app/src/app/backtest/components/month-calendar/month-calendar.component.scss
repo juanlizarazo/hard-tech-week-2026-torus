@@ -20,10 +20,10 @@
   font-size: var(--dt-text-13);
   color: var(--dt-ink);
   font-variant-numeric: tabular-nums;
+}
 
-  strong {
-    font-weight: 800;
-  }
+.dt-month-calendar__strong {
+  font-weight: 800;
 }
 
 .dt-month-calendar__key {
@@ -194,7 +194,7 @@
   background: var(--dt-clear-mark);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 600px) {
   .dt-month-calendar {
     --dt-calendar-dot: 10px;
   }

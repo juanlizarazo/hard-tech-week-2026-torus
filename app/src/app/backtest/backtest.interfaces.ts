@@ -1,7 +1,7 @@
-import { IBacktestResult } from '@app/core/backtest';
+import { IBacktestResult, IBacktestStrategyResult } from '@app/core/backtest';
 import { IProvenance, TariffScheduleId } from '@app/core/models';
 import { IHourChartBand, IHourChartHighlight, IHourChartSeries } from '@app/shared/components/hour-chart/hour-chart.interfaces';
-import { BacktestViewStatus } from './backtest.types';
+import { BacktestTileTone, BacktestViewStatus } from './backtest.types';
 
 export interface IMonthCalendarCell {
   localDate: string;
@@ -56,7 +56,7 @@ export interface IBacktestTile {
   label: string;
   value: string;
   hint: string;
-  tone: 'good' | 'bad' | 'neutral';
+  tone: BacktestTileTone;
   source: IProvenance | null;
 }
 
@@ -78,20 +78,18 @@ export interface IBacktestCycleRow {
   spinThroughputKwh: number;
 }
 
+export interface IBacktestChartPanel {
+  series: IHourChartSeries[];
+  bands: IHourChartBand[];
+  highlight: IHourChartHighlight | null;
+}
+
 export interface IBacktestDayCharts {
   localDate: string;
   dateLabel: string;
   xLabels: string[];
-  load: {
-    series: IHourChartSeries[];
-    bands: IHourChartBand[];
-    highlight: IHourChartHighlight | null;
-  };
-  dispatch: {
-    series: IHourChartSeries[];
-    bands: IHourChartBand[];
-    highlight: IHourChartHighlight | null;
-  };
+  load: IBacktestChartPanel;
+  dispatch: IBacktestChartPanel;
   dayPeakKw: number;
 }
 
@@ -116,4 +114,21 @@ export interface IBacktestViewModel {
   leadName: string;
   shaverName: string;
   oracleName: string;
+}
+
+export interface IBacktestScreenModel {
+  state: IBacktestViewState;
+  model: IBacktestViewModel | null;
+}
+
+export interface IBacktestScheduleOption {
+  id: TariffScheduleId;
+  label: string;
+}
+
+export interface IBacktestBillComponentDefinition {
+  id: string;
+  label: string;
+  match: (id: string) => boolean;
+  pick: (entry: IBacktestStrategyResult) => number;
 }

@@ -28,6 +28,11 @@ export interface IOasisCsvRow {
   [columnName: string]: string;
 }
 
+export interface IDateChunk {
+  start: string;
+  end: string;
+}
+
 export interface IOasisChunk {
   startMs: number;
   endMs: number;

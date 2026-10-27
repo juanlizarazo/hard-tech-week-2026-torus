@@ -340,9 +340,9 @@ export class ChartHelper {
 
   public static interpolateColor(lowHex: string, highHex: string, ratio: number): string {
     const clamped = Math.min(1, Math.max(0, Number.isFinite(ratio) ? ratio : 0));
-    const low = ChartHelper.hexToRgb(lowHex);
-    const high = ChartHelper.hexToRgb(highHex);
-    const channels = low.map((channel, i) => Math.round(channel + (high[i] - channel) * clamped));
+    const low = ChartHelper._hexToRgb(lowHex);
+    const high = ChartHelper._hexToRgb(highHex);
+    const channels = low.map((channel, index) => Math.round(channel + (high[index] - channel) * clamped));
 
     return `#${channels.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
   }
@@ -409,7 +409,7 @@ export class ChartHelper {
     return Math.round(value * 10) / 10;
   }
 
-  private static hexToRgb(hex: string): number[] {
+  private static _hexToRgb(hex: string): number[] {
     const clean = hex.replace('#', '');
 
     return [0, 2, 4].map((offset) => parseInt(clean.slice(offset, offset + 2), 16));

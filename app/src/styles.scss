@@ -16,6 +16,8 @@
   --dt-rush: #f28500;
   --dt-rush-ink: #9a4f00;
   --dt-rush-wash: #fdeedb;
+  --dt-rush-stripe-base: #fef3e5;
+  --dt-rush-stripe-line: #fbd7a8;
   --dt-clear: #0e6b4e;
   --dt-clear-mark: #14875f;
   --dt-clear-wash: #e2f1ea;
@@ -63,6 +65,8 @@
   --dt-theme--chart-grid: var(--dt-line-soft);
   --dt-theme--chart-baseline: var(--dt-line);
   --dt-theme--chart-lane: #eef1f1;
+  --dt-theme--chart-hatch: #e3e7ea;
+  --dt-theme--chart-muted-line: #a3adb5;
   --dt-theme--chart-spin: var(--dt-spin);
   --dt-theme--chart-pulse: var(--dt-pulse);
 }

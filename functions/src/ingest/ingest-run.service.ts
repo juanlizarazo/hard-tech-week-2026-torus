@@ -14,8 +14,6 @@ import { IngestValidationHelper } from './ingest-validation.helper';
 
 const hourMilliseconds = 3_600_000;
 
-type LastRun = Detour.Firestore.Snapshot.ILastRun;
-
 export class IngestRunService {
   public async fetchWeatherMonths(
     fetchService: IngestFetchService,
@@ -218,7 +216,7 @@ export class IngestRunService {
     }
   }
 
-  private _lastRun(status: Detour.Firestore.Snapshot.RunStatus, manifest: Detour.Firestore.Snapshot.IManifest, message: string): LastRun {
+  private _lastRun(status: Detour.Firestore.Snapshot.RunStatus, manifest: Detour.Firestore.Snapshot.IManifest, message: string): Detour.Firestore.Snapshot.ILastRun {
     return { at: Timestamp.now(), status, snapshotId: manifest.id, targetDate: manifest.targetDate, message };
   }
 

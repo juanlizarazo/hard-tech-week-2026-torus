@@ -4,10 +4,6 @@ import { ingestConstants } from './ingest-snapshot.constants';
 import { IngestSnapshotHelper } from './ingest-snapshot.helper';
 import { IIngestResult } from './ingest-snapshot.interfaces';
 
-type Pointer = Detour.Firestore.Snapshot.IPointer;
-type LastRun = Detour.Firestore.Snapshot.ILastRun;
-type Manifest = Detour.Firestore.Snapshot.IManifest;
-
 export class IngestStoreService {
   private readonly _firestoreClient: Firestore | null;
 
@@ -42,19 +38,19 @@ export class IngestStoreService {
     return sizesByFile;
   }
 
-  public async readPointer(): Promise<Pointer | null> {
+  public async readPointer(): Promise<Detour.Firestore.Snapshot.IPointer | null> {
     const pointerSnapshot = await this._pointerReference().get();
 
-    return pointerSnapshot.exists ? (pointerSnapshot.data() as Pointer) : null;
+    return pointerSnapshot.exists ? (pointerSnapshot.data() as Detour.Firestore.Snapshot.IPointer) : null;
   }
 
-  public async readManifest(snapshotId: string): Promise<Manifest | null> {
+  public async readManifest(snapshotId: string): Promise<Detour.Firestore.Snapshot.IManifest | null> {
     const manifestSnapshot = await this._firestore.collection('snapshots').doc(snapshotId).get();
 
-    return manifestSnapshot.exists ? (manifestSnapshot.data() as Manifest) : null;
+    return manifestSnapshot.exists ? (manifestSnapshot.data() as Detour.Firestore.Snapshot.IManifest) : null;
   }
 
-  public async readCurrentManifest(): Promise<Manifest | null> {
+  public async readCurrentManifest(): Promise<Detour.Firestore.Snapshot.IManifest | null> {
     const pointer = await this.readPointer();
 
     return pointer ? this.readManifest(pointer.currentSnapshotId) : null;
@@ -63,7 +59,7 @@ export class IngestStoreService {
   public async writeWeatherToSnapshot(
     snapshotId: string,
     weatherMonths: Detour.Firestore.Snapshot.IWeatherMonth[],
-    manifestPatch: Partial<Manifest>,
+    manifestPatch: Partial<Detour.Firestore.Snapshot.IManifest>,
   ): Promise<void> {
     const snapshotReference = this._firestore.collection('snapshots').doc(snapshotId);
 
@@ -92,10 +88,10 @@ export class IngestStoreService {
     await snapshotReference.set(result.manifest);
   }
 
-  public async flipPointer(snapshotId: string, lastRun: LastRun): Promise<void> {
+  public async flipPointer(snapshotId: string, lastRun: Detour.Firestore.Snapshot.ILastRun): Promise<void> {
     await this._firestore.runTransaction(async (transaction) => {
       const pointerSnapshot = await transaction.get(this._pointerReference());
-      const pointer = pointerSnapshot.exists ? (pointerSnapshot.data() as Pointer) : null;
+      const pointer = pointerSnapshot.exists ? (pointerSnapshot.data() as Detour.Firestore.Snapshot.IPointer) : null;
       const lastGoodSnapshotIds = [snapshotId, ...IngestSnapshotHelper.resolveLastGoodIds(pointer)]
         .filter((id, index, ids) => ids.indexOf(id) === index)
         .slice(0, ingestConstants.LAST_GOOD_SNAPSHOT_LIMIT);
@@ -114,7 +110,7 @@ export class IngestStoreService {
     });
   }
 
-  public async recordLastRun(lastRun: LastRun): Promise<void> {
+  public async recordLastRun(lastRun: Detour.Firestore.Snapshot.ILastRun): Promise<void> {
     await this._pointerReference().set({ lastRun }, { merge: true });
   }
 

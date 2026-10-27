@@ -163,8 +163,8 @@ export class ThreeClocksComponent extends ResponsiveChartDirective implements On
     );
     this.billSegments = this._buildBillSegments(intervals, xScale, lanes[0]);
 
-    const prices = intervals.map((_, i) => {
-      const value = this.edamPricePerMwh?.[i];
+    const prices = intervals.map((_, index) => {
+      const value = this.edamPricePerMwh?.[index];
 
       return value === undefined ? null : value;
     });

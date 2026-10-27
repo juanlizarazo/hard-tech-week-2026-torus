@@ -115,3 +115,9 @@ export interface ITrafficHourValue {
   hour: number;
   value: number;
 }
+
+export interface ITrafficForecastSeries {
+  p10: (number | null)[];
+  p50: (number | null)[];
+  p90: (number | null)[];
+}

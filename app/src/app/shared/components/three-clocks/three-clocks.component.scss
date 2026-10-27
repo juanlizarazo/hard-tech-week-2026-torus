@@ -48,7 +48,7 @@
   fill: var(--dt-theme--chart-lane);
 
   &--rush {
-    fill: #e3e7ea;
+    fill: var(--dt-theme--chart-hatch);
   }
 }
 
@@ -105,7 +105,7 @@
   }
 
   &--hatch {
-    background: repeating-linear-gradient(45deg, rgb(27 36 48 / 25%) 0 2px, #e3e7ea 2px 5px);
+    background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--dt-ink) 25%, transparent) 0 2px, var(--dt-theme--chart-hatch) 2px 5px);
   }
 }
 

@@ -50,22 +50,14 @@
               <h2 class="plan__dials-title">Dials</h2>
 
               <div class="plan__dial">
-                <label class="plan__dial-label" for="dial-site">Site</label>
-                <div class="plan__select-wrap">
-                  <select
-                    id="dial-site"
-                    class="plan__select"
-                    [value]="controls.siteId"
-                    (change)="onSiteChange($any($event.target).value)"
-                  >
+                <span class="plan__dial-label" id="dial-site-label">Site</span>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="plan__select">
+                  <mat-select aria-labelledby="dial-site-label" [value]="controls.siteId" (selectionChange)="onSiteChange($event.value)">
                     @for (card of siteCards; track card.archetype.id) {
-                      <option [value]="card.archetype.id" [selected]="card.archetype.id === controls.siteId">
-                        {{ siteShortName(card.archetype) }}
-                      </option>
+                      <mat-option [value]="card.archetype.id">{{ siteShortName(card.archetype) }}</mat-option>
                     }
-                  </select>
-                  <mat-icon class="plan__select-icon" aria-hidden="true">expand_more</mat-icon>
-                </div>
+                  </mat-select>
+                </mat-form-field>
                 @if (selectedSiteCard; as card) {
                   <span class="plan__dial-hint">
                     July peak {{ card.julyStats.peakKw | number: '1.0-0' }} kW, bill {{ card.julyBill.total | currency: 'USD' : 'symbol' : '1.0-0' }}

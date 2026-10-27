@@ -132,17 +132,16 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+}
 
-  th,
-  td {
-    padding: 6px 8px;
-    text-align: left;
-    border-bottom: 1px solid var(--dt-viz-grid);
-  }
+.dt-component-bars__cell {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--dt-viz-grid);
+}
 
-  th {
-    font-weight: 600;
-  }
+.dt-component-bars__head {
+  font-weight: 600;
 }
 
 .dt-component-bars__num {
@@ -159,7 +158,7 @@
   white-space: nowrap;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 600px) {
   .dt-component-bars__group {
     grid-template-columns: 160px minmax(0, 1fr);
     align-items: center;

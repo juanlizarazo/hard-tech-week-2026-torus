@@ -11,3 +11,7 @@ export * from './figure/figure.component';
 export * from './source-chip/source-chip.component';
 export * from './under-the-hood/under-the-hood.component';
 export * from './three-clocks/three-clocks.component';
+export * from './hour-chart/hour-chart.interfaces';
+export * from './hour-chart/hour-chart.types';
+export * from './side-panel/side-panel.interfaces';
+export * from './figure/figure.types';

@@ -1,8 +1,15 @@
 import { IBacktestDay, IBacktestResult, IBacktestStrategyResult } from '@app/core/backtest';
 import { IInterval, IPlanInterval } from '@app/core/models';
 import { IHourChartBand, IHourChartHighlight } from '@app/shared/components/hour-chart/hour-chart.interfaces';
-import { backtestScreenSettings, backtestStrategyColors, backtestStrategyNames } from './backtest.constants';
 import {
+  backtestScreenSettings,
+  backtestStrategyColors,
+  backtestStrategyNames,
+  longMonthNames,
+  monthNames,
+} from './backtest.constants';
+import {
+  IBacktestBillComponentDefinition,
   IBacktestCycleRow,
   IBacktestDayCharts,
   IBacktestTile,
@@ -11,11 +18,6 @@ import {
   IMonthCalendarCell,
   IMonthCalendarScale,
 } from './backtest.interfaces';
-
-const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const longMonthNames = [
-  'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December',
-];
 
 export class BacktestHelper {
   public static buildViewModel(result: IBacktestResult, selectedDate: string | null): IBacktestViewModel {
@@ -274,7 +276,7 @@ export class BacktestHelper {
     const lines = result.baseline.bill.lines;
     const baselineFor = (match: (id: string) => boolean): number =>
       lines.filter((line) => match(line.id)).reduce((sum: number, line) => sum + line.amount, 0);
-    const groups: { id: string; label: string; match: (id: string) => boolean; pick: (entry: IBacktestStrategyResult) => number }[] = [
+    const groups: IBacktestBillComponentDefinition[] = [
       { id: 'demand', label: 'Demand charge', match: (id) => id === 'demand', pick: (entry) => entry.savings.demand },
       { id: 'facilities', label: 'Facilities charge', match: (id) => id === 'facilities', pick: (entry) => entry.savings.facilities },
       { id: 'energy', label: 'Energy', match: (id) => id.startsWith('energy'), pick: (entry) => entry.savings.energy },
@@ -327,6 +329,7 @@ export class BacktestHelper {
     const rushHighlight = BacktestHelper.range(rush, 'Rush hour');
     const spinNet = lead.map((entry: IPlanInterval) => entry.spinDischargeKw - entry.spinChargeKw);
     const pulseNet = lead.map((entry: IPlanInterval) => entry.pulseDischargeKw - entry.pulseChargeKw);
+
     return {
       localDate: day.localDate,
       dateLabel: BacktestHelper.formatDay(day.localDate),

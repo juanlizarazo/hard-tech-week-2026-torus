@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { IMonthCalendarCell, IMonthCalendarScale } from '../../backtest.interfaces';
-import { WEEKDAY_LABELS } from './month-calendar.constants';
+import { weekdayLabels } from './month-calendar.constants';
 
 @Component({
   selector: 'dt-month-calendar',
@@ -16,7 +16,7 @@ export class MonthCalendarComponent implements OnChanges {
   @Input({ required: true }) public scale!: IMonthCalendarScale;
   @Output() public readonly daySelected = new EventEmitter<string>();
 
-  public readonly weekdays = WEEKDAY_LABELS;
+  public readonly weekdays = weekdayLabels;
   public blanks: number[] = [];
 
   public ngOnChanges(): void {

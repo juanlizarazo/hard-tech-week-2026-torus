@@ -2,13 +2,11 @@ import { ingestConstants } from './ingest-snapshot.constants';
 import { IngestSnapshotHelper } from './ingest-snapshot.helper';
 import { IIngestDiagnostics, IIngestResult, IIngestValidation } from './ingest-snapshot.interfaces';
 
-type Manifest = Detour.Firestore.Snapshot.IManifest;
-
 export class IngestValidationHelper {
   public static validate(
     result: IIngestResult,
     diagnostics: IIngestDiagnostics,
-    currentManifest: Manifest | null,
+    currentManifest: Detour.Firestore.Snapshot.IManifest | null,
   ): IIngestValidation {
     const reasons: string[] = [];
     const { manifest } = result;
