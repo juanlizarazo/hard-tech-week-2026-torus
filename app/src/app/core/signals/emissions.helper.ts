@@ -33,7 +33,7 @@ export class EmissionsHelper {
   }
 
   public static seasonOf(month: number): MefSeason {
-    return mefSeasonMonths.summer.includes(month) ? 'summer' : 'winter';
+    return mefSeasonMonths.SUMMER.includes(month) ? 'summer' : 'winter';
   }
 
   public static ols(predictors: number[], responses: number[]): IRegressionResult {

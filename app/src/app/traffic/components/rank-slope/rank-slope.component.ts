@@ -17,7 +17,7 @@ export class RankSlopeComponent implements OnChanges {
   public readonly rowHeight = rankSlopeLayout.ROW_HEIGHT;
 
   public lines: IRankSlopeLine[] = [];
-  public height: number = rankSlopeLayout.DEFAULT_HEIGHT;
+  public height = rankSlopeLayout.DEFAULT_HEIGHT;
   public activeHour: number | null = null;
   public ariaSummary = '';
 

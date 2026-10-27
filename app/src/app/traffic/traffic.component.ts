@@ -4,9 +4,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Observable, map } from 'rxjs';
+import { map } from 'rxjs';
 import { GridSignalsService, SnapshotService, emissionFactors } from '@app/core';
-import { IEmissionFactor } from '@app/core/models';
 import { AlertBannerComponent, HourChartComponent, ScreenToolbarComponent } from '@app/shared/components';
 import { RankSlopeComponent } from './components/rank-slope/rank-slope.component';
 import { trafficLimitations, trafficMethodSteps } from './traffic.constants';
@@ -35,14 +34,14 @@ export class TrafficComponent {
   private readonly _snapshotService = inject(SnapshotService);
   private readonly _gridSignalsService = inject(GridSignalsService);
 
-  public readonly factors: IEmissionFactor[] = [emissionFactors.COAL, emissionFactors.GAS];
+  public readonly factors = [emissionFactors.COAL, emissionFactors.GAS];
   public readonly limitations = trafficLimitations;
   public readonly methodSteps = trafficMethodSteps;
   public readonly megawattFormat = (value: number): string => `${Math.round(value).toLocaleString()} MW`;
   public readonly priceFormat = (value: number): string => `$${value.toFixed(0)}/MWh`;
   public readonly carbonFormat = (value: number): string => `${Math.round(value).toLocaleString()} lb/MWh`;
 
-  public readonly viewModel$: Observable<ITrafficViewModel> = TrafficViewStateHelper.fromSources({
+  public readonly viewModel$ = TrafficViewStateHelper.fromSources({
     manifest$: this._snapshotService.manifest$,
     history$: this._gridSignalsService.history$,
     priceHours$: this._gridSignalsService.targetPriceHours$,

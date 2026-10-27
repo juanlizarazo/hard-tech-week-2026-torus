@@ -86,7 +86,7 @@
                   [valueFormat]="carbonFormat"
                 ></dt-hour-chart>
                 <p class="traffic__hint">
-                  {{ report.season }} hours of the day. Based on PACE fossil generation, the next MWh emits
+                  {{ report.season === 'summer' ? 'Summer' : 'Winter' }} hours of the day. Based on PACE fossil generation, the next MWh emits
                   @if (report.fossilRange; as fossilRange) {
                     {{ fossilRange.minLbPerMwh | number: '1.0-0' }}–{{ fossilRange.maxLbPerMwh | number: '1.0-0' }} lb;
                   }
@@ -218,70 +218,70 @@
                 </mat-card>
               </div>
 
-            <div>
-              <h2 class="traffic__heading">Provenance</h2>
-              <div class="traffic__table-wrap">
-                <table class="traffic__table">
-                  <thead>
-                    <tr>
-                      <th class="traffic__cell traffic__cell--head" scope="col">Source</th>
-                      <th class="traffic__cell traffic__cell--head" scope="col">Kind</th>
-                      <th class="traffic__cell traffic__cell--head" scope="col">Series</th>
-                      <th class="traffic__cell traffic__cell--head" scope="col">Link</th>
-                      <th class="traffic__cell traffic__cell--head" scope="col">Note</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (source of manifest.sources; track source.id) {
+              <div>
+                <h2 class="traffic__heading">Provenance</h2>
+                <div class="traffic__table-wrap">
+                  <table class="traffic__table">
+                    <thead>
                       <tr>
-                        <td class="traffic__cell">{{ source.label }}</td>
-                        <td class="traffic__cell">{{ source.kind }}</td>
-                        <td class="traffic__cell">{{ source.seriesId || '—' }}</td>
-                        <td class="traffic__cell">
-                          @if (source.url) {
-                            <a [href]="source.url" target="_blank" rel="noopener noreferrer">Open</a>
-                          } @else {
-                            —
-                          }
-                        </td>
-                        <td class="traffic__cell">{{ source.note || '—' }}</td>
+                        <th class="traffic__cell traffic__cell--head" scope="col">Source</th>
+                        <th class="traffic__cell traffic__cell--head" scope="col">Kind</th>
+                        <th class="traffic__cell traffic__cell--head" scope="col">Series</th>
+                        <th class="traffic__cell traffic__cell--head" scope="col">Link</th>
+                        <th class="traffic__cell traffic__cell--head" scope="col">Note</th>
                       </tr>
-                    }
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      @for (source of manifest.sources; track source.id) {
+                        <tr>
+                          <td class="traffic__cell">{{ source.label }}</td>
+                          <td class="traffic__cell">{{ source.kind }}</td>
+                          <td class="traffic__cell">{{ source.seriesId || '—' }}</td>
+                          <td class="traffic__cell">
+                            @if (source.url) {
+                              <a [href]="source.url" target="_blank" rel="noopener noreferrer">Open</a>
+                            } @else {
+                              —
+                            }
+                          </td>
+                          <td class="traffic__cell">{{ source.note || '—' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
 
-            <div>
-              <h2 class="traffic__heading">Row counts by month</h2>
-              <div class="traffic__table-wrap">
-                <table class="traffic__table">
-                  <thead>
-                    <tr>
-                      <th class="traffic__cell traffic__cell--head" scope="col">Series</th>
-                      <th class="traffic__cell traffic__cell--head" scope="col">Month</th>
-                      <th class="traffic__cell traffic__cell--head" scope="col">Rows</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (entry of manifest.gridMonths; track entry.month) {
+              <div>
+                <h2 class="traffic__heading">Row counts by month</h2>
+                <div class="traffic__table-wrap">
+                  <table class="traffic__table">
+                    <thead>
                       <tr>
-                        <td class="traffic__cell">Grid</td>
-                        <td class="traffic__cell">{{ entry.month }}</td>
-                        <td class="traffic__cell">{{ entry.rowCount }}</td>
+                        <th class="traffic__cell traffic__cell--head" scope="col">Series</th>
+                        <th class="traffic__cell traffic__cell--head" scope="col">Month</th>
+                        <th class="traffic__cell traffic__cell--head" scope="col">Rows</th>
                       </tr>
-                    }
-                    @for (entry of manifest.priceMonths; track entry.month) {
-                      <tr>
-                        <td class="traffic__cell">Price</td>
-                        <td class="traffic__cell">{{ entry.month }}</td>
-                        <td class="traffic__cell">{{ entry.rowCount }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      @for (entry of manifest.gridMonths; track entry.month) {
+                        <tr>
+                          <td class="traffic__cell">Grid</td>
+                          <td class="traffic__cell">{{ entry.month }}</td>
+                          <td class="traffic__cell">{{ entry.rowCount }}</td>
+                        </tr>
+                      }
+                      @for (entry of manifest.priceMonths; track entry.month) {
+                        <tr>
+                          <td class="traffic__cell">Price</td>
+                          <td class="traffic__cell">{{ entry.month }}</td>
+                          <td class="traffic__cell">{{ entry.rowCount }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
 
             </mat-expansion-panel>
           }

@@ -3,7 +3,6 @@ export const trafficConfig = {
   TOP_THIRD: 2 / 3,
   TREND_DAYS: 7,
   WINDOW_DAYS: 3,
-  HIGHLIGHT_RANK_SHIFTS: 3,
 };
 
 export const trafficClocks = {
@@ -12,7 +11,7 @@ export const trafficClocks = {
   CARBON: 'carbon',
 };
 
-export const trafficLimitations: string[] = [
+export const trafficLimitations = [
   'Fuel-level, not unit-level: EIA-930 reports coal and gas totals, not which plant moved.',
   'Imports are not attributed. The shaded import band shows how much lower the number gets when demand changes are partly met by imports.',
   'One gas factor covers combined-cycle and combustion turbines, so hours when a peaker is on the margin are understated.',
@@ -20,7 +19,7 @@ export const trafficLimitations: string[] = [
   'A linear factor assumes small changes in load. It is not a forecast of what a large battery would displace.',
 ];
 
-export const trafficMethodSteps: string[] = [
+export const trafficMethodSteps = [
   'Hourly emissions E = coal MWh x 2,260 + gas MWh x 970 lb CO2/MWh.',
   'Take hour-over-hour changes (consecutive UTC hours only) of E and of generation (or demand).',
   'Within each hour-of-day x season group, regress change in E on change in generation. The slope is the marginal emissions factor; the band is the 95% interval.',

@@ -1,5 +1,4 @@
 import { IEmissionFactor } from '../models';
-import { MefSeason } from '../models/emissions.types';
 
 const eiaFaqUrl = 'https://www.eia.gov/tools/faqs/faq.php?id=74&t=11';
 
@@ -30,9 +29,9 @@ export const emissionFactors: Record<'COAL' | 'GAS', IEmissionFactor> = {
   },
 };
 
-export const mefSeasonMonths: Record<MefSeason, number[]> = {
-  summer: [6, 7, 8, 9],
-  winter: [1, 2, 3, 4, 5, 10, 11, 12],
+export const mefSeasonMonths = {
+  SUMMER: [6, 7, 8, 9],
+  WINTER: [1, 2, 3, 4, 5, 10, 11, 12],
 };
 
 export const signalsConfig = {

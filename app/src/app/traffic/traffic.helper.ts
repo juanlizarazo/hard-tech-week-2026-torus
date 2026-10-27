@@ -188,7 +188,7 @@ export class TrafficHelper {
       dividerIndices: [],
     };
 
-    dates.forEach((date: string, dayIndex: number) => {
+    dates.forEach((date, dayIndex) => {
       if (dayIndex > 0) {
         load.dividerIndices.push(dayIndex * 24);
       }
