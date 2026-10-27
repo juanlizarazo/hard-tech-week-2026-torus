@@ -51,4 +51,4 @@ Airport, Schedule 8, July 2026, seed 42, real snapshot and phase-03 MEF:
 ## Done when
 
 - [x] Demo path step works in the running app
-- [ ] Committed and PR opened
+- [x] Committed and PR opened (#13)
