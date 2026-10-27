@@ -30,7 +30,7 @@
           <button
             type="button"
             role="radio"
-            class="plan__site"
+            class="dt-card dt-card--clickable plan__site"
             [class.plan__site--active]="card.archetype.id === controls.siteId"
             [attr.aria-checked]="card.archetype.id === controls.siteId"
             (click)="onSiteSelect(card.archetype)"
@@ -133,7 +133,7 @@
       @if (solve$ | async; as solve) {
         <p class="plan__status" aria-live="polite">
           @if (solve.status === 'solving') {
-            <mat-spinner diameter="14"></mat-spinner>
+            <mat-icon class="plan__status-icon plan__status-icon--pending" aria-hidden="true">hourglass_top</mat-icon>
             <span>Solving…</span>
           } @else if (solve.viewModel) {
             <mat-icon class="plan__status-icon" aria-hidden="true">bolt</mat-icon>

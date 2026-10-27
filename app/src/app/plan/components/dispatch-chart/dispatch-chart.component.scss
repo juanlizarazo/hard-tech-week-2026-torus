@@ -5,11 +5,11 @@
 }
 
 .dispatch-chart__spin-bar {
-  fill: #2a78d6;
+  fill: var(--dt-theme--chart-spin);
 }
 
 .dispatch-chart__pulse-bar {
-  fill: #eb6834;
+  fill: var(--dt-theme--chart-pulse);
 }
 
 .dispatch-chart__panel-text {
@@ -19,17 +19,17 @@
 }
 
 .dispatch-chart__side-text {
-  fill: #6b6a65;
+  fill: var(--dt-theme--chart-ink-muted);
   font-size: 11px;
 }
 
 .dispatch-chart__soc-band {
-  fill: #eb6834;
+  fill: var(--dt-theme--chart-pulse);
   fill-opacity: 0.07;
 }
 
 .dispatch-chart__soc-limit {
-  stroke: #c3c2b7;
+  stroke: var(--dt-theme--chart-baseline);
   stroke-width: 1;
   shape-rendering: crispEdges;
 }
@@ -48,7 +48,7 @@
 
 .dispatch-chart__pulse-soc {
   fill: none;
-  stroke: #eb6834;
+  stroke: var(--dt-theme--chart-pulse);
   stroke-width: 2;
   stroke-linejoin: round;
   stroke-linecap: round;
@@ -56,7 +56,7 @@
 
 .dispatch-chart__spin-soc {
   fill: none;
-  stroke: #2a78d6;
+  stroke: var(--dt-theme--chart-spin);
   stroke-width: 1.25;
   stroke-linejoin: round;
   stroke-opacity: 0.85;

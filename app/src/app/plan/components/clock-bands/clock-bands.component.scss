@@ -7,7 +7,7 @@
 }
 
 .clock-bands__lane-bg {
-  fill: #f1f2f4;
+  fill: var(--dt-theme--chart-lane);
 }
 
 .clock-bands__on-peak {
@@ -15,7 +15,7 @@
 }
 
 .clock-bands__on-peak-text {
-  fill: #ffffff;
+  fill: var(--dt-theme--card);
   font-size: 11px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -28,28 +28,28 @@
 }
 
 .clock-bands__gap-text {
-  fill: #52514e;
+  fill: var(--dt-theme--chart-ink-secondary);
   font-size: 11px;
   font-style: italic;
 }
 
 .clock-bands__caption {
-  fill: #52514e;
+  fill: var(--dt-theme--chart-ink-secondary);
   font-size: 11px;
 }
 
 .clock-bands__legend-ramp {
-  rx: 2;
+  rx: 8;
 }
 
 .clock-bands__placeholder-pill {
-  fill: #fff4d6;
-  stroke: #9a6b00;
+  fill: var(--dt-theme--accent-bg);
+  stroke: var(--dt-theme--accent-border);
   stroke-width: 1;
 }
 
 .clock-bands__placeholder-text {
-  fill: #6b4900;
+  fill: var(--dt-theme--accent-dark);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -60,4 +60,21 @@
   stroke: var(--dt-theme--error);
   stroke-width: 2;
   pointer-events: none;
+}
+
+.clock-bands__hatch-bg {
+  fill: var(--dt-theme--chart-lane);
+
+  &--rush {
+    fill: var(--dt-theme--error-bg);
+  }
+}
+
+.clock-bands__hatch-line {
+  stroke: var(--dt-theme--chart-baseline);
+
+  &--rush {
+    stroke: var(--dt-theme--error);
+    stroke-opacity: 0.3;
+  }
 }

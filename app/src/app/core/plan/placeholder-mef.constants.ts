@@ -1,4 +1,5 @@
-import { IMarginalEmissionsPoint, IMarginalEmissionsSeries, MefSeason } from '../models';
+import { IMarginalEmissionsSeries } from '../models';
+import { MefHelper } from './mef.helper';
 
 const summerLbPerMwh = [
   1880, 1900, 1910, 1910, 1900, 1860, 1700, 1500, 1320, 1200, 1140, 1110,
@@ -10,19 +11,9 @@ const winterLbPerMwh = [
   1160, 1170, 1210, 1300, 1450, 1580, 1600, 1560, 1500, 1420, 1360, 1300,
 ];
 
-const buildPoints = (season: MefSeason, values: number[]): IMarginalEmissionsPoint[] =>
-  values.map((lbPerMwh: number, hour: number) => ({
-    hour,
-    season,
-    lbPerMwh,
-    ciLowLbPerMwh: lbPerMwh,
-    ciHighLbPerMwh: lbPerMwh,
-    n: 0,
-  }));
-
 export const placeholderMefSeries: IMarginalEmissionsSeries = {
   method: 'fossil-generation',
-  points: [...buildPoints('summer', summerLbPerMwh), ...buildPoints('winter', winterLbPerMwh)],
+  points: [...MefHelper.hourlyPoints('summer', summerLbPerMwh), ...MefHelper.hourlyPoints('winter', winterLbPerMwh)],
   provenance: [
     {
       id: 'placeholder-mef',

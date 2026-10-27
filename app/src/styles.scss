@@ -16,6 +16,18 @@
   --dt-theme--border: #e2e5ea;
   --dt-theme--card: #ffffff;
   --dt-theme--muted: #5b6573;
+  --dt-theme--text-secondary: #4b5563;
+  --dt-theme--text-tertiary: #6b7280;
+  --dt-theme--accent-bg: #fff4d6;
+  --dt-theme--accent-border: #9a6b00;
+  --dt-theme--accent-dark: #6b4900;
+  --dt-theme--chart-ink-secondary: #52514e;
+  --dt-theme--chart-ink-muted: #6b6a65;
+  --dt-theme--chart-grid: #e1e0d9;
+  --dt-theme--chart-baseline: #c3c2b7;
+  --dt-theme--chart-lane: #f1f2f4;
+  --dt-theme--chart-spin: #2a78d6;
+  --dt-theme--chart-pulse: #eb6834;
 }
 
 html {
@@ -49,4 +61,23 @@ body {
   background: var(--dt-theme--card);
   border: 1px solid var(--dt-theme--border);
   border-radius: 12px;
+}
+
+.dt-card--clickable {
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
+
+  &:hover {
+    border-color: var(--dt-theme--primary);
+    box-shadow: 0 2px 8px rgba(31, 42, 55, 0.08);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--dt-theme--primary);
+    outline-offset: 2px;
+  }
 }
