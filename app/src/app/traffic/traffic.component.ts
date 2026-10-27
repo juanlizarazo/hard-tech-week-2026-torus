@@ -1,22 +1,29 @@
 import { Component, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Observable } from 'rxjs';
-import { SnapshotService } from '@app/core';
-import { AlertBannerComponent, ScreenToolbarComponent } from '@app/shared/components';
-import { ISnapshotViewState } from '@app/shared/interfaces/snapshot-view-state.interfaces';
-import { SnapshotViewStateHelper } from '@app/shared/helpers/snapshot-view-state.helper';
+import { map } from 'rxjs';
+import { GridSignalsService, SnapshotService, emissionFactors } from '@app/core';
+import { AlertBannerComponent, HourChartComponent, ScreenToolbarComponent } from '@app/shared/components';
+import { RankSlopeComponent } from './components/rank-slope/rank-slope.component';
+import { trafficLimitations, trafficMethodSteps } from './traffic.constants';
+import { TrafficHelper } from './traffic.helper';
+import { TrafficViewStateHelper } from './traffic-view-state.helper';
 
 @Component({
   selector: 'dt-traffic',
   imports: [
     AsyncPipe,
+    DecimalPipe,
     MatCardModule,
+    MatExpansionModule,
     MatIconModule,
     MatProgressSpinnerModule,
     AlertBannerComponent,
+    HourChartComponent,
+    RankSlopeComponent,
     ScreenToolbarComponent
   ],
   templateUrl: './traffic.component.html',
@@ -24,8 +31,26 @@ import { SnapshotViewStateHelper } from '@app/shared/helpers/snapshot-view-state
 })
 export class TrafficComponent {
   private readonly _snapshotService = inject(SnapshotService);
+  private readonly _gridSignalsService = inject(GridSignalsService);
 
-  public readonly state$: Observable<ISnapshotViewState> = SnapshotViewStateHelper.fromManifest(
-    this._snapshotService.manifest$
+  public readonly factors = [emissionFactors.COAL, emissionFactors.GAS];
+  public readonly limitations = trafficLimitations;
+  public readonly methodSteps = trafficMethodSteps;
+  public readonly megawattFormat = (value: number): string => `${Math.round(value).toLocaleString()} MW`;
+  public readonly priceFormat = (value: number): string => `$${value.toFixed(0)}/MWh`;
+  public readonly carbonFormat = (value: number): string => `${Math.round(value).toLocaleString()} lb/MWh`;
+
+  public readonly viewModel$ = TrafficViewStateHelper.fromSources({
+    manifest$: this._snapshotService.manifest$,
+    history$: this._gridSignalsService.history$,
+    priceHours$: this._gridSignalsService.targetPriceHours$,
+    marginalSeries$: this._gridSignalsService.marginalEmissions$,
+    averagePoints$: this._gridSignalsService.averageEmissions$,
+    score$: this._gridSignalsService.forecastScore$
+  }).pipe(
+    map((state) => ({
+      state,
+      charts: state.report ? TrafficHelper.charts(state.report) : null
+    }))
   );
 }

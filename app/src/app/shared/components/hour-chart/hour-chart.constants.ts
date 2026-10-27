@@ -1,0 +1,41 @@
+export const hourChartLayout = {
+  DEFAULT_WIDTH: 640,
+  DEFAULT_HEIGHT: 300,
+  PLOT_LEFT: 48,
+  PLOT_TOP: 26,
+  PLOT_RIGHT_INSET: 12,
+  PLOT_BOTTOM_INSET: 32,
+  DEFAULT_PLOT_RIGHT: 628,
+  DEFAULT_PLOT_BOTTOM: 268,
+  HOST_BORDER: 2,
+  HOST_PADDING: 32,
+  MIN_HOST_WIDTH: 200,
+  MIN_WIDTH: 260,
+  NARROW_WIDTH: 420,
+  MEDIUM_WIDTH: 640,
+  NARROW_HEIGHT: 240,
+  MEDIUM_HEIGHT: 270
+};
+
+export const hourChartTicks = {
+  X_STEP_CANDIDATES: [1, 2, 3, 4, 6, 8, 12, 24],
+  X_FALLBACK_STEP: 24,
+  X_MAX_COUNT_NARROW: 5,
+  X_MAX_COUNT_WIDE: 7,
+  Y_TARGET_INTERVALS: 4,
+  Y_NICE_RESIDUALS: [1, 2, 2.5, 5],
+  Y_NICE_FALLBACK: 10,
+  Y_ZERO_BASE_RATIO: 0.5
+};
+
+export const hourChartDashPatterns = {
+  DASHED: '7 4',
+  DOTTED: '1.5 4',
+  ESTIMATE: '3 4',
+  NONE: ''
+};
+
+export const hourChartEstimate = {
+  OPACITY: 0.6,
+  SOLID_OPACITY: 1
+};

@@ -15,3 +15,17 @@ export interface IMarginalEmissionsSeries {
   points: IMarginalEmissionsPoint[];
   provenance: IProvenance[];
 }
+
+export interface IEmissionFactor {
+  fuelKey: string;
+  label: string;
+  lbPerMwh: number;
+  provenance: IProvenance;
+}
+
+export interface IAverageEmissionsPoint {
+  hour: number;
+  season: MefSeason;
+  lbPerMwh: number;
+  n: number;
+}

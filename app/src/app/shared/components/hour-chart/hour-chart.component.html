@@ -1,0 +1,135 @@
+<figure class="dt-hour-chart__figure">
+  @if (title) {
+    <figcaption class="dt-hour-chart__title">{{ title }}</figcaption>
+  }
+
+  @if (!hasData) {
+    <p class="dt-hour-chart__empty">No data to chart yet.</p>
+  } @else {
+    @if (legendItems.length >= 2 || bands.length > 0) {
+      <ul class="dt-hour-chart__legend">
+        @for (item of legendItems; track item.label) {
+          <li class="dt-hour-chart__legend-item">
+            <svg class="dt-hour-chart__legend-swatch" viewBox="0 0 24 12" aria-hidden="true">
+              @if (item.isBand) {
+                <rect x="1" y="1" width="22" height="10" rx="2" [attr.fill]="item.color" fill-opacity="0.25" [attr.stroke]="item.color" stroke-opacity="0.5" stroke-width="1"></rect>
+              } @else {
+                <line x1="1" y1="6" x2="23" y2="6" [attr.stroke]="item.color" stroke-width="2" stroke-linecap="round" [attr.stroke-dasharray]="item.dashArray || null"></line>
+              }
+            </svg>
+            <span>{{ item.label }}</span>
+          </li>
+        }
+        @if (highlight) {
+          <li class="dt-hour-chart__legend-item">
+            <svg class="dt-hour-chart__legend-swatch" viewBox="0 0 24 12" aria-hidden="true">
+              <rect x="1" y="1" width="22" height="10" rx="2" fill="var(--dt-viz-highlight)"></rect>
+            </svg>
+            <span>{{ highlight.label }}</span>
+          </li>
+        }
+      </ul>
+    }
+
+    <div class="dt-hour-chart__plot">
+      <svg
+        class="dt-hour-chart__svg"
+        [attr.viewBox]="'0 0 ' + width + ' ' + height"
+        preserveAspectRatio="xMidYMid meet"
+        role="img"
+        [attr.aria-label]="ariaSummary"
+        (pointermove)="onPointerMove($event)"
+        (pointerdown)="onPointerMove($event)"
+        (pointerleave)="onPointerLeave()"
+      >
+        @if (highlightRect) {
+          <rect class="dt-hour-chart__highlight" [attr.x]="highlightRect.x" [attr.y]="plotTop" [attr.width]="highlightRect.width" [attr.height]="plotBottom - plotTop"></rect>
+        }
+
+        @for (tick of yTicks; track tick.position) {
+          <line class="dt-hour-chart__grid" [attr.x1]="plotLeft" [attr.x2]="plotRight" [attr.y1]="tick.position" [attr.y2]="tick.position"></line>
+          <text class="dt-hour-chart__tick-text" [attr.x]="plotLeft - 8" [attr.y]="tick.position + 4" text-anchor="end">{{ tick.label }}</text>
+        }
+
+        <line class="dt-hour-chart__axis" [attr.x1]="plotLeft" [attr.x2]="plotRight" [attr.y1]="plotBottom" [attr.y2]="plotBottom"></line>
+
+        @for (dividerX of dividers; track dividerX) {
+          <line class="dt-hour-chart__divider" [attr.x1]="dividerX" [attr.x2]="dividerX" [attr.y1]="plotTop" [attr.y2]="plotBottom"></line>
+        }
+
+        @for (tick of xTicks; track tick.position) {
+          <text class="dt-hour-chart__tick-text" [attr.x]="tick.position" [attr.y]="plotBottom + 18" [attr.text-anchor]="xTickAnchor($index)">{{ tick.label }}</text>
+        }
+
+        <text class="dt-hour-chart__axis-title" x="4" [attr.y]="plotTop - 14" text-anchor="start">{{ yLabel }}</text>
+
+        @for (band of bandPaths; track band.label) {
+          <path [attr.d]="band.path" [attr.fill]="band.color" fill-opacity="0.18" stroke="none"></path>
+        }
+
+        @for (line of linePaths; track line.key) {
+          <path
+            class="dt-hour-chart__line"
+            [attr.d]="line.path"
+            [attr.stroke]="line.color"
+            [attr.stroke-dasharray]="line.dashArray || null"
+            [attr.stroke-opacity]="line.opacity"
+          ></path>
+        }
+
+        @if (hoverIndex !== null) {
+          <line class="dt-hour-chart__crosshair" [attr.x1]="hoverX" [attr.x2]="hoverX" [attr.y1]="plotTop" [attr.y2]="plotBottom"></line>
+          @for (marker of hoverMarkers; track $index) {
+            <circle class="dt-hour-chart__marker" [attr.cx]="hoverX" [attr.cy]="marker.y" r="4.5" [attr.fill]="marker.color"></circle>
+          }
+        }
+      </svg>
+
+      @if (hoverIndex !== null) {
+        <div class="dt-hour-chart__tooltip" [class.dt-hour-chart__tooltip--flip]="tooltipFlip" [style.left.%]="tooltipLeftPercent">
+          <div class="dt-hour-chart__tooltip-title">{{ tooltipTitle }}</div>
+          @for (row of tooltipRows; track row.label) {
+            <div class="dt-hour-chart__tooltip-row">
+              <svg class="dt-hour-chart__legend-swatch" viewBox="0 0 24 12" aria-hidden="true">
+                @if (row.isBand) {
+                  <rect x="1" y="1" width="22" height="10" rx="2" [attr.fill]="row.color" fill-opacity="0.25" [attr.stroke]="row.color" stroke-opacity="0.5"></rect>
+                } @else {
+                  <line x1="1" y1="6" x2="23" y2="6" [attr.stroke]="row.color" stroke-width="2" stroke-linecap="round" [attr.stroke-dasharray]="row.dashArray || null"></line>
+                }
+              </svg>
+              <span class="dt-hour-chart__tooltip-label">{{ row.label }}</span>
+              <span class="dt-hour-chart__tooltip-value">{{ row.text }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <details class="dt-hour-chart__table-details">
+      <summary class="dt-hour-chart__table-summary">View as table</summary>
+      <div class="dt-hour-chart__table-scroll">
+        <table class="dt-hour-chart__table">
+          <caption class="dt-hour-chart__visually-hidden">{{ title || 'Chart data' }} ({{ yLabel }})</caption>
+          <thead>
+            <tr>
+              <th scope="col" class="dt-hour-chart__th">Time</th>
+              @for (header of tableHeaders; track header) {
+                <th scope="col" class="dt-hour-chart__th">{{ header }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of tableRows; track row.xLabel) {
+              <tr>
+                <th scope="row" class="dt-hour-chart__th dt-hour-chart__th--row">{{ row.xLabel }}</th>
+                @for (cell of row.cells; track $index) {
+                  <td class="dt-hour-chart__td">{{ cell }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </details>
+  }
+</figure>
