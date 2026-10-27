@@ -1,0 +1,64 @@
+<dt-screen-toolbar title="Plan — Three Clocks" subtitle="Bill, carbon and reserve, planned together for tomorrow's rush hour.">
+  <dt-simulated-badge></dt-simulated-badge>
+</dt-screen-toolbar>
+
+@if (state$ | async; as state) {
+  @switch (state.status) {
+    @case ('loading') {
+      <mat-card class="dt-card" appearance="outlined">
+        <mat-card-content class="screen__state-content">
+          <mat-spinner diameter="28"></mat-spinner>
+          <span>Loading…</span>
+        </mat-card-content>
+      </mat-card>
+    }
+    @case ('error') {
+      <dt-alert-banner [message]="state.errorMessage"></dt-alert-banner>
+    }
+    @default {
+      <!-- site cards -->
+      <p class="plan__intro">
+        Three simulated Utah sites, each with a Torus Station (Nova Spin flywheel + Nova Pulse battery).
+        Baseline = July 2026 bill with no storage, Rocky Mountain Power base rates, riders excluded.
+      </p>
+      <div class="plan__grid">
+        @for (card of siteCards; track card.archetype.id) {
+          <mat-card class="dt-card plan__site" appearance="outlined">
+            <mat-card-header>
+              <mat-card-title>{{ card.archetype.name }}</mat-card-title>
+              <mat-card-subtitle>{{ card.scheduleName }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <dt-simulated-badge></dt-simulated-badge>
+              <p class="plan__desc">{{ card.archetype.description }}</p>
+              <dl class="plan__stats">
+                <div><dt>July peak</dt><dd>{{ card.julyStats.peakKw | number: '1.0-0' }} kW</dd></div>
+                <div><dt>July average</dt><dd>{{ card.julyStats.avgKw | number: '1.0-0' }} kW</dd></div>
+                <div><dt>Baseline July bill</dt><dd>{{ card.julyBill.total | currency: 'USD' : 'symbol' : '1.0-0' }}</dd></div>
+              </dl>
+              <h4>Nova Spin</h4>
+              <ul class="plan__assets">
+                @for (row of card.spinRows; track row.label) {
+                  <li>
+                    <span>{{ row.label }}</span><strong>{{ row.value }}</strong>
+                    <span class="plan__tag plan__tag--{{ row.kind }}" [title]="row.note">{{ row.kind === 'torus-spec' ? 'Torus spec' : 'Assumption' }}</span>
+                  </li>
+                }
+              </ul>
+              <h4>Nova Pulse</h4>
+              <ul class="plan__assets">
+                @for (row of card.pulseRows; track row.label) {
+                  <li>
+                    <span>{{ row.label }}</span><strong>{{ row.value }}</strong>
+                    <span class="plan__tag plan__tag--{{ row.kind }}" [title]="row.note">{{ row.kind === 'torus-spec' ? 'Torus spec' : 'Assumption' }}</span>
+                  </li>
+                }
+              </ul>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+      <p class="plan__footnote">Live LP re-solve arrives in phase 02.</p>
+    }
+  }
+}

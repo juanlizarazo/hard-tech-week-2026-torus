@@ -1,2 +1,3 @@
-lib/
+lib/*
+!lib/firestore/
 node_modules/

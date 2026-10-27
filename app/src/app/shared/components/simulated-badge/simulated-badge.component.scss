@@ -1,0 +1,19 @@
+.simulated-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #9a6b00;
+  background: #fff4d6;
+  color: #6b4900;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.simulated-badge__icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}

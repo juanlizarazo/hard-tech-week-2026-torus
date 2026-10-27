@@ -1,0 +1,9 @@
+<div class="alert-banner" [class.alert-banner--info]="variant === 'info'" role="alert">
+  <mat-icon class="alert-banner__icon" aria-hidden="true">{{ variant === 'error' ? 'error' : 'info' }}</mat-icon>
+  <span class="alert-banner__message">{{ message }}</span>
+  @if (dismissed.observed) {
+    <button type="button" class="alert-banner__close" aria-label="Dismiss" (click)="onDismiss()">
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+</div>

@@ -1,0 +1,10 @@
+.screen__state-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.screen__placeholder {
+  background: var(--dt-theme--surface);
+  border-style: dashed;
+}

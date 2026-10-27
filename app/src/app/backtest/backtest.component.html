@@ -1,0 +1,27 @@
+<dt-screen-toolbar title="Backtest" subtitle="How the plan would have performed against a naive shaver and a perfect-foresight oracle.">
+  <dt-simulated-badge></dt-simulated-badge>
+</dt-screen-toolbar>
+
+@if (state$ | async; as state) {
+  @switch (state.status) {
+    @case ('loading') {
+      <mat-card class="dt-card" appearance="outlined">
+        <mat-card-content class="screen__state-content">
+          <mat-spinner diameter="28"></mat-spinner>
+          <span>Loading…</span>
+        </mat-card-content>
+      </mat-card>
+    }
+    @case ('error') {
+      <dt-alert-banner [message]="state.errorMessage"></dt-alert-banner>
+    }
+    @default {
+      <mat-card class="dt-card screen__placeholder" appearance="outlined">
+        <mat-card-content class="screen__state-content">
+          <mat-icon aria-hidden="true">history</mat-icon>
+          <span>July 2026 backtest arrives in phase 04.</span>
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+}
