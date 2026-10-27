@@ -27,7 +27,7 @@
 
 .screen-toolbar__subtitle {
   margin: 4px 0 0;
-  color: #5b6573;
+  color: var(--dt-theme--muted, #5b6573);
 }
 
 .screen-toolbar__actions {

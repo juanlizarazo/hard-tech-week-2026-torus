@@ -13,7 +13,7 @@
 }
 
 .snapshot-badge--muted {
-  color: #5b6573;
+  color: var(--dt-theme--muted, #5b6573);
   background: var(--dt-theme--surface);
 }
 
@@ -25,5 +25,5 @@
 }
 
 .snapshot-badge--muted .snapshot-badge__icon {
-  color: #5b6573;
+  color: var(--dt-theme--muted, #5b6573);
 }
