@@ -331,7 +331,12 @@ export class PlanComponent {
   }
 
   private _keepLastViewModel(state: IPlanSolveState): IPlanSolveState {
-    const merged = { ...state, viewModel: state.viewModel ?? this._lastState?.viewModel ?? null };
+    const isStale = state.viewModel === null && this._lastState?.viewModel !== null;
+    const merged = {
+      ...state,
+      viewModel: state.viewModel ?? this._lastState?.viewModel ?? null,
+      isStale
+    };
     this._lastState = merged;
 
     return merged;

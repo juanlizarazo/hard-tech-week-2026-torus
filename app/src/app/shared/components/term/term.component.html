@@ -18,9 +18,9 @@
   [cdkConnectedOverlayFlexibleDimensions]="false"
   [cdkConnectedOverlayPush]="true"
 >
-  <div class="dt-term__popover" role="tooltip" [id]="popoverId" (mouseenter)="cancelHide()" (mouseleave)="hideSoon()">
+  <div class="dt-term__popover" role="dialog" [attr.aria-label]="'Definition of ' + entry.term" [id]="popoverId" (mouseenter)="cancelHide()" (mouseleave)="hideSoon()" (keydown.escape)="hide()">
     <span class="dt-term__popover-term">{{ entry.term }}</span>
     <span class="dt-term__popover-text">{{ entry.short }}</span>
-    <button type="button" class="dt-term__more" tabindex="-1" (click)="openMore()">More about {{ entry.term }}</button>
+    <button type="button" class="dt-term__more" (click)="openMore()">More about {{ entry.term }}</button>
   </div>
 </ng-template>

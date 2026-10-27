@@ -30,6 +30,12 @@ On top of that, a Wattsmart demand-response call can drain the battery right bef
 
 Every screen ends with a "Next stop" link, so the demo walks Start → ① → ② → ③ → back to Start.
 
+## Rehearsal materials
+
+- [One-page demo script](docs/demo-script.md)
+- [Judge Q&A answer sheet](docs/qa.md)
+- [PR E persona review and rubric re-audit](docs/pr-e-audit.md)
+
 ## Architecture
 
 ```mermaid

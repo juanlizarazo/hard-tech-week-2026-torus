@@ -1,5 +1,6 @@
 @if (viewModel$ | async; as viewModel) {
   <dt-chart-frame title="Where the power comes from" [notice]="viewModel.state.data?.notice ?? ''">
+    <p frame-notice class="dt-hint">SIMULATED site pin · seed 42. PACE plants and fuel totals are real public data.</p>
     @switch (viewModel.state.status) {
       @case ('loading') {
         <div class="dt-state" role="status">
