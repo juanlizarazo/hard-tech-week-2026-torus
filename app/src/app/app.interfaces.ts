@@ -4,4 +4,5 @@ export interface INavLink {
   shortLabel: string;
   step: string;
   description: string;
+  dayNoun?: string;
 }

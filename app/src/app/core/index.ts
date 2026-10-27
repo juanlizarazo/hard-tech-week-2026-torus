@@ -1,5 +1,7 @@
 export * from './services/auth.service';
 export * from './services/snapshot.service';
+export * from './services/planning-day.service';
+export * from './services/day-title-strategy.service';
 export * from './services/loading.service';
 export * from './services/grid-signals.service';
 export * from './services/backtest.service';

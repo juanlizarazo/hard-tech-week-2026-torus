@@ -33,7 +33,7 @@
     </div>
     <nav class="dt-shell__nav" aria-label="Steps">
       <ol class="dt-shell__steps">
-        @for (link of links; track link.path) {
+        @for (link of links$ | async; track link.path) {
           <li class="dt-shell__step-item">
             <a
               class="dt-shell__step"

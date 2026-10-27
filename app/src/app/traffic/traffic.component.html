@@ -1,7 +1,7 @@
 <div class="dt-page">
   <header class="dt-page__head">
     <p class="dt-page__step">Step 1 of 3</p>
-    <h1 class="dt-question">When is the grid jammed tomorrow?</h1>
+    <h1 class="dt-question">When is the grid jammed {{ (day$ | async)?.word }}?</h1>
     @if (viewModel$ | async; as viewModel) {
       @if (viewModel.answer.length > 0) {
         <p class="dt-answer">
@@ -67,7 +67,7 @@
                     <p class="dt-hint">Across: hours, local Utah time. Up: megawatts of demand across the whole PACE footprint.</p>
                     <ul class="dt-list">
                       <li>Solid dark line: actual load on the days before. Solid green: actual net load, which is load minus wind and solar.</li>
-                      <li>Dashed grey: PACE's own day-ahead forecast. Dotted green: our net load estimate for tomorrow, PACE's forecast minus the last week's average wind and solar for that hour.</li>
+                      <li>Dashed grey: PACE's own day-ahead forecast. Dotted green: our net load estimate for the day, PACE's forecast minus the last week's average wind and solar for that hour.</li>
                       <li>Purple band: the range our own forecast expects actual load to land in 8 times out of 10 (P10–P90). Turn on "Show our forecast" to see its middle line.</li>
                       <li>Orange stripes: PACE's rush hour, the busiest four hours of its forecast. The station tries to keep the site off the grid here.</li>
                       <li>Faded lines after the day divider are forecasts, not measurements.</li>
@@ -87,7 +87,7 @@
                       [valueFormat]="priceFormat"
                     ></dt-hour-chart>
                   } @else {
-                    <p class="dt-state">Tomorrow's wholesale prices are not posted yet. They usually arrive around 2 p.m. Mountain time.</p>
+                    <p class="dt-state">Wholesale prices for this day are not posted yet. They usually arrive around 2 p.m. Mountain time.</p>
                   }
                   <div how-to-read>
                     <p class="dt-hint">Across: hours of the planned day. Up: dollars per megawatt-hour.</p>

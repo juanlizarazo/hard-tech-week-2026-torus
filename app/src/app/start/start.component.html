@@ -13,7 +13,7 @@
       @case ('loading') {
         <div class="dt-state" role="status">
           <mat-spinner diameter="24"></mat-spinner>
-          <span>Reading tomorrow's PACE grid data…</span>
+          <span>Reading PACE grid data…</span>
         </div>
       }
       @case ('error') {
@@ -38,7 +38,7 @@
               <p class="start__rush">
                 <span class="start__rush-swatch" aria-hidden="true"></span>
                 <span class="start__rush-text">
-                  <span class="start__rush-label"><dt-term key="RUSH_HOUR">Rush hour</dt-term> tomorrow</span>
+                  <span class="start__rush-label"><dt-term key="RUSH_HOUR">Rush hour</dt-term> {{ (day$ | async)?.word }}</span>
                   <span class="start__rush-value">{{ preview.rushLabel }}</span>
                 </span>
               </p>
@@ -53,7 +53,7 @@
               [mefIsPlaceholder]="preview.mefIsPlaceholder"
             ></dt-three-clocks>
             @if (preview.rushIsAssumption) {
-              <p class="dt-hint">PACE has not posted tomorrow's forecast yet, so the rush hour is an assumed late-afternoon block.</p>
+              <p class="dt-hint">PACE has not posted the forecast for {{ preview.dateLabel }} yet, so the rush hour is an assumed late-afternoon block.</p>
             }
           </section>
         }
@@ -64,7 +64,7 @@
   <section class="start__route" aria-labelledby="start-route-title">
     <h2 class="dt-section__title" id="start-route-title">Three stops: forecast, decision, proof</h2>
     <ol class="start__steps">
-      @for (step of steps; track step.path) {
+      @for (step of steps$ | async; track step.path) {
         <li class="start__step">
           <span class="start__step-sign" aria-hidden="true">{{ step.step }}</span>
           <div class="start__step-body">
@@ -72,7 +72,7 @@
             <p class="start__step-question">{{ step.question }}</p>
             <p class="start__step-description">{{ step.description }}</p>
             @if (step.step === '1' && (state$ | async)?.preview; as preview) {
-              <p class="start__step-live">Rush hour tomorrow: <strong class="dt-num">{{ preview.rushLabel }}</strong></p>
+              <p class="start__step-live">Rush hour {{ (day$ | async)?.word }}: <strong class="dt-num">{{ preview.rushLabel }}</strong></p>
             }
             <a class="start__step-link" [class.start__step-link--primary]="step.isPrimary" [routerLink]="step.path">
               <span>{{ step.linkLabel }}</span>

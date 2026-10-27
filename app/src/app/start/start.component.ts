@@ -4,12 +4,13 @@ import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Observable, catchError, combineLatest, map, of, startWith } from 'rxjs';
-import { GridSignalsService, SnapshotService } from '@app/core';
+import { GridSignalsService, PlanningDayService, SnapshotService } from '@app/core';
+import { DayRelationHelper } from '@app/shared/helpers';
 import { AlertBannerComponent, TermComponent, ThreeClocksComponent } from '@app/shared/components';
 import { PlanHelper } from '../plan/plan.helper';
 import { startSettings, startSteps } from './start.constants';
 import { StartHelper } from './start.helper';
-import { IStartViewState } from './start.interfaces';
+import { IStartStep, IStartViewState } from './start.interfaces';
 
 @Component({
   selector: 'dt-start',
@@ -20,9 +21,21 @@ import { IStartViewState } from './start.interfaces';
 export class StartComponent {
   private readonly _snapshotService = inject(SnapshotService);
   private readonly _gridSignalsService = inject(GridSignalsService);
+  private readonly _planningDayService = inject(PlanningDayService);
 
   public readonly hook = PlanHelper.hookNumbers();
-  public readonly steps = startSteps;
+  public readonly day$ = this._planningDayService.day$;
+  public readonly steps$: Observable<IStartStep[]> = this.day$.pipe(
+    map((day) =>
+      startSteps.map((step) => ({
+        ...step,
+        title: DayRelationHelper.phrase(step.title, day),
+        question: DayRelationHelper.phrase(step.question, day),
+        description: DayRelationHelper.phrase(step.description, day),
+        linkLabel: DayRelationHelper.phrase(step.linkLabel, day)
+      }))
+    )
+  );
 
   public readonly state$: Observable<IStartViewState> = combineLatest([
     this._snapshotService.manifest$,
