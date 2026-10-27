@@ -27,7 +27,7 @@
   padding: 0;
   list-style: none;
   font-size: 0.8125rem;
-  color: #52514e;
+  color: var(--dt-theme--chart-ink-secondary);
 }
 
 .chart__legend-item {
@@ -41,12 +41,12 @@
   flex: none;
   width: 16px;
   height: 10px;
-  border-radius: 2px;
+  border-radius: 8px;
 }
 
 .chart__key--line {
   height: 2px;
-  border-radius: 1px;
+  border-radius: 8px;
 }
 
 .chart__key--dash {
@@ -69,25 +69,25 @@
 }
 
 .chart__grid-line {
-  stroke: #e1e0d9;
+  stroke: var(--dt-theme--chart-grid);
   stroke-width: 1;
   shape-rendering: crispEdges;
 }
 
 .chart__baseline {
-  stroke: #c3c2b7;
+  stroke: var(--dt-theme--chart-baseline);
   stroke-width: 1;
   shape-rendering: crispEdges;
 }
 
 .chart__midnight-line {
-  stroke: #c3c2b7;
+  stroke: var(--dt-theme--chart-baseline);
   stroke-width: 1;
   shape-rendering: crispEdges;
 }
 
 .chart__axis-text {
-  fill: #6b6a65;
+  fill: var(--dt-theme--chart-ink-muted);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
@@ -106,7 +106,7 @@
 
 .chart__halo-text {
   paint-order: stroke;
-  stroke: #ffffff;
+  stroke: var(--dt-theme--card);
   stroke-width: 3px;
   stroke-linejoin: round;
 }
@@ -131,7 +131,7 @@
   padding: 8px 10px;
   border: 1px solid var(--dt-theme--border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--dt-theme--card);
   box-shadow: 0 4px 14px rgba(31, 42, 55, 0.12);
   font-size: 0.75rem;
   color: var(--dt-theme--primary);
@@ -164,7 +164,7 @@
 
 .chart__tooltip-label {
   flex: 1;
-  color: #52514e;
+  color: var(--dt-theme--chart-ink-secondary);
 }
 
 .chart__tooltip-value {
@@ -175,13 +175,13 @@
 .chart__caption {
   margin: 6px 0 0;
   font-size: 0.75rem;
-  color: #52514e;
+  color: var(--dt-theme--chart-ink-secondary);
 }
 
 .chart__empty {
   padding: 24px 0;
   font-size: 0.875rem;
-  color: #52514e;
+  color: var(--dt-theme--chart-ink-secondary);
   text-align: center;
 }
 

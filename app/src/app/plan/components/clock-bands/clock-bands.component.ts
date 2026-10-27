@@ -272,7 +272,7 @@ export class ClockBandsComponent extends ResponsiveChartDirective implements OnC
       });
     }
 
-    const gaps: ILabeledRect[] = ChartHelper.runs(values.map((value) => value === null)).map((run) => {
+    const gaps = ChartHelper.runs(values.map((value) => value === null)).map((run) => {
       const x0 = ChartHelper.scale(xScale, run.startIndex);
       const width = ChartHelper.scale(xScale, run.endIndex + 1) - x0;
 

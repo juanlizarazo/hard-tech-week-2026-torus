@@ -20,23 +20,9 @@
   flex-direction: column;
   gap: 4px;
   padding: 12px 16px;
-  border: 1px solid var(--dt-theme--border);
-  border-radius: 12px;
-  background: #fff;
   color: var(--dt-theme--primary);
   font: inherit;
   text-align: left;
-  cursor: pointer;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
-
-  &:hover {
-    border-color: var(--dt-theme--primary);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--dt-theme--primary);
-    outline-offset: 2px;
-  }
 
   &--active {
     border-color: var(--dt-theme--primary);
@@ -50,7 +36,7 @@
 
 .plan__site-meta {
   font-size: 0.8125rem;
-  color: #4b5563;
+  color: var(--dt-theme--text-secondary);
 }
 
 .plan__controls {
@@ -88,12 +74,12 @@
 .plan__control-label {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #4b5563;
+  color: var(--dt-theme--text-secondary);
 }
 
 .plan__control-hint {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--dt-theme--text-tertiary);
 }
 
 .plan__slider {
@@ -108,7 +94,7 @@
   min-height: 24px;
   margin: 8px 0 12px;
   font-size: 0.8125rem;
-  color: #4b5563;
+  color: var(--dt-theme--text-secondary);
 }
 
 .plan__status-icon {
@@ -116,6 +102,10 @@
   height: 18px;
   font-size: 18px;
   color: var(--dt-theme--tertiary);
+
+  &--pending {
+    color: var(--dt-theme--text-tertiary);
+  }
 }
 
 .plan__tiles {
@@ -128,7 +118,7 @@
 .plan__tile-label {
   margin: 0;
   font-size: 0.8125rem;
-  color: #4b5563;
+  color: var(--dt-theme--text-secondary);
 }
 
 .plan__tile-value {
@@ -154,7 +144,7 @@
 .plan__tile-source {
   margin: 8px 0 0;
   font-size: 0.6875rem;
-  color: #6b7280;
+  color: var(--dt-theme--text-tertiary);
 }
 
 .plan__panel {
@@ -170,7 +160,7 @@
 .plan__panel-hint {
   margin: 0 0 12px;
   font-size: 0.8125rem;
-  color: #4b5563;
+  color: var(--dt-theme--text-secondary);
 }
 
 .plan__details {

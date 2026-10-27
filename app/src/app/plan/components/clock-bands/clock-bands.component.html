@@ -23,8 +23,8 @@
           patternUnits="userSpaceOnUse"
           patternTransform="rotate(45)"
         >
-          <rect width="6" height="6" fill="#f1f2f4"></rect>
-          <line x1="0" y1="0" x2="0" y2="6" stroke="#c3c2b7" stroke-width="2"></line>
+          <rect class="clock-bands__hatch-bg" width="6" height="6"></rect>
+          <line class="clock-bands__hatch-line" x1="0" y1="0" x2="0" y2="6" stroke-width="2"></line>
         </pattern>
         <pattern
           [attr.id]="idPrefix + '-bill-hatch'"
@@ -33,8 +33,8 @@
           patternUnits="userSpaceOnUse"
           patternTransform="rotate(45)"
         >
-          <rect width="6" height="6" fill="#fdecec"></rect>
-          <line x1="0" y1="0" x2="0" y2="6" stroke="#d63c3c" stroke-opacity="0.3" stroke-width="2"></line>
+          <rect class="clock-bands__hatch-bg clock-bands__hatch-bg--rush" width="6" height="6"></rect>
+          <line class="clock-bands__hatch-line clock-bands__hatch-line--rush" x1="0" y1="0" x2="0" y2="6" stroke-width="2"></line>
         </pattern>
         <linearGradient [attr.id]="idPrefix + '-price-gradient'" x1="0" x2="1" y1="0" y2="0">
           <stop offset="0" [attr.stop-color]="colors.PRICE_LOW"></stop>
@@ -168,7 +168,7 @@
           [attr.y]="stripsTop - 4"
           [attr.width]="range.x1 - range.x0"
           [attr.height]="stripsBottom - stripsTop + 8"
-          rx="3"
+          rx="8"
         ></rect>
         <text class="chart__band-text" [attr.x]="range.labelX" [attr.text-anchor]="range.labelAnchor" [attr.y]="rushLabelY">{{ range.label }}</text>
       }
