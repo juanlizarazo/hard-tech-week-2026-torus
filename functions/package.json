@@ -5,6 +5,7 @@
     "build": "tsc",
     "typecheck:dev": "tsc -p tsconfig.dev.json",
     "ingest": "tsx src/dev/ingest-snapshot.ts",
+    "ingest:plants": "tsx src/dev/ingest-plants.ts",
     "snapshot:status": "tsx src/dev/snapshot-admin.ts status",
     "snapshot:pin": "tsx src/dev/snapshot-admin.ts pin",
     "snapshot:unpin": "tsx src/dev/snapshot-admin.ts unpin",
