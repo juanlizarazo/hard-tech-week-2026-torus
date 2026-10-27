@@ -1,6 +1,7 @@
 import {
   IBillBreakdown,
   IBillLine,
+  IMarginalEmissionsSeries,
   IPlanInterval,
   IPlanRequest,
   IPlanResult,
@@ -12,7 +13,7 @@ import {
 import { SiteGeneratorHelper, SitesHelper } from '@app/core/sites';
 import { TariffHelper, tariffSchedules } from '@app/core/tariff';
 import { TimeHelper } from '@app/core/helpers';
-import { ILpInput, PlanEngineHelper } from '@app/core/plan';
+import { ILpInput, PlanEngineHelper, placeholderMefSeries } from '@app/core/plan';
 import {
   IAssetRow,
   IBillLineDelta,
@@ -134,6 +135,10 @@ export class PlanHelper {
     };
   }
 
+  public static mefOrPlaceholder(series: IMarginalEmissionsSeries | undefined): IMarginalEmissionsSeries {
+    return series && series.points.length > 0 ? series : placeholderMefSeries;
+  }
+
   public static applyPeakSoFarMode(input: ILpInput, peakSoFarMode: PeakSoFarMode): ILpInput {
     if (peakSoFarMode === 'month-to-date') {
       return input;
@@ -166,8 +171,11 @@ export class PlanHelper {
     controls: IPlanControls,
     context: IPlanDateContext,
     result: IPlanResult,
-    assets: IStationAssets
+    assets: IStationAssets,
+    mef: IMarginalEmissionsSeries
   ): IPlanViewModel {
+    const mefIsPlaceholder = mef === placeholderMefSeries;
+
     const schedule = PlanHelper.scheduleFor(controls.scheduleId);
     const rates = TariffHelper.seasonRatesFor(schedule, context.date);
     const pulseMinSocKwh = assets.pulse.energyKwh * assets.pulse.minSocFraction;
@@ -178,14 +186,15 @@ export class PlanHelper {
       date: context.date,
       dateLabel: PlanHelper.dateLabel(context.date),
       result,
-      tiles: PlanHelper.buildTiles(controls, context, result),
+      tiles: PlanHelper.buildTiles(controls, context, result, mefIsPlaceholder),
       billLines: PlanHelper.billLineDeltas(result.baselineBill, result.plannedBill),
       edamPricePerMwh: PlanHelper.edamSeries(result.intervals, context.priceHours),
       demandLabel: `${isOnPeakBasis ? 'On-peak demand' : 'Demand (all hours)'} ${PlanHelper.formatNumber(result.demandKw)} kW`,
       billCaption: isOnPeakBasis
         ? `$${rates.demandRatePerKw.toFixed(2)}/kW, ${(rates.energyOnPeakPerKwh * 100).toFixed(1)}¢ vs ${(rates.energyOffPeakPerKwh * 100).toFixed(1)}¢/kWh`
         : `$${rates.demandRatePerKw.toFixed(2)}/kW any hour, ${(rates.energyOffPeakPerKwh * 100).toFixed(1)}¢/kWh flat`,
-      carbonCaption: 'Marginal CO2, lb/MWh (phase 03 swaps in)',
+      carbonCaption: mefIsPlaceholder ? 'Marginal CO2, lb/MWh (placeholder)' : 'Marginal CO2, lb/MWh (EIA-930 regression)',
+      mefIsPlaceholder,
       pulseMinSocKwh,
       pulseMaxSocKwh: assets.pulse.energyKwh * assets.pulse.maxSocFraction,
       spinMaxSocKwh: assets.spin.energyKwh,
@@ -244,7 +253,12 @@ export class PlanHelper {
     ];
   }
 
-  private static buildTiles(controls: IPlanControls, context: IPlanDateContext, result: IPlanResult): IPlanTile[] {
+  private static buildTiles(
+    controls: IPlanControls,
+    context: IPlanDateContext,
+    result: IPlanResult,
+    mefIsPlaceholder: boolean
+  ): IPlanTile[] {
     const metrics = result.metrics;
     const billChange = result.plannedBill.total - result.baselineBill.total;
     const demandChange = PlanHelper.lineChange(result, 'demand') + PlanHelper.lineChange(result, 'facilities');
@@ -272,7 +286,9 @@ export class PlanHelper {
         label: 'Marginal CO2 change, 48 h',
         value: `${PlanHelper.signOf(co2ChangeKg)}${PlanHelper.formatNumber(Math.abs(co2ChangeKg))} kg`,
         detail: `CO2 weight $${controls.co2WeightPerKg.toFixed(2)}/kg in the objective`,
-        source: 'PLACEHOLDER marginal CO2 by hour (phase 03 swaps in the regression)',
+        source: mefIsPlaceholder
+          ? 'PLACEHOLDER marginal CO2 by hour (regression unavailable)'
+          : 'Siler-Evans marginal CO2 by hour × season, Δ fossil generation on EIA-930 PACE',
         tone: co2ChangeKg < -0.5 ? 'good' : co2ChangeKg > 0.5 ? 'bad' : 'neutral'
       },
       {

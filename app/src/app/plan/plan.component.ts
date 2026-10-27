@@ -7,6 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSliderModule } from '@angular/material/slider';
 import {
   BehaviorSubject,
+  asapScheduler,
   Observable,
   catchError,
   combineLatest,
@@ -17,9 +18,10 @@ import {
   of,
   shareReplay,
   startWith,
+  subscribeOn,
   switchMap
 } from 'rxjs';
-import { SnapshotService } from '@app/core';
+import { GridSignalsService, SnapshotService } from '@app/core';
 import { IMarginalEmissionsSeries, ISiteArchetype, IStationAssets, TariffScheduleId } from '@app/core/models';
 import { PlanEngineHelper, PlanSolverService, placeholderMefSeries } from '@app/core/plan';
 import { SitesHelper } from '@app/core/sites';
@@ -68,7 +70,13 @@ export class PlanComponent {
   private readonly _snapshotService = inject(SnapshotService);
   private readonly _planSolverService = inject(PlanSolverService);
   private readonly _controls$ = new BehaviorSubject<IPlanControls>(PlanHelper.defaultControls());
-  private readonly _mef$ = of(placeholderMefSeries);
+  private readonly _gridSignalsService = inject(GridSignalsService);
+  private readonly _mef$: Observable<IMarginalEmissionsSeries> = this._gridSignalsService.marginalEmissions$.pipe(
+    subscribeOn(asapScheduler),
+    map(([fossilGenerationSeries]) => PlanHelper.mefOrPlaceholder(fossilGenerationSeries)),
+    catchError(() => of(placeholderMefSeries)),
+    shareReplay(1)
+  );
   private _lastState: IPlanSolveState | null = null;
 
   public readonly hook = PlanHelper.buildHook();
@@ -221,7 +229,7 @@ export class PlanComponent {
         controls.peakSoFarMode
       );
       const result = await this._planSolverService.solve(input);
-      const viewModel = PlanHelper.buildViewModel(controls, context, result, assets);
+      const viewModel = PlanHelper.buildViewModel(controls, context, result, assets, mef);
 
       if (result.status !== 'optimal') {
         return {

@@ -70,6 +70,7 @@ export interface IPlanViewModel {
   demandLabel: string;
   billCaption: string;
   carbonCaption: string;
+  mefIsPlaceholder: boolean;
   pulseMinSocKwh: number;
   pulseMaxSocKwh: number;
   spinMaxSocKwh: number;

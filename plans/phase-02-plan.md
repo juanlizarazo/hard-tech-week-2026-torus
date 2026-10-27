@@ -10,6 +10,7 @@
 - [x] `core/models/plan.interfaces.ts` additive: `IPlanMetrics`, `IPlanResult.metrics?`, `IPlanResult.errorMessage?`
 - [x] `core/plan/plan-engine.interfaces.ts`: `ILpInput`, `ILpModel`
 - [x] `core/plan/placeholder-mef.constants.ts`: hour × season shaped series, labeled PLACEHOLDER until phase 03 (one-line seam in the Plan component)
+- [x] Phase 03 merged first: the Plan screen now reads the Siler-Evans fossil-generation MEF from `GridSignalsService`, falling back to the PLACEHOLDER series only if the regression has no points
 - [x] `pulse.rampLimitKwPerStep` = 25% of rated power with an updated assumption note, so fast transients go to Spin
 
 ### LP engine (`core/plan/`, reused by 04)
