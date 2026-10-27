@@ -174,6 +174,7 @@ describe('July 2026 LP strategies sanity checks', () => {
           expect(Math.abs(interval.loadKw - interval.gridKw - (interval.spinDischargeKw - interval.spinChargeKw) - (interval.pulseDischargeKw - interval.pulseChargeKw))).toBeLessThanOrEqual(epsilon);
         });
         expect(detour.bill.determinants.demandKw).toBeLessThanOrEqual(result.baseline.bill.determinants.demandKw + epsilon);
+        expect(detour.bill.determinants.facilitiesKw).toBeLessThanOrEqual(result.baseline.bill.determinants.facilitiesKw + epsilon);
       });
 
       it('never sets an LP billed demand peak or bill above the no-storage baseline', () => {

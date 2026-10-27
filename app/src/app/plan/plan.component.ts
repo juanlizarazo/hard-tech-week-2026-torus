@@ -188,6 +188,12 @@ export class PlanComponent {
   }
 
   public onTryChip(chip: IPlanTryChip): void {
+    if (chip.changes.siteId) {
+      this.onSiteChange(chip.changes.siteId);
+
+      return;
+    }
+
     this._update(PlanDeltaHelper.chipChanges(chip, this.maxReserveKwh));
   }
 
@@ -209,6 +215,12 @@ export class PlanComponent {
         wattsmartReserveKwh: PlanHelper.defaultReserveKwh(SitesHelper.getAssets(site.id) as IStationAssets)
       });
     }
+  }
+
+  public headingDay(solve: IPlanSolveState | null, planningDayWord: string | undefined): string {
+    const viewModel = solve?.viewModel ?? null;
+
+    return PlanHelper.dayPhrase(viewModel?.controls.dateMode ?? null, planningDayWord ?? 'tomorrow', viewModel?.dateLabel ?? '');
   }
 
   public onDateModeChange(dateMode: PlanDateMode): void {

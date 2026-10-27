@@ -15,7 +15,7 @@ export class LpStrategyHelper {
       id: 'detour',
       label: 'DETOUR',
       description:
-        "Plans each day the afternoon before on a load forecast (the mean of the same day one and two weeks earlier), then runs it against the real load with a live cap: when the site would pass the planned peak or the month's peak so far, Spin and then Pulse discharge more, without touching the Wattsmart reserve.",
+        "Plans each day the afternoon before on a load forecast (the highest load on the same weekday over the last four weeks), then runs it against the real load with a live cap: when the site would pass the planned peak or the month's peak so far, Spin and then Pulse discharge more, without touching the Wattsmart reserve.",
       role: 'realistic',
       run: (input: IBacktestInput): Promise<IPlanInterval[]> => LpStrategyHelper.runForecastRolling(solver, input),
     };
@@ -87,6 +87,7 @@ export class LpStrategyHelper {
       billedPeakKw: 0,
       billedLoadPeakKw: LpStrategyHelper.recentBilledLoadPeakKw(input),
       facilitiesPeakKw: 0,
+      facilitiesLoadPeakKw: LpStrategyHelper.recentAverageDailyPeakKw(input),
     };
 
     for (const [startIndex, endIndex] of LpStrategyHelper.dayRanges(input.intervals)) {
@@ -145,6 +146,23 @@ export class LpStrategyHelper {
     }
 
     return peakKw;
+  }
+
+  public static recentAverageDailyPeakKw(input: IBacktestInput): number {
+    const firstDate = input.intervals[0]?.localDate;
+
+    if (!firstDate) {
+      return 0;
+    }
+
+    let totalKw = 0;
+
+    for (let daysBack = 1; daysBack <= backtestSettings.RECENT_LOAD_PEAK_DAYS; daysBack++) {
+      const loads = SiteGeneratorHelper.generateDay(input.site, TimeHelper.addDays(firstDate, -daysBack));
+      totalKw += Math.max(...loads.map((load: ISiteLoadInterval) => load.kw));
+    }
+
+    return totalKw / backtestSettings.RECENT_LOAD_PEAK_DAYS;
   }
 
   public static async solveWithFallback(solver: ILpSolver, lpInput: ILpInput): Promise<IPlanInterval[]> {

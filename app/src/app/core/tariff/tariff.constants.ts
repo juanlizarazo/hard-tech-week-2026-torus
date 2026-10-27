@@ -1,9 +1,10 @@
 import { IProvenance, ITariffSchedule } from '../models';
 
-const rateSheetUrl = 'https://pscdocs.utah.gov/electric/25docs/25035T05/339730Trf5-9-2025.pdf';
+const rateSheetUrl =
+  'https://www.rockymountainpower.net/content/dam/pcorp/documents/en/rockymountainpower/rates-regulation/utah/Utah_Price_Summary.pdf';
 
 const rateVintageNote =
-  'Base rates from the Sept 25, 2026 price summary, riders excluded. Customer charge from the April 2025 PSC tariff sheet.';
+  'Base rates from the Sept 25, 2026 price summary, riders excluded. Customer charge from the April 2025 Utah PSC tariff sheet (pscdocs.utah.gov, docket 25-035-T05).';
 
 const schedule8Provenance: IProvenance = {
   id: 'rmp-schedule-8',

@@ -1,4 +1,4 @@
-import { IBacktestDay, IBacktestResult, IBacktestStrategyResult } from '@app/core/backtest';
+import { IBacktestDay, IBacktestResult, IBacktestStrategyResult, IComponentSavings } from '@app/core/backtest';
 import { IInterval, IPlanInterval } from '@app/core/models';
 import { IHourChartBand, IHourChartHighlight } from '@app/shared/components/hour-chart/hour-chart.interfaces';
 import {
@@ -78,13 +78,27 @@ export class BacktestHelper {
       return `Not this time: planning one day ahead on a load forecast, ${leadName} did not lower the July bill on a simulated ${megawatts} ${scheduleName} ${siteNoun}. ${BacktestHelper.co2Clause(result)}`;
     }
 
-    const demandShare = BacktestHelper.formatNumber((lead.savings.demand / total) * 100);
+    const demandClause = BacktestHelper.demandClause(lead.savings);
     const capture = lead.captureRate;
     const captureText =
       capture === null ? '' : `, ${BacktestHelper.formatNumber(capture * 100)}% of the ${backtestStrategyNames.oracle.toLowerCase()} optimum`;
-    const leadSentence = `${BacktestHelper.formatMoney(total)} saved on a simulated ${megawatts} ${scheduleName} ${siteNoun}, ${demandShare}% from the demand charge${captureText}, with ${BacktestHelper.formatNumber(lead.wattsmart.minimumHeldKwh)} kWh held for Wattsmart.`;
+    const leadSentence = `${BacktestHelper.formatMoney(total)} saved on a simulated ${megawatts} ${scheduleName} ${siteNoun}, ${demandClause}${captureText}, with ${BacktestHelper.formatNumber(lead.wattsmart.minimumHeldKwh)} kWh held for Wattsmart.`;
 
     return [leadSentence, BacktestHelper.shaverClause(result), BacktestHelper.co2Clause(result)].filter(Boolean).join(' ');
+  }
+
+  public static demandClause(savings: IComponentSavings): string {
+    if (savings.total <= 0) {
+      return '';
+    }
+
+    const share = (savings.demand / savings.total) * 100;
+
+    if (share <= 100) {
+      return `${BacktestHelper.formatNumber(Math.max(0, share))}% from the demand charge`;
+    }
+
+    return `all of it from the demand charge (${BacktestHelper.formatMoney(savings.demand)} there, ${BacktestHelper.formatMoney(savings.demand - savings.total)} given back on other lines)`;
   }
 
   public static siteNoun(siteName: string): string {
@@ -129,6 +143,7 @@ export class BacktestHelper {
     const lead = result.lead;
     const total = lead.savings.total;
     const demandShare = total > 0 ? (lead.savings.demand / total) * 100 : 0;
+    const isDemandOverNet = demandShare > 100;
     const capture = lead.captureRate;
     const shaver = result.shaver;
     const perfectLoad = result.perfectLoad;
@@ -148,8 +163,8 @@ export class BacktestHelper {
       {
         id: 'demand-share',
         label: 'From the demand charge',
-        value: `${BacktestHelper.formatNumber(demandShare)}%`,
-        hint: `${leadName} cut billed demand from ${BacktestHelper.formatNumber(result.baseline.bill.determinants.demandKw)} kW to ${BacktestHelper.formatNumber(lead.bill.determinants.demandKw)} kW.`,
+        value: isDemandOverNet ? BacktestHelper.formatMoney(lead.savings.demand) : `${BacktestHelper.formatNumber(Math.max(0, demandShare))}%`,
+        hint: `${leadName} cut billed demand from ${BacktestHelper.formatNumber(result.baseline.bill.determinants.demandKw)} kW to ${BacktestHelper.formatNumber(lead.bill.determinants.demandKw)} kW.${isDemandOverNet ? ` More than the net saving: other bill lines gave back ${BacktestHelper.formatMoney(lead.savings.demand - total)}.` : ''}`,
         tone: 'neutral',
         source: result.sources.tariff,
       },

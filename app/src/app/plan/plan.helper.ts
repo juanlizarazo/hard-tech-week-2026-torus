@@ -29,7 +29,7 @@ import {
   IPlanViewModel
 } from './plan.interfaces';
 import { planBaseline, planDefaults } from './plan.constants';
-import { PeakSoFarMode } from './plan.types';
+import { PeakSoFarMode, PlanDateMode } from './plan.types';
 
 export class PlanHelper {
   public static buildSiteCards(): IPlanSiteCard[] {
@@ -236,10 +236,10 @@ export class PlanHelper {
     }
 
     const condition = controls.peakSoFarMode === 'fresh'
-      ? "if tomorrow sets the month's peak"
+      ? "if the planned day sets the month's peak"
       : `above the peak ${PlanHelper.monthName(date)} already set`;
 
-    return `It cuts the billed peak by ${PlanHelper.formatNumber(value.peakCutKw)} kW, worth ${PlanHelper.formatMoney(value.worthPerMonth)}/month on the demand charge ${condition}.`;
+    return `It cuts the billed peak by ${PlanHelper.formatNumber(value.peakCutKw)} kW, worth ${PlanHelper.formatMoney(value.worthPerMonth)}/month on the demand and facilities charges ${condition}.`;
   }
 
   public static flywheelSentence(result: IPlanResult, assets: IStationAssets): string {
@@ -257,10 +257,28 @@ export class PlanHelper {
     const wear = `${share} of Pulse's wear ($${spinWear.toFixed(3)} vs $${pulseWear.toFixed(3)} per kWh)`;
 
     if (metrics.wattsmartHeldKwh > 0.5) {
-      return `Spin catches ${spikes} at ${wear}, so Pulse keeps ${PlanHelper.formatNumber(metrics.wattsmartHeldKwh)} kWh for Wattsmart.`;
+      return `Spin catches ${spikes} at ${wear}, which leaves Pulse free to keep ${PlanHelper.formatNumber(metrics.wattsmartHeldKwh)} kWh for Wattsmart.`;
     }
 
     return `Spin catches ${spikes} at ${wear}.`;
+  }
+
+  public static energyDetail(energyChange: number, peakCutKw: number, isOnPeakBasis: boolean): string {
+    if (energyChange > 0.5) {
+      return peakCutKw > 0.5
+        ? 'Charging losses cost a little energy; the peak charges pay for it'
+        : 'Charging losses cost a little energy at these settings';
+    }
+
+    if (energyChange < -0.5) {
+      return isOnPeakBasis ? 'Energy bought off-peak instead of on-peak' : 'Energy bought in cheaper hours';
+    }
+
+    return 'Energy cost is about the same';
+  }
+
+  public static dayPhrase(dateMode: PlanDateMode | null, planningDayWord: string, dateLabel: string): string {
+    return dateMode === 'july-peak' ? `on ${dateLabel}` : planningDayWord;
   }
 
   private static co2Sentence(controls: IPlanControls, result: IPlanResult): string {
@@ -417,7 +435,7 @@ export class PlanHelper {
     const windowLabel = window ? TimeLabelHelper.window(window.startLocalHour, window.endLocalHour) : 'rush hour';
     const peakCutKw = value?.peakCutKw ?? 0;
     const worth = value?.worthPerMonth ?? 0;
-    const condition = controls.peakSoFarMode === 'fresh' ? "If tomorrow sets the month's peak" : 'Above the peak this month already set';
+    const condition = controls.peakSoFarMode === 'fresh' ? "If the planned day sets the month's peak" : 'Above the peak this month already set';
 
     return [
       {
@@ -432,7 +450,7 @@ export class PlanHelper {
       },
       {
         id: 'demand-worth',
-        label: 'Worth per month on the demand charge',
+        label: 'Worth per month on peak charges',
         value: PlanHelper.formatMoney(worth),
         detail: value
           ? `${condition}: ${PlanHelper.formatNumber(value.peakCutKw)} kW × $${value.demandRatePerKw.toFixed(2)} demand + ${PlanHelper.formatNumber(value.facilitiesCutKw)} kW × $${value.facilitiesRatePerKw.toFixed(2)} facilities`
@@ -444,9 +462,7 @@ export class PlanHelper {
         id: 'energy',
         label: 'Energy cost change (48 h)',
         value: PlanHelper.formatMoneyChange(energyChange),
-        detail: energyChange > 0.5
-          ? 'Charging losses cost a little energy; the demand charge pays for it'
-          : 'Energy bought off-peak instead of on-peak',
+        detail: PlanHelper.energyDetail(energyChange, peakCutKw, isOnPeakBasis),
         source: tariffSource,
         tone: energyChange < -0.5 ? 'good' : 'neutral'
       },

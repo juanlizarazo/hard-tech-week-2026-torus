@@ -17,7 +17,7 @@ export const architectureStages: IArchitectureStage[] = [
     id: 'cloud',
     title: 'Every day at 3 p.m. MT',
     tone: 'cloud',
-    items: [{ title: 'refreshSnapshot', detail: 'Cloud Function|Validate, then pin' }]
+    items: [{ title: 'refreshSnapshot', detail: 'Cloud Function|Validate, then publish' }]
   },
   {
     id: 'store',

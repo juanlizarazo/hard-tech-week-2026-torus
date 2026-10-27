@@ -1,15 +1,39 @@
 <div class="dt-page">
   <section class="start__hero" aria-labelledby="start-headline">
     <h1 class="start__headline" id="start-headline">The grid has a rush hour. DETOUR plans a <dt-term key="TORUS_STATION">Torus Station</dt-term> around it.</h1>
-    <p class="start__versus">
-      <span class="start__versus-big">{{ hook.demandRateLabel }}</span>
-      <span class="start__versus-vs">vs</span>
-      <span class="start__versus-small">{{ hook.spreadLabel }}</span>
-    </p>
+    <dl class="start__saves">
+      <div class="start__save start__save--peak">
+        <dt class="start__save-number">{{ hook.demandRateLabel }}</dt>
+        <dd class="start__save-text">
+          <span>
+            <strong>saved every month</strong> for each kW you cut from your busiest 15 minutes, the
+            <dt-term key="ON_PEAK_DEMAND">on-peak demand</dt-term> the bill is built on.
+          </span>
+          <svg class="start__save-bar" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <rect width="100" height="10"></rect>
+          </svg>
+          <span class="start__save-scale">One kW of peak, for one month</span>
+        </dd>
+      </div>
+      <div class="start__save start__save--shift">
+        <dt class="start__save-number">{{ hook.spreadLabel }}</dt>
+        <dd class="start__save-text">
+          <span><strong>saved once</strong> for each kWh you move from a costly hour to a cheaper one.</span>
+          <svg class="start__save-bar" [attr.viewBox]="'0 0 ' + hook.roundedKwh / 10 + ' 10'" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <defs>
+              <pattern id="start-ticks" width="1" height="10" patternUnits="userSpaceOnUse">
+                <rect width="0.72" height="10"></rect>
+              </pattern>
+            </defs>
+            <rect [attr.width]="hook.roundedKwh / 10" height="10" fill="url(#start-ticks)"></rect>
+          </svg>
+          <span class="start__save-scale">{{ hook.roundedKwh | number: '1.0-0' }} kWh moved, one tick per 10 kWh. The same length.</span>
+        </dd>
+      </div>
+    </dl>
     <p class="start__hook">
-      One kW of summer <dt-term key="ON_PEAK_DEMAND">on-peak demand</dt-term> costs <span class="dt-num">{{ hook.demandRateLabel }}</span> a month.
-      Moving one kWh to a cheaper hour saves <span class="dt-num">{{ hook.spreadLabel }}</span>.
-      The money is in the peak: about <span class="dt-num">{{ hook.roundedKwh | number: '1.0-0' }}</span> kWh of shifting per kW.
+      One kW off the peak saves as much as shifting about <strong class="dt-num">{{ hook.roundedKwh | number: '1.0-0' }} kWh</strong>,
+      so DETOUR goes after the peak. <span class="start__hook-note">Summer rates, Schedule 8.</span>
     </p>
   </section>
 
