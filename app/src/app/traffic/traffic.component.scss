@@ -1,39 +1,39 @@
-.traffic__grid {
+.dt-traffic__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
 
-.traffic__tiles {
+.dt-traffic__tiles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
 
-.traffic__section {
+.dt-traffic__section {
   margin-bottom: 16px;
 }
 
-.traffic__insight {
+.dt-traffic__insight {
   border-left: 4px solid var(--dt-theme--error);
 }
 
-.traffic__headline {
+.dt-traffic__headline {
   margin: 4px 0 12px;
   font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.25;
 }
 
-.traffic__sentence {
+.dt-traffic__sentence {
   margin: 0 0 8px;
   font-size: 1rem;
   line-height: 1.5;
 }
 
-.traffic__label {
+.dt-traffic__label {
   margin: 0;
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -41,32 +41,32 @@
   color: var(--dt-theme--muted);
 }
 
-.traffic__value {
+.dt-traffic__value {
   margin: 4px 0;
   font-size: 1.125rem;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 
-.traffic__hint {
+.dt-traffic__hint {
   margin: 0 0 12px;
   font-size: 0.8125rem;
   color: var(--dt-theme--muted);
 }
 
-.traffic__heading {
+.dt-traffic__heading {
   margin: 0 0 12px;
   font-size: 1.0625rem;
   font-weight: 600;
 }
 
-.traffic__subheading {
+.dt-traffic__subheading {
   margin: 20px 0 8px;
   font-size: 0.9375rem;
   font-weight: 600;
 }
 
-.traffic__list {
+.dt-traffic__list {
   margin: 0 0 12px;
   list-style: revert;
   padding-left: 20px;
@@ -74,7 +74,7 @@
   line-height: 1.5;
 }
 
-.traffic__chip {
+.dt-traffic__chip {
   display: inline-block;
   padding: 2px 8px;
   border: 1px solid var(--dt-theme--border);
@@ -85,40 +85,40 @@
   text-decoration: none;
 }
 
-.traffic__audit {
+.dt-traffic__audit {
   margin-bottom: 16px;
 }
 
-.traffic__table-wrap {
+.dt-traffic__table-wrap {
   overflow-x: auto;
 }
 
-.traffic__table {
+.dt-traffic__table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
 
-  .traffic__cell {
+  .dt-traffic__cell {
     padding: 8px 12px 8px 0;
     text-align: left;
     vertical-align: top;
     border-bottom: 1px solid var(--dt-theme--border);
   }
 
-  .traffic__cell--head {
+  .dt-traffic__cell--head {
     font-weight: 600;
     white-space: nowrap;
   }
 }
 
-.traffic__state-content {
+.dt-traffic__state-content {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 @media (max-width: 599.98px) {
-  .traffic__headline {
+  .dt-traffic__headline {
     font-size: 1.25rem;
   }
 }
