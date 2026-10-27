@@ -32,7 +32,7 @@
 }
 
 .start__versus-big {
-  font-size: clamp(3rem, 8vw, 5rem);
+  font-size: clamp(2.5rem, 7.5vw, 4.5rem);
   line-height: 0.9;
   font-weight: 800;
   letter-spacing: -0.035em;
@@ -40,16 +40,9 @@
 
 .start__versus-vs {
   padding-bottom: 30px;
-  font-size: var(--dt-text-21);
+  font-size: var(--dt-text-34);
   font-weight: 600;
   color: var(--dt-muted);
-}
-
-.start__versus-small {
-  font-size: clamp(2.25rem, 6vw, 3.75rem);
-  line-height: 0.95;
-  font-weight: 800;
-  letter-spacing: -0.02em;
 }
 
 .start__versus-caption {
@@ -339,5 +332,13 @@
 
   .start__words {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 599.98px) {
+  .start__versus-vs {
+    width: 100%;
+    padding-bottom: 0;
+    line-height: 1;
   }
 }

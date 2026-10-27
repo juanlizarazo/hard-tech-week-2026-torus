@@ -4,18 +4,18 @@
     <div class="start__versus">
       <p class="start__versus-block">
         <span class="start__versus-big">{{ hook.demandRateLabel }}</span>
-        <span class="start__versus-caption">for one kW of peak, every month</span>
+        <span class="start__versus-caption">a month, to hold one kW of peak demand</span>
       </p>
-      <span class="start__versus-vs" aria-hidden="true">vs</span>
+      <span class="start__versus-vs" aria-label="is the same as">=</span>
       <p class="start__versus-block">
-        <span class="start__versus-small">{{ hook.spreadLabel }}</span>
-        <span class="start__versus-caption">for moving one kWh to a cheaper hour</span>
+        <span class="start__versus-big">{{ hook.roundedKwh | number: '1.0-0' }} kWh</span>
+        <span class="start__versus-caption">of shifting, at {{ hook.spreadLabel }} saved per kWh</span>
       </p>
     </div>
     <p class="start__hook">
       One kW of summer <dt-term key="ON_PEAK_DEMAND">on-peak demand</dt-term> costs <span class="dt-num">{{ hook.demandRateLabel }}</span> a month.
-      Moving one kWh to a cheaper hour saves <span class="dt-num">{{ hook.spreadLabel }}</span>.
-      The money is in the peak: about <span class="dt-num">{{ hook.roundedKwh | number: '1.0-0' }}</span> kWh of shifting per kW.
+      Moving one kWh to a cheaper hour saves only <span class="dt-num">{{ hook.spreadLabel }}</span>, so it takes about
+      <span class="dt-num">{{ hook.roundedKwh | number: '1.0-0' }}</span> kWh of shifting to match one kW of peak. The money is in the peak.
     </p>
   </section>
 
