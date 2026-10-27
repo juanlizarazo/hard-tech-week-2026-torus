@@ -3,8 +3,10 @@ import { Observable, combineLatest, defer, from, map, shareReplay } from 'rxjs';
 import { backtestSettings } from '../backtest/backtest.constants';
 import { IBacktestResult, IBacktestSnapshotSources, IBacktestStrategy } from '../backtest/backtest.interfaces';
 import { BacktestRunnerHelper } from '../backtest/backtest-runner.helper';
+import { LpStrategyHelper } from '../backtest/lp-strategy.helper';
 import { NaiveShaverHelper } from '../backtest/naive-shaver.helper';
 import { IMarginalEmissionsSeries, ITariffSchedule, TariffScheduleId } from '../models';
+import { PlanSolverService } from '../plan/plan-solver.service';
 import { SitesHelper } from '../sites/sites.helper';
 import { tariffSchedules } from '../tariff/tariff.constants';
 import { GridSignalsService } from './grid-signals.service';
@@ -14,8 +16,14 @@ import { SnapshotService } from './snapshot.service';
 export class BacktestService {
   private readonly _snapshotService = inject(SnapshotService);
   private readonly _gridSignalsService = inject(GridSignalsService);
+  private readonly _planSolverService = inject(PlanSolverService);
 
-  public readonly strategies: IBacktestStrategy[] = [NaiveShaverHelper.noStorage, NaiveShaverHelper.naiveShaver];
+  public readonly strategies: IBacktestStrategy[] = [
+    NaiveShaverHelper.noStorage,
+    NaiveShaverHelper.naiveShaver,
+    LpStrategyHelper.rollingLp(this._planSolverService),
+    LpStrategyHelper.oracle(this._planSolverService),
+  ];
 
   public readonly sources$: Observable<IBacktestSnapshotSources> = combineLatest([
     this._snapshotService.manifest$,

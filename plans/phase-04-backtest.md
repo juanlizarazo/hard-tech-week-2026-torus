@@ -1,6 +1,6 @@
 # Phase 04 — July 2026 backtest + Backtest screen
 
-**Goal:** Backtest July 2026 on a simulated site against a no-storage baseline and a naive threshold shaver, and show it on the Backtest screen with the brief's lead sentence. The rolling LP and the perfect-foresight oracle plug in later with one registration each.
+**Goal:** Backtest July 2026 on a simulated site against a no-storage baseline, a naive threshold shaver, a rolling daily LP and a perfect-foresight oracle, and show it on the Backtest screen with the brief's lead sentence and capture rate.
 **Brief requirements covered:** §6 must-have 5 (month backtest, capture rate) and 7-Backtest; §7 demo 3:30–4:30; §4 SIMULATED badge and a source on every $, kW and CO2 figure.
 **Depends on:** 01 (snapshot, tariff, sites, contracts), 03 (marginal CO2 series), 02 (rush-hour rule; the LP strategies themselves are a follow-up).
 
@@ -30,26 +30,31 @@
 - [x] Pulse SOC never below min + Wattsmart reserve; empty, error and loading states forced through the view-state helper
 - [x] Component savings sum to total savings; no storage bills like the raw load
 
-## Handoff to phase 02 follow-up
+## Phase 02 follow-up: LP strategies
 
-- Add `rollingLp` and `oracle` as one entry each in `BacktestService.strategies`, built on `PlanSolverService` and `PlanEngineHelper` with roles `realistic` and `oracle`.
-- The rolling LP must override `request.peakSoFar*` with the peak already achieved with storage and carry SOC forward day to day.
-- Capture rate and the lead sentence switch over on their own once the oracle is registered; no screen change needed.
+- [x] `LpStrategyHelper.rollingLp` (role `realistic`, label "Rolling day-ahead optimizer"): one LP per local day on that day's inputs only, `peakSoFar*` overridden with the peak already set with storage, Pulse and Spin SOC and the Pulse net power carried into the next day
+- [x] `LpStrategyHelper.oracle` (role `oracle`): one LP over the whole month (2,976 intervals), bill only (no CO2 weight, no degradation cost), so it is a true ceiling on bill savings and the capture rate cannot pass 100%
+- [x] Both built on `PlanEngineHelper.defaultRequest` and `PlanEngineHelper.solve` through `PlanSolverService`; one registration each in `BacktestService.strategies`
+- [x] Additive: `IPlanRequest.initialPulseNetKw?` adds a t = 0 Pulse ramp row so the ramp holds across day boundaries; `ILpSolver` in `backtest.interfaces.ts`; strategy contract unchanged
+- [x] Sanity checks: both LPs inside SOC, power, ramp and the Wattsmart reserve; billed demand and bill never above no storage; oracle saves at least as much as the rolling LP (3 sites x 2 schedules)
+- Facilities peak can rise above no storage under the LPs on Schedule 8 (ski resort): demand at $16.84/kW outweighs facilities at $5.15/kW, so charging off-peak to shave on-peak is bill-optimal. The check is on the billed demand peak and the total bill, not facilities.
+- The lead label is "Rolling day-ahead optimizer" because the screen lowercases the label ("lp").
 
 ## Verified
 
 Airport, Schedule 8, July 2026, seed 42, real snapshot and phase-03 MEF:
 
-- No storage bill $74,891; naive shaver $68,910; saved $5,980 (demand $4,389, facilities $1,342, energy $250, customer $0), 73% from the demand charge.
-- Billed demand 1,952 kW to 1,691 kW. Month peak interval: Jul 2, 6:00 p.m., 1,952 kW.
-- Cycles: Pulse 5.3 (0.07% of 7,500), Spin 28.8 (0.12% of 25,000).
-- Wattsmart: 800 kWh held through every rush hour.
-- Traffic avoided: 14,567 kWh, 13,228 kg CO2 out of the rush band; net month change +3,624 kg CO2 (round-trip losses).
-- Schedule 6 on the airport: $5,100 saved, 79% from demand. Ski resort (Schedule 6): the naive shaver does not lower the bill (-$35), shown honestly.
-- 375 px viewport: no horizontal scroll.
-- `yarn test` 44 passed, `yarn build` clean.
+- Lead sentence: "The rolling day-ahead optimizer saved $13,937 on a simulated 2 MW Schedule 8 site in July 2026. 72% of it came from the demand charge. That is 96% of the perfect-foresight optimum. 800 kWh held for Wattsmart."
+- Capture rate 96%. No storage bill $74,891 to $60,953. Billed demand 1,952 kW to 1,354 kW.
+- Savings by component (naive / rolling LP / oracle): demand $4,389 / $10,060 / $10,125; facilities $1,342 / $3,036 / $2,970; energy $250 / $841 / $1,437; customer $0.
+- Traffic avoided 41,684 kWh, 37,988 kg CO2 out of the rush band; net month change +2,792 kg CO2 (round-trip losses).
+- Schedule 6 on the airport: rolling LP $11,019 saved, 78% from demand, capture rate 100% (rounded; oracle saves a few dollars more). Billed demand 1,952 kW to 1,356 kW.
+- Month peak interval: Jul 2, 6:00 p.m., 1,952 kW. Solve time in the browser: about 4.5 s for the first run (31 daily LPs + one month LP), 2.5 s for the Schedule 6 toggle.
+- Naive shaver (phase 04 numbers, unchanged): $5,980 saved on Schedule 8, $5,100 on Schedule 6.
+- `yarn test` 71 passed, `yarn build` clean, no console errors on /backtest.
 
 ## Done when
 
 - [x] Demo path step works in the running app
 - [x] Committed and PR opened (#13)
+- [x] LP strategies registered, capture rate live
