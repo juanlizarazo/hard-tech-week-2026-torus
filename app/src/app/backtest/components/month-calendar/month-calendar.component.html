@@ -1,0 +1,45 @@
+<section class="dt-month-calendar" [attr.aria-label]="'Peak demand calendar, ' + monthLabel">
+  <header class="dt-month-calendar__header">
+    <h3 class="dt-month-calendar__month">{{ monthLabel }}</h3>
+    @if (peakLabel) {
+      <p class="dt-month-calendar__peak">
+        <span class="dt-month-calendar__peak-marker" aria-hidden="true"></span>
+        <span>Month peak: {{ peakLabel }}</span>
+      </p>
+    }
+  </header>
+
+  @if (cells.length === 0) {
+    <p class="dt-month-calendar__empty">No days to show for this month yet.</p>
+  } @else {
+    <div class="dt-month-calendar__grid">
+      @for (weekday of weekdays; track weekday) {
+        <div class="dt-month-calendar__weekday" aria-hidden="true">{{ weekday }}</div>
+      }
+      @for (blank of blanks; track blank) {
+        <div class="dt-month-calendar__blank" aria-hidden="true"></div>
+      }
+      @for (cell of cells; track cell.localDate) {
+        <button
+          type="button"
+          class="dt-month-calendar__cell"
+          [ngClass]="{
+            'dt-month-calendar__cell--off-peak': cell.isOffPeakDay,
+            'dt-month-calendar__cell--peak': cell.isPeakDay,
+            'dt-month-calendar__cell--selected': cell.isSelected
+          }"
+          [attr.aria-pressed]="cell.isSelected"
+          [attr.aria-label]="ariaLabel(cell)"
+          [attr.title]="cell.isOffPeakDay && cell.offPeakReason ? cell.offPeakReason : null"
+          (click)="select(cell)"
+        >
+          <span class="dt-month-calendar__day">{{ cell.dayOfMonth }}</span>
+          @if (cell.isPeakDay) {
+            <span class="dt-month-calendar__flag">Peak</span>
+          }
+          <span class="dt-month-calendar__bar" [style.height.%]="barHeight(cell)" aria-hidden="true"></span>
+        </button>
+      }
+    </div>
+  }
+</section>
