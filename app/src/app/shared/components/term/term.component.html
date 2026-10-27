@@ -3,13 +3,12 @@
   class="dt-term"
   cdkOverlayOrigin
   #origin="cdkOverlayOrigin"
-  [attr.aria-describedby]="isOpen ? popoverId : null"
+  #trigger
+  [attr.aria-describedby]="descriptionId"
   (mouseenter)="show()"
   (mouseleave)="hideSoon()"
-  (focus)="show()"
-  (blur)="hide()"
   (click)="openMore()"
-><ng-content></ng-content></button>
+><ng-content></ng-content></button><span class="cdk-visually-hidden" [id]="descriptionId">{{ entry.short }}</span>
 
 <ng-template
   cdkConnectedOverlay
