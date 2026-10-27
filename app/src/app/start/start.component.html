@@ -1,21 +1,24 @@
 <div class="dt-page">
   <section class="start__hero" aria-labelledby="start-headline">
     <h1 class="start__headline" id="start-headline">The grid has a rush hour. DETOUR plans a <dt-term key="TORUS_STATION">Torus Station</dt-term> around it.</h1>
-    <div class="start__versus">
-      <p class="start__versus-block">
-        <span class="start__versus-big">{{ hook.demandRateLabel }}</span>
-        <span class="start__versus-caption">a month, to hold one kW of peak demand</span>
-      </p>
-      <span class="start__versus-vs" aria-label="is the same as">=</span>
-      <p class="start__versus-block">
-        <span class="start__versus-big">{{ hook.roundedKwh | number: '1.0-0' }} kWh</span>
-        <span class="start__versus-caption">of shifting, at {{ hook.spreadLabel }} saved per kWh</span>
-      </p>
-    </div>
+    <dl class="start__saves">
+      <div class="start__save start__save--peak">
+        <dt class="start__save-number">{{ hook.demandRateLabel }}</dt>
+        <dd class="start__save-text">
+          <strong>saved every month</strong> for each kW you cut from your busiest 15 minutes, the
+          <dt-term key="ON_PEAK_DEMAND">on-peak demand</dt-term> the bill is built on.
+        </dd>
+      </div>
+      <div class="start__save start__save--shift">
+        <dt class="start__save-number">{{ hook.spreadLabel }}</dt>
+        <dd class="start__save-text">
+          <strong>saved once</strong> for each kWh you move from a costly hour to a cheaper one.
+        </dd>
+      </div>
+    </dl>
     <p class="start__hook">
-      One kW of summer <dt-term key="ON_PEAK_DEMAND">on-peak demand</dt-term> costs <span class="dt-num">{{ hook.demandRateLabel }}</span> a month.
-      Moving one kWh to a cheaper hour saves only <span class="dt-num">{{ hook.spreadLabel }}</span>, so it takes about
-      <span class="dt-num">{{ hook.roundedKwh | number: '1.0-0' }}</span> kWh of shifting to match one kW of peak. The money is in the peak.
+      So one kW off the peak saves as much as shifting about <strong class="dt-num">{{ hook.roundedKwh | number: '1.0-0' }} kWh</strong>.
+      DETOUR goes after the peak. <span class="start__hook-note">Summer rates, Schedule 8.</span>
     </p>
   </section>
 
