@@ -55,8 +55,4 @@ export class TrafficComponent {
       charts: state.report ? TrafficHelper.charts(state.report) : null
     }))
   );
-
-  public absoluteValue(value: number): number {
-    return Math.abs(value);
-  }
 }

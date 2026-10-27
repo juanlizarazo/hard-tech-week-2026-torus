@@ -202,6 +202,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     if (style === 'dashed') {
       return '7 4';
     }
+
     if (style === 'dotted') {
       return '1.5 4';
     }
@@ -219,6 +220,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
         }
       }
     }
+
     for (const band of this.bands) {
       for (const value of [...band.lower, ...band.upper]) {
         if (value !== null && value !== undefined && !Number.isNaN(value)) {
@@ -247,6 +249,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     if (low > 0 && low < high * 0.5) {
       low = 0;
     }
+
     if (low === high) {
       high = low + 1;
     }
@@ -344,6 +347,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
           run.push(index);
           continue;
         }
+
         if (run.length > 0) {
           const top = run.map((point: number, position: number): string =>
             `${position === 0 ? 'M' : 'L'}${this._xAt(point).toFixed(1)} ${this._yAt(this._valueAt(band.upper, point) as number).toFixed(1)}`
@@ -355,6 +359,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
           run = [];
         }
       }
+
       return { label: band.label, color: band.color, path: runs.join('') };
     });
   }

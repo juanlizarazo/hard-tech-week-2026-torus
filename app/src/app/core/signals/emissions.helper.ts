@@ -36,45 +36,45 @@ export class EmissionsHelper {
     return mefSeasonMonths.summer.includes(month) ? 'summer' : 'winter';
   }
 
-  public static ols(x: number[], y: number[]): IRegressionResult {
-    const n = x.length;
+  public static ols(predictors: number[], responses: number[]): IRegressionResult {
+    const sampleCount = predictors.length;
 
-    if (n < 2) {
-      return { slope: 0, intercept: n === 1 ? y[0] : 0, slopeStandardError: NaN, n };
+    if (sampleCount < 2) {
+      return { slope: 0, intercept: sampleCount === 1 ? responses[0] : 0, slopeStandardError: NaN, n: sampleCount };
     }
 
-    const meanX = x.reduce((sum, value) => sum + value, 0) / n;
-    const meanY = y.reduce((sum, value) => sum + value, 0) / n;
-    let sxx = 0;
-    let sxy = 0;
+    const meanPredictor = predictors.reduce((sum, value) => sum + value, 0) / sampleCount;
+    const meanResponse = responses.reduce((sum, value) => sum + value, 0) / sampleCount;
+    let sumSquaresX = 0;
+    let sumCross = 0;
 
-    for (let i = 0; i < n; i++) {
-      sxx += (x[i] - meanX) ** 2;
-      sxy += (x[i] - meanX) * (y[i] - meanY);
+    for (let i = 0; i < sampleCount; i++) {
+      sumSquaresX += (predictors[i] - meanPredictor) ** 2;
+      sumCross += (predictors[i] - meanPredictor) * (responses[i] - meanResponse);
     }
 
-    if (sxx === 0) {
-      return { slope: 0, intercept: meanY, slopeStandardError: NaN, n };
+    if (sumSquaresX === 0) {
+      return { slope: 0, intercept: meanResponse, slopeStandardError: NaN, n: sampleCount };
     }
 
-    const slope = sxy / sxx;
-    const intercept = meanY - slope * meanX;
+    const slope = sumCross / sumSquaresX;
+    const intercept = meanResponse - slope * meanPredictor;
 
-    if (n < 3) {
-      return { slope, intercept, slopeStandardError: NaN, n };
+    if (sampleCount < 3) {
+      return { slope, intercept, slopeStandardError: NaN, n: sampleCount };
     }
 
-    let ssr = 0;
+    let residualSumSquares = 0;
 
-    for (let i = 0; i < n; i++) {
-      ssr += (y[i] - (intercept + slope * x[i])) ** 2;
+    for (let i = 0; i < sampleCount; i++) {
+      residualSumSquares += (responses[i] - (intercept + slope * predictors[i])) ** 2;
     }
 
-    return { slope, intercept, slopeStandardError: Math.sqrt(ssr / (n - 2) / sxx), n };
+    return { slope, intercept, slopeStandardError: Math.sqrt(residualSumSquares / (sampleCount - 2) / sumSquaresX), n: sampleCount };
   }
 
   public static marginalSeries(rows: IEmissionsRow[], method: MefMethod): IMarginalEmissionsSeries {
-    const strata = new Map<string, { x: number[]; y: number[] }>();
+    const strata = new Map<string, { predictors: number[]; responses: number[] }>();
 
     for (let i = 1; i < rows.length; i++) {
       const previous = rows[i - 1];
@@ -93,9 +93,9 @@ export class EmissionsHelper {
       }
 
       const key = `${current.season}-${current.localHour}`;
-      const stratum = strata.get(key) ?? { x: [], y: [] };
-      stratum.x.push(currentLoad - previousLoad);
-      stratum.y.push(current.emissionsLbPerHour - previous.emissionsLbPerHour);
+      const stratum = strata.get(key) ?? { predictors: [], responses: [] };
+      stratum.predictors.push(currentLoad - previousLoad);
+      stratum.responses.push(current.emissionsLbPerHour - previous.emissionsLbPerHour);
       strata.set(key, stratum);
     }
 
@@ -105,11 +105,11 @@ export class EmissionsHelper {
       for (let hour = 0; hour < 24; hour++) {
         const stratum = strata.get(`${season}-${hour}`);
 
-        if (!stratum || stratum.x.length < 3) {
+        if (!stratum || stratum.predictors.length < 3) {
           continue;
         }
 
-        const fit = EmissionsHelper.ols(stratum.x, stratum.y);
+        const fit = EmissionsHelper.ols(stratum.predictors, stratum.responses);
         const margin = signalsConfig.Z_95 * fit.slopeStandardError;
 
         points.push({

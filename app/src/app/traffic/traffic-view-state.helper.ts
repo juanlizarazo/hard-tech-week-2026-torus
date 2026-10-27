@@ -1,17 +1,9 @@
 import { Observable, catchError, combineLatest, map, of, startWith } from 'rxjs';
-import { IAverageEmissionsPoint, IForecastScore, IMarginalEmissionsSeries } from '@app/core/models';
-import { ITrafficViewState } from './traffic.interfaces';
+import { ITrafficViewSources, ITrafficViewState } from './traffic.interfaces';
 import { TrafficHelper } from './traffic.helper';
 
 export class TrafficViewStateHelper {
-  public static fromSources(sources: {
-    manifest$: Observable<Detour.Firestore.Snapshot.IManifest | null>;
-    history$: Observable<Detour.Firestore.Snapshot.IGridHour[]>;
-    priceHours$: Observable<Detour.Firestore.Snapshot.IPriceHour[]>;
-    marginalSeries$: Observable<IMarginalEmissionsSeries[]>;
-    averagePoints$: Observable<IAverageEmissionsPoint[]>;
-    score$: Observable<IForecastScore>;
-  }): Observable<ITrafficViewState> {
+  public static fromSources(sources: ITrafficViewSources): Observable<ITrafficViewState> {
     return combineLatest([
       sources.manifest$,
       sources.history$,
@@ -32,7 +24,7 @@ export class TrafficViewStateHelper {
           errorMessage: '',
         };
       }),
-      catchError((error) => {
+      catchError((error: unknown) => {
         console.error('Failed to build the traffic report', error);
 
         return of<ITrafficViewState>({

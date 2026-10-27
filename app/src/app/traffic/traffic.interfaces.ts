@@ -1,5 +1,8 @@
+import { Observable } from 'rxjs';
+import { MefSeason } from '@app/core/models/emissions.types';
 import { IAverageEmissionsPoint, IForecastScore, IMarginalEmissionsSeries } from '@app/core/models';
 import { IHourChartBand, IHourChartHighlight, IHourChartSeries } from '@app/shared/components/hour-chart/hour-chart.interfaces';
+import { TrafficViewStatus } from './traffic.types';
 import { IRankSlopeRow } from './components/rank-slope/rank-slope.interfaces';
 
 export interface ITrafficLoadWindow {
@@ -60,7 +63,8 @@ export interface ITrafficInputs {
 export interface ITrafficReport {
   targetDate: string;
   targetDateLabel: string;
-  season: string;
+  season: MefSeason;
+  peakMissLabel: string;
   load: ITrafficLoadWindow;
   hours: ITrafficHour[];
   hasPrices: boolean;
@@ -75,7 +79,7 @@ export interface ITrafficReport {
 }
 
 export interface ITrafficViewState {
-  status: 'loading' | 'empty' | 'error' | 'ready';
+  status: TrafficViewStatus;
   manifest: Detour.Firestore.Snapshot.IManifest | null;
   report: ITrafficReport | null;
   errorMessage: string;
@@ -99,4 +103,13 @@ export interface ITrafficCharts {
 export interface ITrafficViewModel {
   state: ITrafficViewState;
   charts: ITrafficCharts | null;
+}
+
+export interface ITrafficViewSources {
+  manifest$: Observable<Detour.Firestore.Snapshot.IManifest | null>;
+  history$: Observable<Detour.Firestore.Snapshot.IGridHour[]>;
+  priceHours$: Observable<Detour.Firestore.Snapshot.IPriceHour[]>;
+  marginalSeries$: Observable<IMarginalEmissionsSeries[]>;
+  averagePoints$: Observable<IAverageEmissionsPoint[]>;
+  score$: Observable<IForecastScore>;
 }

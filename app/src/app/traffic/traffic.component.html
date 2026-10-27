@@ -111,7 +111,7 @@
                 <mat-card-content>
                   <p class="traffic__label">Low at the daily peak</p>
                   <p class="traffic__value">{{ report.score.peakUnderForecastRate | number: '1.0-0' }}% of days</p>
-                  <p class="traffic__hint">Forecast below actual at the peak hour. On average PACE is {{ absoluteValue(report.score.meanPeakMissMw) | number: '1.0-0' }} MW {{ report.score.meanPeakMissMw < 0 ? 'above' : 'below' }} the actual peak</p>
+                  <p class="traffic__hint">Forecast below actual at the peak hour. On average PACE is {{ report.peakMissLabel }} the actual peak</p>
                 </mat-card-content>
               </mat-card>
               <mat-card class="dt-card" appearance="outlined">
@@ -153,17 +153,17 @@
                   <table class="traffic__table">
                     <thead>
                       <tr>
-                        <th scope="col">Fuel</th>
-                        <th scope="col">Factor (assumption)</th>
-                        <th scope="col">Source</th>
+                        <th class="traffic__cell traffic__cell--head" scope="col">Fuel</th>
+                        <th class="traffic__cell traffic__cell--head" scope="col">Factor (assumption)</th>
+                        <th class="traffic__cell traffic__cell--head" scope="col">Source</th>
                       </tr>
                     </thead>
                     <tbody>
                       @for (factor of factors; track factor.fuelKey) {
                         <tr>
-                          <td>{{ factor.label }} ({{ factor.fuelKey }})</td>
-                          <td>{{ factor.lbPerMwh | number: '1.0-0' }} lb/MWh</td>
-                          <td>
+                          <td class="traffic__cell">{{ factor.label }} ({{ factor.fuelKey }})</td>
+                          <td class="traffic__cell">{{ factor.lbPerMwh | number: '1.0-0' }} lb/MWh</td>
+                          <td class="traffic__cell">
                             <a class="traffic__chip" [href]="factor.provenance.url" target="_blank" rel="noopener noreferrer">
                               {{ factor.provenance.kind }}
                             </a>
@@ -224,27 +224,27 @@
                 <table class="traffic__table">
                   <thead>
                     <tr>
-                      <th scope="col">Source</th>
-                      <th scope="col">Kind</th>
-                      <th scope="col">Series</th>
-                      <th scope="col">Link</th>
-                      <th scope="col">Note</th>
+                      <th class="traffic__cell traffic__cell--head" scope="col">Source</th>
+                      <th class="traffic__cell traffic__cell--head" scope="col">Kind</th>
+                      <th class="traffic__cell traffic__cell--head" scope="col">Series</th>
+                      <th class="traffic__cell traffic__cell--head" scope="col">Link</th>
+                      <th class="traffic__cell traffic__cell--head" scope="col">Note</th>
                     </tr>
                   </thead>
                   <tbody>
                     @for (source of manifest.sources; track source.id) {
                       <tr>
-                        <td>{{ source.label }}</td>
-                        <td>{{ source.kind }}</td>
-                        <td>{{ source.seriesId || '—' }}</td>
-                        <td>
+                        <td class="traffic__cell">{{ source.label }}</td>
+                        <td class="traffic__cell">{{ source.kind }}</td>
+                        <td class="traffic__cell">{{ source.seriesId || '—' }}</td>
+                        <td class="traffic__cell">
                           @if (source.url) {
                             <a [href]="source.url" target="_blank" rel="noopener noreferrer">Open</a>
                           } @else {
                             —
                           }
                         </td>
-                        <td>{{ source.note || '—' }}</td>
+                        <td class="traffic__cell">{{ source.note || '—' }}</td>
                       </tr>
                     }
                   </tbody>
@@ -258,24 +258,24 @@
                 <table class="traffic__table">
                   <thead>
                     <tr>
-                      <th scope="col">Series</th>
-                      <th scope="col">Month</th>
-                      <th scope="col">Rows</th>
+                      <th class="traffic__cell traffic__cell--head" scope="col">Series</th>
+                      <th class="traffic__cell traffic__cell--head" scope="col">Month</th>
+                      <th class="traffic__cell traffic__cell--head" scope="col">Rows</th>
                     </tr>
                   </thead>
                   <tbody>
                     @for (entry of manifest.gridMonths; track entry.month) {
                       <tr>
-                        <td>Grid</td>
-                        <td>{{ entry.month }}</td>
-                        <td>{{ entry.rowCount }}</td>
+                        <td class="traffic__cell">Grid</td>
+                        <td class="traffic__cell">{{ entry.month }}</td>
+                        <td class="traffic__cell">{{ entry.rowCount }}</td>
                       </tr>
                     }
                     @for (entry of manifest.priceMonths; track entry.month) {
                       <tr>
-                        <td>Price</td>
-                        <td>{{ entry.month }}</td>
-                        <td>{{ entry.rowCount }}</td>
+                        <td class="traffic__cell">Price</td>
+                        <td class="traffic__cell">{{ entry.month }}</td>
+                        <td class="traffic__cell">{{ entry.rowCount }}</td>
                       </tr>
                     }
                   </tbody>

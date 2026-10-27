@@ -98,15 +98,14 @@
   border-collapse: collapse;
   font-size: 0.875rem;
 
-  th,
-  td {
+  .traffic__cell {
     padding: 8px 12px 8px 0;
     text-align: left;
     vertical-align: top;
     border-bottom: 1px solid var(--dt-theme--border);
   }
 
-  th {
+  .traffic__cell--head {
     font-weight: 600;
     white-space: nowrap;
   }

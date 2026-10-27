@@ -26,3 +26,8 @@ export const trafficMethodSteps: string[] = [
   'Within each hour-of-day x season group, regress change in E on change in generation. The slope is the marginal emissions factor; the band is the 95% interval.',
   'Run it twice: on PACE fossil generation (Siler-Evans) and on PACE demand. The gap between the two is the import band.',
 ];
+
+export const trafficCalendar = {
+  WEEKDAYS: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+  MONTHS: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+};

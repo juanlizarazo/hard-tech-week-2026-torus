@@ -1,8 +1,8 @@
 import { EmissionsHelper, signalsConfig } from '@app/core';
-import { IMarginalEmissionsPoint, MefMethod } from '@app/core/models';
+import { IMarginalEmissionsPoint, MefMethod, MefSeason } from '@app/core/models';
 import { TimeHelper } from '@app/core/helpers';
 import { IRankSlopeRow } from './components/rank-slope/rank-slope.interfaces';
-import { trafficClocks, trafficConfig } from './traffic.constants';
+import { trafficCalendar, trafficClocks, trafficConfig } from './traffic.constants';
 import {
   IRushHourBand,
   ITrafficHour,
@@ -15,22 +15,6 @@ import {
 } from './traffic.interfaces';
 
 export class TrafficHelper {
-  private static readonly _weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  private static readonly _monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
   public static buildReport(inputs: ITrafficInputs): ITrafficReport {
     const targetDate = inputs.manifest.targetDate;
     const season = EmissionsHelper.seasonOf(Number(targetDate.slice(5, 7)));
@@ -73,8 +57,9 @@ export class TrafficHelper {
 
     return {
       targetDate,
-      targetDateLabel: TrafficHelper.dateLabel(targetDate),
+      targetDateLabel: TrafficHelper.dayLabel(targetDate),
       season,
+      peakMissLabel: TrafficHelper.peakMissLabel(inputs.score.meanPeakMissMw),
       load,
       hours,
       hasPrices: hours.some((hour) => hour.lmp !== null),
@@ -385,23 +370,23 @@ export class TrafficHelper {
     rushHour: IRushHourBand | null,
     ranking: IRankSlopeRow[],
     inputs: ITrafficInputs,
-    season: string,
+    season: MefSeason,
   ): ITrafficInsights {
     const sentences: string[] = [];
-    const dateLabel = TrafficHelper.dateLabel(targetDate);
+    const dateLabel = TrafficHelper.dayLabel(targetDate);
     let headline = `No rush hour could be placed for ${dateLabel}`;
 
     if (rushHour) {
-      const window = hours.slice(rushHour.startHour, rushHour.endHourExclusive);
+      const windowHours = hours.slice(rushHour.startHour, rushHour.endHourExclusive);
       const windowLabel = `${TrafficHelper.hourLabel(rushHour.startHour)}–${TrafficHelper.hourLabel(rushHour.endHourExclusive % 24)}`;
       const coincident = rushHour.hours.filter((hour) => hour.clocks.length === 3).length;
 
       headline = `The rush hour on ${dateLabel} is ${windowLabel}`;
 
-      const meanLmp = TrafficHelper._mean(window.map((hour) => hour.lmp));
-      const meanCarbon = TrafficHelper._mean(window.map((hour) => hour.mefFossilLbPerMwh));
+      const meanLmp = TrafficHelper._mean(windowHours.map((hour) => hour.lmp));
+      const meanCarbon = TrafficHelper._mean(windowHours.map((hour) => hour.mefFossilLbPerMwh));
       const dayLoad = TrafficHelper._mean(hours.map((hour) => hour.estimatedNetLoadMw ?? hour.forecastMw));
-      const windowLoad = TrafficHelper._mean(window.map((hour) => hour.estimatedNetLoadMw ?? hour.forecastMw));
+      const windowLoad = TrafficHelper._mean(windowHours.map((hour) => hour.estimatedNetLoadMw ?? hour.forecastMw));
       const parts: string[] = [];
 
       if (windowLoad !== null && dayLoad !== null && dayLoad > 0) {
@@ -446,6 +431,10 @@ export class TrafficHelper {
     return { headline, sentences };
   }
 
+  public static peakMissLabel(meanPeakMissMw: number): string {
+    return `${Math.round(Math.abs(meanPeakMissMw)).toLocaleString()} MW ${meanPeakMissMw < 0 ? 'above' : 'below'}`;
+  }
+
   public static hourLabel(hour: number): string {
     const suffix = hour < 12 ? 'a.m.' : 'p.m.';
     const twelveHour = hour % 12 === 0 ? 12 : hour % 12;
@@ -457,17 +446,13 @@ export class TrafficHelper {
     const [year, month, day] = localDate.split('-').map(Number);
     const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
 
-    return `${TrafficHelper._weekdayNames[weekday]} ${TrafficHelper._monthNames[month - 1]} ${day}`;
-  }
-
-  public static dateLabel(localDate: string): string {
-    return TrafficHelper.dayLabel(localDate);
+    return `${trafficCalendar.WEEKDAYS[weekday]} ${trafficCalendar.MONTHS[month - 1]} ${day}`;
   }
 
   private static _pointsByHour(
     inputs: ITrafficInputs,
     method: MefMethod,
-    season: string,
+    season: MefSeason,
   ): Map<number, IMarginalEmissionsPoint> {
     const points = new Map<number, IMarginalEmissionsPoint>();
     const series = inputs.marginalSeries.find((candidate) => candidate.method === method);
