@@ -16,18 +16,19 @@
 
 .start__saves {
   display: grid;
-  gap: 12px;
+  gap: 28px;
   max-width: 52rem;
   margin: 0;
   font-variant-numeric: tabular-nums;
 }
 
 .start__save {
+  position: relative;
   display: grid;
   grid-template-columns: 15rem minmax(0, 1fr);
-  align-items: center;
+  align-items: start;
   gap: 4px 20px;
-  padding: 14px 20px;
+  padding: 16px 20px 14px;
   border: 1px solid var(--dt-line);
   border-left: 6px solid var(--dt-line);
   border-radius: 8px;
@@ -36,6 +37,20 @@
 
 .start__save--peak {
   border-left-color: var(--dt-ink);
+}
+
+.start__save--shift::before {
+  content: 'vs';
+  position: absolute;
+  top: -22px;
+  left: 14px;
+  padding: 2px 12px 3px;
+  border-radius: 999px;
+  background: var(--dt-ink);
+  color: var(--dt-panel);
+  font-size: var(--dt-text-15);
+  font-weight: 800;
+  line-height: 1.3;
 }
 
 .start__save-number {
@@ -47,10 +62,26 @@
 }
 
 .start__save-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin: 0;
   font-size: var(--dt-text-17);
   line-height: 1.4;
   color: var(--dt-ink);
+}
+
+.start__save-bar {
+  display: block;
+  width: 100%;
+  height: 14px;
+  fill: var(--dt-ink);
+}
+
+.start__save-scale {
+  margin-top: -4px;
+  font-size: var(--dt-text-13);
+  color: var(--dt-muted);
 }
 
 .start__hook-note {
