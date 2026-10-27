@@ -2,11 +2,11 @@
 
 **Energy × AI Infrastructure** · Hard Tech Week 2026
 
-Official bounty card, transcribed from [`torus-bounty.png`](torus-bounty.png). One bounty, two options, pick one. We are building **Option 1**.
+Official bounty card, transcribed from [`torus-bounty.png`](torus-bounty.png). One bounty, two options, pick one. I'm working on **Option 1**.
 
 ---
 
-## Option 1 — Rush Hour for Electrons ✅ our pick
+## Option 1 — Rush Hour for Electrons ✅ my pick
 
 The grid has a rush hour: demand spikes, prices jump, solar fades. Most software ignores it.
 
