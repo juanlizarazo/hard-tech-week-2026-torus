@@ -2,18 +2,19 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   border-radius: 999px;
-  border: 1px solid #9a6b00;
-  background: #fff4d6;
-  color: #6b4900;
-  font-size: 0.75rem;
+  border: 1px solid var(--dt-line);
+  background: var(--dt-panel);
+  color: var(--dt-ink);
+  font-size: var(--dt-text-13);
   font-weight: 600;
-  letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .simulated-badge__icon {
   width: 16px;
   height: 16px;
   font-size: 16px;
+  color: var(--dt-pulse);
 }

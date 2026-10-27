@@ -1,8 +1,6 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { IPlanInterval, IRushHourWindow } from '@app/core/models/plan.interfaces';
-import { SimulatedBadgeComponent } from '@app/shared/components';
-import { ChartHelper } from '../chart.helper';
-import { chartColors } from '../chart.constants';
+import { ChartHelper, chartColors } from '@app/shared/charts';
 import {
   IChartTooltip,
   IHourTick,
@@ -10,12 +8,11 @@ import {
   IRect,
   IValueTick,
   IWindowRange
-} from '../chart.interfaces';
-import { ResponsiveChartDirective } from '../responsive-chart.directive';
+} from '@app/shared/charts';
+import { ResponsiveChartDirective } from '@app/shared/charts';
 
 @Component({
   selector: 'dt-dispatch-chart',
-  imports: [SimulatedBadgeComponent],
   templateUrl: './dispatch-chart.component.html',
   styleUrl: './dispatch-chart.component.scss'
 })
@@ -153,7 +150,7 @@ export class DispatchChartComponent extends ResponsiveChartDirective implements 
       startUtcs,
       this.rushHourWindows ?? [],
       xScale,
-      this.isNarrow ? 'Rush hour' : 'PACE rush hour'
+      'Rush hour'
     );
     this._buildBars(intervals, xScale, powerScale);
     this.pulseSocPath = ChartHelper.linePath(

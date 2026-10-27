@@ -3,6 +3,7 @@ import {
   IChartTooltip,
   IHourTick,
   IIndexRun,
+  ILabelPlacement,
   ILinearScale,
   ILocalTimeParts,
   IRect,
@@ -273,6 +274,7 @@ export class ChartHelper {
     baseLabel: string
   ): IWindowRange[] {
     const ranges: IWindowRange[] = [];
+    let previousLabelEnd = -Infinity;
 
     for (const window of windows) {
       const run = ChartHelper.windowIndexRun(startUtcs, window);
@@ -283,14 +285,37 @@ export class ChartHelper {
 
       const x0 = ChartHelper.round(ChartHelper.scale(xScale, run.startIndex));
       const x1 = ChartHelper.round(ChartHelper.scale(xScale, run.endIndex + 1));
-      const label = window.isAssumption ? `${baseLabel} (assumed)` : baseLabel;
-      const estimatedWidth = label.length * 6.2;
-      const anchorEnd = x0 + estimatedWidth > xScale.rangeMax;
+      const fullLabel = window.isAssumption ? `${baseLabel} (assumed)` : baseLabel;
+      const fullPlacement = ChartHelper._labelPlacement(fullLabel, x0, x1, xScale.rangeMax, previousLabelEnd);
+      const label = fullPlacement.fits || !window.isAssumption ? fullLabel : 'Assumed';
+      const placement = label === fullLabel ? fullPlacement : ChartHelper._labelPlacement(label, x0, x1, xScale.rangeMax, previousLabelEnd);
+      const anchorEnd = placement.anchorEnd;
+      const labelX = placement.labelX;
+      previousLabelEnd = placement.end;
 
-      ranges.push({ x0, x1, label, labelX: anchorEnd ? x1 : x0, labelAnchor: anchorEnd ? 'end' : 'start' });
+      ranges.push({ x0, x1, label, labelX, labelAnchor: anchorEnd ? 'end' : 'start' });
     }
 
     return ranges;
+  }
+
+  private static _labelPlacement(
+    label: string,
+    x0: number,
+    x1: number,
+    rangeMax: number,
+    previousLabelEnd: number
+  ): ILabelPlacement {
+    const width = label.length * chartLayout.LABEL_CHAR_WIDTH;
+    const anchorEnd = x0 + width > rangeMax;
+    const start = anchorEnd ? x1 - width : x0;
+
+    return {
+      labelX: anchorEnd ? x1 : x0,
+      anchorEnd,
+      end: anchorEnd ? x1 : x0 + width,
+      fits: start >= previousLabelEnd + 8
+    };
   }
 
   public static runs(flags: boolean[]): IIndexRun[] {

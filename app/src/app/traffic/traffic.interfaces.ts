@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { MefSeason } from '@app/core/models/emissions.types';
-import { IAverageEmissionsPoint, IForecastScore, ILoadForecast, IMarginalEmissionsSeries } from '@app/core/models';
+import { IAverageEmissionsPoint, IForecastScore, ILoadForecast, IMarginalEmissionsSeries, IRushHourWindow } from '@app/core/models';
 import { IHourChartBand, IHourChartHighlight, IHourChartSeries } from '@app/shared/components/hour-chart/hour-chart.interfaces';
 import { TrafficViewStatus } from './traffic.types';
 import { IRankSlopeRow } from './components/rank-slope/rank-slope.interfaces';
@@ -70,6 +70,7 @@ export interface ITrafficReport {
   hasPrices: boolean;
   hourLabels: string[];
   rushHour: IRushHourBand | null;
+  paceRush: IRushHourWindow | null;
   ranking: IRankSlopeRow[];
   insights: ITrafficInsights;
   fossilRange: ITrafficRange | null;
@@ -113,4 +114,22 @@ export interface IForecastViewState {
   status: TrafficViewStatus;
   forecast: ILoadForecast | null;
   errorMessage: string;
+}
+
+export interface ITrafficChartOptions {
+  showAllDays: boolean;
+  showOurForecast: boolean;
+  showUncertainty: boolean;
+}
+
+export interface ITrafficNotices {
+  load: string;
+  price: string;
+  carbon: string;
+  ranking: string;
+}
+
+export interface ITrafficHourValue {
+  hour: number;
+  value: number;
 }

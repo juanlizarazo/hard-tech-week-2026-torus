@@ -1,25 +1,20 @@
-<div class="chart__header">
-  <h3 class="chart__title">Site load vs grid draw</h3>
-  <dt-simulated-badge></dt-simulated-badge>
-</div>
-
 <ul class="chart__legend">
   <li class="chart__legend-item">
     <span class="chart__key chart__key--line" [style.background]="colors.LOAD"></span>
-    Site load (before)
+    Site load, no storage
   </li>
   <li class="chart__legend-item">
     <span class="chart__key load-chart__key-area"></span>
-    Grid draw (after DETOUR)
+    Grid draw with the plan
   </li>
   <li class="chart__legend-item">
     <span class="chart__key load-chart__key-band"></span>
-    PACE rush hour
+    Rush hour
   </li>
   @if (showDemand) {
     <li class="chart__legend-item">
       <span class="chart__key chart__key--dash load-chart__key-demand"></span>
-      Billed demand (D)
+      Billed demand
     </li>
   }
 </ul>
@@ -81,8 +76,8 @@
       }
 
       <!-- Series -->
-      <path class="load-chart__grid-area" [attr.d]="gridAreaPath"></path>
-      <path class="load-chart__grid-line" [attr.d]="gridLinePath"></path>
+      <path class="load-chart__grid-area" [attr.d]="gridAreaPath" [style.d]="cssPath(gridAreaPath)"></path>
+      <path class="load-chart__grid-line" [attr.d]="gridLinePath" [style.d]="cssPath(gridLinePath)"></path>
       <path class="load-chart__load-line" [attr.d]="loadLinePath"></path>
 
       <!-- Demand D -->

@@ -67,3 +67,10 @@ export interface IChartTooltip {
   leftPercent: number;
   alignRight: boolean;
 }
+
+export interface ILabelPlacement {
+  labelX: number;
+  anchorEnd: boolean;
+  end: number;
+  fits: boolean;
+}

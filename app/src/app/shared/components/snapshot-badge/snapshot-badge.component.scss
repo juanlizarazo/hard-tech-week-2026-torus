@@ -2,28 +2,36 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--dt-theme--border);
-  background: var(--dt-theme--card);
-  color: var(--dt-theme--primary);
+  max-width: 100%;
   font-size: 0.75rem;
   font-weight: 500;
-  max-width: 100%;
-}
-
-.dt-snapshot-badge--muted {
-  color: var(--dt-theme--muted);
-  background: var(--dt-theme--surface);
+  line-height: 1.3;
+  color: var(--dt-ink, #1b2430);
 }
 
 .dt-snapshot-badge__icon {
-  width: 16px;
-  height: 16px;
-  font-size: 16px;
-  color: var(--dt-theme--tertiary);
+  flex: none;
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  color: var(--dt-muted, #5a6672);
 }
 
-.dt-snapshot-badge--muted .dt-snapshot-badge__icon {
-  color: var(--dt-theme--muted);
+.dt-snapshot-badge__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dt-snapshot-badge--muted {
+  color: var(--dt-muted, #5a6672);
+}
+
+.dt-snapshot-badge--stale {
+  color: var(--dt-rush-ink, #9a4f00);
+}
+
+.dt-snapshot-badge--stale .dt-snapshot-badge__icon {
+  color: var(--dt-rush, #f28500);
 }

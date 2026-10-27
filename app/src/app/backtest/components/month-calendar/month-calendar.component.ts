@@ -35,6 +35,10 @@ export class MonthCalendarComponent implements OnChanges {
     return Math.max(MIN_BAR_PERCENT, Math.min(1, Math.max(0, cell.barFraction)) * 100);
   }
 
+  public kwLabel(cell: IMonthCalendarCell): string {
+    return `${Math.round(cell.peakKw).toLocaleString('en-US')} kW`;
+  }
+
   public ariaLabel(cell: IMonthCalendarCell): string {
     const date = new Date(`${cell.localDate}T12:00:00`);
     const day = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });

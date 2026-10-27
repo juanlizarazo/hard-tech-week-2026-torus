@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, doc, getDoc } from '@angular/fire/firestore';
-import { Observable, defer, finalize, from, map, shareReplay, switchMap, tap } from 'rxjs';
+import { Observable, combineLatest, defer, finalize, from, map, shareReplay, switchMap, tap } from 'rxjs';
 import { LoadingService } from './loading.service';
+import { ISnapshotResolution, ISnapshotStatus } from './snapshot.interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class SnapshotService {
@@ -18,15 +19,37 @@ export class SnapshotService {
     shareReplay(1)
   );
 
-  public readonly manifest$: Observable<Detour.Firestore.Snapshot.IManifest | null> = defer(() => {
+  private readonly _resolution$: Observable<ISnapshotResolution> = defer(() => {
     this._loadingService.show();
 
     return this.pointer$.pipe(
-      switchMap((pointer) => this._loadManifest(pointer)),
+      switchMap((pointer) => from(this._resolveManifest(pointer))),
       tap({ error: (error) => console.error('Failed to load snapshot manifest', error) }),
       finalize(() => this._loadingService.hide())
     );
   }).pipe(shareReplay(1));
+
+  public readonly manifest$: Observable<Detour.Firestore.Snapshot.IManifest | null> = this._resolution$.pipe(
+    map((resolution) => resolution.manifest),
+    shareReplay(1)
+  );
+
+  public readonly status$: Observable<ISnapshotStatus> = combineLatest([this.pointer$, this._resolution$]).pipe(
+    map(([pointer, resolution]): ISnapshotStatus => {
+      const lastRun = pointer?.lastRun ?? null;
+      const isLastRunUnhealthy = lastRun?.status === 'rejected' || lastRun?.status === 'failed';
+      const pinnedSnapshotId = pointer?.pinnedSnapshotId ?? null;
+
+      return {
+        ...resolution,
+        lastRun,
+        pinnedSnapshotId,
+        isPinned: pinnedSnapshotId !== null && pinnedSnapshotId === resolution.manifest?.id,
+        isShowingLastGood: resolution.isFallback || isLastRunUnhealthy
+      };
+    }),
+    shareReplay(1)
+  );
 
   public getGridMonth(month: string): Observable<Detour.Firestore.Snapshot.IGridMonth | null> {
     return this._cached(this._gridMonthCache, month, 'gridMonths');
@@ -71,19 +94,38 @@ export class SnapshotService {
     return snapshot.exists() ? ({ ...snapshot.data(), id: snapshot.id } as Detour.Firestore.Snapshot.IManifest) : null;
   }
 
-  private _loadManifest(pointer: Detour.Firestore.Snapshot.IPointer | null): Observable<Detour.Firestore.Snapshot.IManifest | null> {
+  private async _tryLoadManifest(snapshotId: string): Promise<Detour.Firestore.Snapshot.IManifest | null> {
+    try {
+      return await this._loadManifestById(snapshotId);
+    } catch (error) {
+      console.error(`Failed to load snapshot ${snapshotId}`, error);
+
+      return null;
+    }
+  }
+
+  private async _resolveManifest(pointer: Detour.Firestore.Snapshot.IPointer | null): Promise<ISnapshotResolution> {
     if (!pointer) {
-      return from([null]);
+      return { manifest: null, requestedSnapshotId: null, isFallback: false };
     }
 
-    return from(
-      this._loadManifestById(pointer.currentSnapshotId).then((current) => {
-        if (current || !pointer.previousSnapshotId) {
-          return current;
-        }
-
-        return this._loadManifestById(pointer.previousSnapshotId);
-      })
+    const requestedSnapshotId = pointer.pinnedSnapshotId ?? pointer.currentSnapshotId;
+    const fallbackIds = [
+      ...(pointer.lastGoodSnapshotIds ?? []),
+      pointer.currentSnapshotId,
+      pointer.previousSnapshotId
+    ].filter((snapshotId, index, snapshotIds): snapshotId is string =>
+      Boolean(snapshotId) && snapshotId !== requestedSnapshotId && snapshotIds.indexOf(snapshotId) === index
     );
+
+    for (const snapshotId of [requestedSnapshotId, ...fallbackIds]) {
+      const manifest = await this._tryLoadManifest(snapshotId);
+
+      if (manifest) {
+        return { manifest, requestedSnapshotId, isFallback: snapshotId !== requestedSnapshotId };
+      }
+    }
+
+    return { manifest: null, requestedSnapshotId, isFallback: false };
   }
 }

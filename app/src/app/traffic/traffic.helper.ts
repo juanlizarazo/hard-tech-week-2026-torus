@@ -1,14 +1,28 @@
 import { EmissionsHelper, signalsConfig } from '@app/core';
-import { IForecastComparisonRow, ILoadForecast, IMarginalEmissionsPoint, MefMethod, MefSeason } from '@app/core/models';
+import {
+  IForecastComparisonRow,
+  ILoadForecast,
+  IMarginalEmissionsPoint,
+  IRushHourWindow,
+  MefMethod,
+  MefSeason,
+} from '@app/core/models';
 import { TimeHelper } from '@app/core/helpers';
+import { PlanEngineHelper } from '@app/core/plan';
+import { TimeLabelHelper } from '@app/shared/helpers/time-label.helper';
+import { IHourChartBand, IHourChartHighlight, IHourChartSeries } from '@app/shared/components/hour-chart/hour-chart.interfaces';
 import { IRankSlopeRow } from './components/rank-slope/rank-slope.interfaces';
-import { trafficCalendar, trafficClocks, trafficConfig } from './traffic.constants';
+import { trafficCalendar, trafficChartDefaults, trafficClocks, trafficConfig } from './traffic.constants';
 import {
   IRushHourBand,
   ITrafficHour,
   ITrafficInputs,
+  ITrafficChart,
+  ITrafficChartOptions,
   ITrafficCharts,
+  ITrafficHourValue,
   ITrafficInsights,
+  ITrafficNotices,
   ITrafficLoadWindow,
   ITrafficRange,
   ITrafficReport,
@@ -65,6 +79,7 @@ export class TrafficHelper {
       hasPrices: hours.some((hour) => hour.lmp !== null),
       hourLabels: hours.map((hour) => TrafficHelper.hourLabel(hour.hour)),
       rushHour,
+      paceRush: PlanEngineHelper.rushHourWindows(inputs.history, targetDate)[0] ?? null,
       ranking,
       insights: TrafficHelper.insights(targetDate, hours, rushHour, ranking, inputs, season),
       fossilRange: TrafficHelper.range(hours.map((hour) => hour.mefFossilLbPerMwh)),
@@ -74,52 +89,54 @@ export class TrafficHelper {
     };
   }
 
-  public static charts(report: ITrafficReport, forecast: ILoadForecast | null): ITrafficCharts {
+  public static charts(
+    report: ITrafficReport,
+    forecast: ILoadForecast | null,
+    options: ITrafficChartOptions = trafficChartDefaults,
+  ): ITrafficCharts {
     const label = 'Rush hour';
-    const band = report.rushHour;
-    const dayHighlight = band
-      ? { startIndex: band.startHour, endIndex: band.endHourExclusive - 1, label }
+    const window = report.paceRush;
+    const dayHighlight: IHourChartHighlight | null = window
+      ? { startIndex: window.startLocalHour, endIndex: window.endLocalHour - 1, label }
       : null;
-    const loadHighlight = band
+    const loadHighlight: IHourChartHighlight | null = window
       ? {
-          startIndex: report.load.targetStartIndex + band.startHour,
-          endIndex: report.load.targetStartIndex + band.endHourExclusive - 1,
+          startIndex: report.load.targetStartIndex + window.startLocalHour,
+          endIndex: report.load.targetStartIndex + window.endLocalHour - 1,
           label,
         }
       : null;
-    const importLower = report.hours.map((hour) =>
-      hour.mefFossilLbPerMwh !== null && hour.mefDemandLbPerMwh !== null
-        ? Math.min(hour.mefFossilLbPerMwh, hour.mefDemandLbPerMwh)
-        : null,
-    );
-    const importUpper = report.hours.map((hour) =>
-      hour.mefFossilLbPerMwh !== null && hour.mefDemandLbPerMwh !== null
-        ? Math.max(hour.mefFossilLbPerMwh, hour.mefDemandLbPerMwh)
-        : null,
-    );
-
     const forecastSeries = TrafficHelper._forecastSeries(report, forecast);
+    const loadSeries: IHourChartSeries[] = [
+      { label: 'Load (actual)', values: report.load.actualLoadMw, style: 'solid', color: 'var(--dt-ink)' },
+      { label: 'Net load (actual)', values: report.load.actualNetLoadMw, style: 'solid', color: 'var(--dt-clear-mark)' },
+      { label: "PACE's day-ahead forecast", values: report.load.forecastMw, style: 'dashed', color: 'var(--dt-muted)' },
+      { label: 'Net load (estimate)', values: report.load.estimatedNetLoadMw, style: 'dotted', color: 'var(--dt-clear-mark)' },
+    ];
+    const loadBands: IHourChartBand[] = [];
+
+    if (forecastSeries) {
+      if (options.showOurForecast) {
+        loadSeries.push({ label: 'Our forecast', values: forecastSeries.p50, style: 'dashed', color: 'var(--dt-pulse)' });
+      }
+
+      loadBands.push({ label: 'Our P10–P90 range', lower: forecastSeries.p10, upper: forecastSeries.p90, color: 'var(--dt-pulse)' });
+    }
+
+    const load: ITrafficChart = {
+      series: loadSeries,
+      bands: loadBands,
+      highlight: loadHighlight,
+      xLabels: report.load.xLabels,
+      dividerIndices: report.load.dividerIndices,
+      estimateFromIndex: report.load.targetStartIndex,
+    };
 
     return {
-      load: {
-        series: [
-          { label: 'Load (actual)', values: report.load.actualLoadMw, style: 'solid', color: 'var(--dt-viz-1)' },
-          { label: 'Net load (actual)', values: report.load.actualNetLoadMw, style: 'solid', color: 'var(--dt-viz-3)' },
-          { label: "PACE's day-ahead forecast", values: report.load.forecastMw, style: 'dashed', color: 'var(--dt-viz-2)' },
-          { label: 'Net load (estimate)', values: report.load.estimatedNetLoadMw, style: 'dotted', color: 'var(--dt-viz-3)' },
-          ...(forecastSeries ? [{ label: 'Our forecast (ridge)', values: forecastSeries.p50, style: 'dashed' as const, color: 'var(--dt-viz-4)' }] : []),
-        ],
-        bands: forecastSeries
-          ? [{ label: 'P10–P90 (ours)', lower: forecastSeries.p10, upper: forecastSeries.p90, color: 'var(--dt-viz-4)' }]
-          : [],
-        highlight: loadHighlight,
-        xLabels: report.load.xLabels,
-        dividerIndices: report.load.dividerIndices,
-        estimateFromIndex: report.load.targetStartIndex,
-      },
+      load: options.showAllDays ? load : TrafficHelper._dropLeadingHours(load, report.load.targetStartIndex - 24),
       price: {
         series: [
-          { label: 'EDAM day-ahead price', values: report.hours.map((hour) => hour.lmp), style: 'solid', color: 'var(--dt-viz-2)' },
+          { label: 'Day-ahead price', values: report.hours.map((hour) => hour.lmp), style: 'solid', color: 'var(--dt-price-high)' },
         ],
         bands: [],
         highlight: dayHighlight,
@@ -127,42 +144,87 @@ export class TrafficHelper {
         dividerIndices: [],
         estimateFromIndex: null,
       },
-      carbon: {
-        series: [
-          {
-            label: 'Marginal CO2, fossil generation',
-            values: report.hours.map((hour) => hour.mefFossilLbPerMwh),
-            style: 'solid',
-            color: 'var(--dt-viz-1)',
-          },
-          {
-            label: 'Marginal CO2, demand',
-            values: report.hours.map((hour) => hour.mefDemandLbPerMwh),
-            style: 'dashed',
-            color: 'var(--dt-viz-3)',
-          },
-        ],
-        bands: [
-          {
-            label: '95% interval (fossil)',
-            lower: report.hours.map((hour) => hour.mefFossilLowLbPerMwh),
-            upper: report.hours.map((hour) => hour.mefFossilHighLbPerMwh),
-            color: 'var(--dt-viz-1)',
-          },
-          { label: 'Import band', lower: importLower, upper: importUpper, color: 'var(--dt-viz-3)' },
-          {
-            label: '95% interval (demand)',
-            lower: report.hours.map((hour) => hour.mefDemandLowLbPerMwh),
-            upper: report.hours.map((hour) => hour.mefDemandHighLbPerMwh),
-            color: 'var(--dt-viz-4)',
-          },
-        ],
-        highlight: dayHighlight,
-        xLabels: report.hourLabels,
-        dividerIndices: [],
-        estimateFromIndex: null,
-      },
+      carbon: TrafficHelper._carbonChart(report, dayHighlight, options.showUncertainty),
     };
+  }
+
+  public static answer(report: ITrafficReport): string[] {
+    const window = report.paceRush;
+    const sentences: string[] = [];
+
+    if (!window) {
+      return [`No rush hour could be placed for ${report.targetDateLabel}.`];
+    }
+
+    const windowLabel = TimeLabelHelper.window(window.startLocalHour, window.endLocalHour);
+
+    if (window.isAssumption) {
+      sentences.push(`PACE has not posted its forecast for ${report.targetDateLabel} yet, so DETOUR assumes a rush hour of ${windowLabel}`);
+    } else {
+      const windowLoad = TrafficHelper._mean(report.hours.slice(window.startLocalHour, window.endLocalHour).map((hour) => hour.forecastMw));
+      const dayLoad = TrafficHelper._mean(report.hours.map((hour) => hour.forecastMw));
+      const loadPart =
+        windowLoad !== null && dayLoad !== null && dayLoad > 0
+          ? `, when its own forecast averages ${Math.round(windowLoad).toLocaleString('en-US')} MW, ${Math.round(((windowLoad - dayLoad) / dayLoad) * 100)}% above the day's mean`
+          : '';
+      sentences.push(`PACE's rush hour on ${report.targetDateLabel} is ${windowLabel}${loadPart ? `${loadPart}.` : ''}`);
+    }
+
+    const composite = report.rushHour;
+
+    if (!composite) {
+      return sentences;
+    }
+
+    const compositeLabel = TimeLabelHelper.window(composite.startHour, composite.endHourExclusive);
+    const overlap =
+      Math.min(composite.endHourExclusive, window.endLocalHour) - Math.max(composite.startHour, window.startLocalHour);
+
+    if (overlap >= trafficConfig.RUSH_HOUR_HOURS / 2) {
+      sentences.push(`Price and carbon agree: counting all three clocks, the hottest four hours are ${compositeLabel}`);
+    } else {
+      sentences.push(`Price and carbon disagree: counting all three clocks together, the hottest four hours are ${compositeLabel}`);
+    }
+
+    return sentences;
+  }
+
+  public static notices(report: ITrafficReport): ITrafficNotices {
+    const window = report.paceRush;
+    const inRush = (hour: number): boolean => !!window && hour >= window.startLocalHour && hour < window.endLocalHour;
+    const where = (hour: number): string => (inRush(hour) ? 'inside the rush hour' : 'outside the rush hour');
+    const loadPeak = TrafficHelper._extreme(report.hours.map((hour) => hour.forecastMw), 'max');
+    const netLow = TrafficHelper._extreme(report.hours.map((hour) => hour.estimatedNetLoadMw), 'min');
+    const priceHigh = TrafficHelper._extreme(report.hours.map((hour) => hour.lmp), 'max');
+    const priceLow = TrafficHelper._extreme(report.hours.map((hour) => hour.lmp), 'min');
+    const carbonHigh = TrafficHelper._extreme(report.hours.map((hour) => hour.mefFossilLbPerMwh), 'max');
+    const carbonLow = TrafficHelper._extreme(report.hours.map((hour) => hour.mefFossilLbPerMwh), 'min');
+    const megawatts = (value: number): string => `${Math.round(value).toLocaleString('en-US')} MW`;
+    const pounds = (value: number): string => `${Math.round(value).toLocaleString('en-US')} lb`;
+    const loadParts: string[] = [];
+
+    if (loadPeak) {
+      loadParts.push(`PACE expects load to peak near ${megawatts(loadPeak.value)} at ${TrafficHelper.hourLabel(loadPeak.hour)}, ${where(loadPeak.hour)}.`);
+    }
+
+    if (netLow) {
+      loadParts.push(`Net load bottoms out near ${megawatts(netLow.value)} at ${TrafficHelper.hourLabel(netLow.hour)}. That dip is wind and solar at work.`);
+    }
+
+    const price =
+      priceHigh && priceLow
+        ? `Power is cheapest at ${TrafficHelper.hourLabel(priceLow.hour)} ($${priceLow.value.toFixed(0)}/MWh) and dearest at ${TrafficHelper.hourLabel(priceHigh.hour)} ($${priceHigh.value.toFixed(0)}/MWh), ${where(priceHigh.hour)}.`
+        : '';
+    const carbon =
+      carbonHigh && carbonLow
+        ? `One more MWh emits most at ${TrafficHelper.hourLabel(carbonHigh.hour)} (${pounds(carbonHigh.value)}) and least at ${TrafficHelper.hourLabel(carbonLow.hour)} (${pounds(carbonLow.value)}). The dirtiest hour is ${where(carbonHigh.hour)}.`
+        : '';
+    const cleanest = report.ranking.length > 0 ? [...report.ranking].sort((first, second) => first.averageRank - second.averageRank)[0] : null;
+    const ranking = cleanest
+      ? `The cleanest hour on average, ${cleanest.hourLabel}, ranks ${cleanest.marginalRank} of ${report.ranking.length} on the marginal scale.`
+      : '';
+
+    return { load: loadParts.join(' '), price, carbon, ranking };
   }
 
   public static loadWindow(history: Detour.Firestore.Snapshot.IGridHour[], targetDate: string): ITrafficLoadWindow {
@@ -207,7 +269,7 @@ export class TrafficHelper {
         const forecast = row?.dayAheadForecastMw ?? null;
         const trend = renewableTrend.get(hour) ?? null;
 
-        load.xLabels.push(`${TrafficHelper.dayLabel(date).slice(0, 3)} ${TrafficHelper.hourLabel(hour)}`);
+        load.xLabels.push(`${TrafficHelper.dayLabel(date).slice(0, 3)} ${TrafficHelper.compactHourLabel(hour)}`);
         load.actualLoadMw.push(demand);
         load.actualNetLoadMw.push(demand !== null && renewable !== null ? demand - renewable : null);
         load.forecastMw.push(forecast);
@@ -463,6 +525,12 @@ export class TrafficHelper {
     return `${Math.round(Math.abs(meanPeakMissMw)).toLocaleString()} MW ${meanPeakMissMw < 0 ? 'above' : 'below'}`;
   }
 
+  public static compactHourLabel(hour: number): string {
+    const twelveHour = hour % 12 === 0 ? 12 : hour % 12;
+
+    return `${twelveHour}${hour < 12 ? 'am' : 'pm'}`;
+  }
+
   public static hourLabel(hour: number): string {
     const suffix = hour < 12 ? 'a.m.' : 'p.m.';
     const twelveHour = hour % 12 === 0 ? 12 : hour % 12;
@@ -521,5 +589,91 @@ export class TrafficHelper {
     }
 
     return { p10, p50, p90 };
+  }
+
+  private static _carbonChart(report: ITrafficReport, highlight: IHourChartHighlight | null, showUncertainty: boolean): ITrafficChart {
+    const fossil: IHourChartSeries = {
+      label: 'Marginal CO2 (fossil generation)',
+      values: report.hours.map((hour) => hour.mefFossilLbPerMwh),
+      style: 'solid',
+      color: 'var(--dt-carbon-high)',
+    };
+
+    if (!showUncertainty) {
+      return { series: [fossil], bands: [], highlight, xLabels: report.hourLabels, dividerIndices: [], estimateFromIndex: null };
+    }
+
+    const importLower = report.hours.map((hour) =>
+      hour.mefFossilLbPerMwh !== null && hour.mefDemandLbPerMwh !== null ? Math.min(hour.mefFossilLbPerMwh, hour.mefDemandLbPerMwh) : null,
+    );
+    const importUpper = report.hours.map((hour) =>
+      hour.mefFossilLbPerMwh !== null && hour.mefDemandLbPerMwh !== null ? Math.max(hour.mefFossilLbPerMwh, hour.mefDemandLbPerMwh) : null,
+    );
+
+    return {
+      series: [
+        fossil,
+        {
+          label: 'Marginal CO2 (demand)',
+          values: report.hours.map((hour) => hour.mefDemandLbPerMwh),
+          style: 'dashed',
+          color: 'var(--dt-muted)',
+        },
+      ],
+      bands: [
+        {
+          label: '95% interval (fossil)',
+          lower: report.hours.map((hour) => hour.mefFossilLowLbPerMwh),
+          upper: report.hours.map((hour) => hour.mefFossilHighLbPerMwh),
+          color: 'var(--dt-carbon-high)',
+        },
+        { label: 'Import band', lower: importLower, upper: importUpper, color: 'var(--dt-spin)' },
+        {
+          label: '95% interval (demand)',
+          lower: report.hours.map((hour) => hour.mefDemandLowLbPerMwh),
+          upper: report.hours.map((hour) => hour.mefDemandHighLbPerMwh),
+          color: 'var(--dt-muted)',
+        },
+      ],
+      highlight,
+      xLabels: report.hourLabels,
+      dividerIndices: [],
+      estimateFromIndex: null,
+    };
+  }
+
+  private static _dropLeadingHours(chart: ITrafficChart, count: number): ITrafficChart {
+    if (count <= 0) {
+      return chart;
+    }
+
+    return {
+      series: chart.series.map((line) => ({ ...line, values: line.values.slice(count) })),
+      bands: chart.bands.map((band) => ({ ...band, lower: band.lower.slice(count), upper: band.upper.slice(count) })),
+      highlight: chart.highlight
+        ? { ...chart.highlight, startIndex: chart.highlight.startIndex - count, endIndex: chart.highlight.endIndex - count }
+        : null,
+      xLabels: chart.xLabels.slice(count),
+      dividerIndices: chart.dividerIndices.filter((index) => index > count).map((index) => index - count),
+      estimateFromIndex: chart.estimateFromIndex === null ? null : chart.estimateFromIndex - count,
+    };
+  }
+
+  private static _extreme(values: (number | null)[], direction: 'min' | 'max'): ITrafficHourValue | null {
+    let best: ITrafficHourValue | null = null;
+
+    for (let hour = 0; hour < values.length; hour++) {
+      const value = values[hour];
+
+      if (value === null || !Number.isFinite(value)) {
+        continue;
+      }
+
+      if (!best || (direction === 'max' ? value > best.value : value < best.value)) {
+        best = { hour, value };
+      }
+    }
+
+    return best;
   }
 }

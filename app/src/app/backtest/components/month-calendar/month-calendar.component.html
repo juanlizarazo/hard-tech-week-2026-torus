@@ -1,13 +1,10 @@
-<section class="dt-month-calendar" [attr.aria-label]="'Peak demand calendar, ' + monthLabel">
-  <header class="dt-month-calendar__header">
-    <h3 class="dt-month-calendar__month">{{ monthLabel }}</h3>
-    @if (peakLabel) {
-      <p class="dt-month-calendar__peak">
-        <span class="dt-month-calendar__peak-marker" aria-hidden="true"></span>
-        <span>Month peak: {{ peakLabel }}</span>
-      </p>
-    }
-  </header>
+<section class="dt-month-calendar" [attr.aria-label]="'Daily peak calendar, ' + monthLabel">
+  @if (peakLabel) {
+    <p class="dt-month-calendar__peak">
+      <span class="dt-month-calendar__peak-marker" aria-hidden="true"></span>
+      <span>Month peak: {{ peakLabel }}</span>
+    </p>
+  }
 
   @if (cells.length === 0) {
     <p class="dt-month-calendar__empty">No days to show for this month yet.</p>
@@ -34,10 +31,12 @@
           (click)="select(cell)"
         >
           <span class="dt-month-calendar__day">{{ cell.dayOfMonth }}</span>
-          @if (cell.isPeakDay) {
-            <span class="dt-month-calendar__flag">Peak</span>
+          @if (cell.peakKw > 0) {
+            <span class="dt-month-calendar__kw">{{ kwLabel(cell) }}</span>
           }
-          <span class="dt-month-calendar__bar" [style.height.%]="barHeight(cell)" aria-hidden="true"></span>
+          <span class="dt-month-calendar__track" aria-hidden="true">
+            <span class="dt-month-calendar__bar" [style.height.%]="barHeight(cell)"></span>
+          </span>
         </button>
       }
     </div>

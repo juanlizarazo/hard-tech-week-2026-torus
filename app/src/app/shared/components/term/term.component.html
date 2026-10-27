@@ -1,0 +1,27 @@
+<button
+  type="button"
+  class="dt-term"
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  [attr.aria-describedby]="isOpen ? popoverId : null"
+  (mouseenter)="show()"
+  (mouseleave)="hideSoon()"
+  (focus)="show()"
+  (blur)="hide()"
+  (click)="openMore()"
+><ng-content></ng-content></button>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="isOpen"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayFlexibleDimensions]="false"
+  [cdkConnectedOverlayPush]="true"
+>
+  <div class="dt-term__popover" role="tooltip" [id]="popoverId" (mouseenter)="cancelHide()" (mouseleave)="hideSoon()">
+    <span class="dt-term__popover-term">{{ entry.term }}</span>
+    <span class="dt-term__popover-text">{{ entry.short }}</span>
+    <button type="button" class="dt-term__more" tabindex="-1" (click)="openMore()">More about {{ entry.term }}</button>
+  </div>
+</ng-template>

@@ -1,6 +1,6 @@
 <figure class="dt-hour-chart__figure">
   @if (title) {
-    <figcaption class="dt-hour-chart__title">{{ title }}</figcaption>
+    <figcaption class="dt-hour-chart__visually-hidden">{{ title }}</figcaption>
   }
 
   @if (!hasData) {
@@ -23,7 +23,7 @@
         @if (highlight) {
           <li class="dt-hour-chart__legend-item">
             <svg class="dt-hour-chart__legend-swatch" viewBox="0 0 24 12" aria-hidden="true">
-              <rect x="1" y="1" width="22" height="10" rx="2" fill="var(--dt-viz-highlight)"></rect>
+              <rect x="1" y="1" width="22" height="10" rx="2" [attr.fill]="stripeFill"></rect>
             </svg>
             <span>{{ highlight.label }}</span>
           </li>
@@ -42,8 +42,15 @@
         (pointerdown)="onPointerMove($event)"
         (pointerleave)="onPointerLeave()"
       >
+        <defs>
+          <pattern [attr.id]="stripeId" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect class="dt-hour-chart__stripe-bg" width="8" height="8"></rect>
+            <rect class="dt-hour-chart__stripe" width="3.5" height="8"></rect>
+          </pattern>
+        </defs>
         @if (highlightRect) {
-          <rect class="dt-hour-chart__highlight" [attr.x]="highlightRect.x" [attr.y]="plotTop" [attr.width]="highlightRect.width" [attr.height]="plotBottom - plotTop"></rect>
+          <rect [attr.x]="highlightRect.x" [attr.y]="plotTop" [attr.width]="highlightRect.width" [attr.height]="plotBottom - plotTop" [attr.fill]="stripeFill"></rect>
+          <text class="dt-hour-chart__band-text" [attr.x]="highlightRect.x + highlightRect.width / 2" [attr.y]="plotTop - 6" text-anchor="middle">{{ highlight?.label }}</text>
         }
 
         @for (tick of yTicks; track tick.position) {

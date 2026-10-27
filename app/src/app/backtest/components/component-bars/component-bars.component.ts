@@ -1,17 +1,18 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CurrencyPipe, NgClass } from '@angular/common';
-import { IComponentBarGroup } from '../../backtest.interfaces';
-import { IComponentBarGroupView, IComponentBarLegendItem } from './component-bars.interfaces';
+import { SourceChipComponent } from '@app/shared/components';
+import { IBacktestLegendItem, IComponentBarGroup } from '../../backtest.interfaces';
+import { IComponentBarGroupView } from './component-bars.interfaces';
 
 @Component({
   selector: 'dt-component-bars',
-  imports: [CurrencyPipe, NgClass],
+  imports: [CurrencyPipe, NgClass, SourceChipComponent],
   templateUrl: './component-bars.component.html',
   styleUrl: './component-bars.component.scss'
 })
 export class ComponentBarsComponent implements OnChanges {
   @Input() public groups: IComponentBarGroup[] = [];
-  @Input() public strategyLegend: IComponentBarLegendItem[] = [];
+  @Input() public strategyLegend: IBacktestLegendItem[] = [];
 
   public views: IComponentBarGroupView[] = [];
   public zeroPercent = 0;
@@ -32,6 +33,7 @@ export class ComponentBarsComponent implements OnChanges {
       rows: group.bars.map((bar) => {
         const lengthPercent = (Math.abs(bar.savings) / span) * 100;
         const isNegative = bar.savings < 0;
+
         return {
           bar,
           lengthPercent,

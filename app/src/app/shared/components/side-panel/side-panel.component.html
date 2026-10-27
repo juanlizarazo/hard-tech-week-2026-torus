@@ -1,0 +1,28 @@
+@if (content$ | async; as content) {
+  <div class="dt-side-panel__backdrop" (click)="onClose()" aria-hidden="true"></div>
+  <aside
+    class="dt-side-panel"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="content.title"
+    cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true"
+  >
+    <header class="dt-side-panel__head">
+      <h2 class="dt-side-panel__title">{{ content.title }}</h2>
+      <button type="button" class="dt-side-panel__close" aria-label="Close" cdkFocusInitial (click)="onClose()">
+        <mat-icon aria-hidden="true">close</mat-icon>
+      </button>
+    </header>
+    <div class="dt-side-panel__body">
+      @if (content.entry; as entry) {
+        <p class="dt-side-panel__short">{{ entry.short }}</p>
+        <p class="dt-side-panel__text">{{ entry.long }}</p>
+        <p class="dt-side-panel__why"><span class="dt-side-panel__why-label">Why it matters here.</span> {{ entry.whyItMatters }}</p>
+      }
+      @if (content.template) {
+        <ng-container [ngTemplateOutlet]="content.template"></ng-container>
+      }
+    </div>
+  </aside>
+}

@@ -14,12 +14,15 @@ import { SiteGeneratorHelper, SitesHelper } from '@app/core/sites';
 import { TariffHelper, tariffSchedules } from '@app/core/tariff';
 import { TimeHelper } from '@app/core/helpers';
 import { ILpInput, PlanEngineHelper, placeholderMefSeries } from '@app/core/plan';
+import { TimeLabelHelper } from '@app/shared/helpers/time-label.helper';
 import {
   IAssetRow,
   IBillLineDelta,
   IPlanControls,
   IPlanDateContext,
   IPlanHook,
+  IPlanHookNumbers,
+  IPlanNotices,
   IPlanSiteCard,
   IPlanTile,
   IPlanViewModel
@@ -59,13 +62,22 @@ export class PlanHelper {
     return scheduleId === 'schedule-8' ? tariffSchedules.SCHEDULE_8 : tariffSchedules.SCHEDULE_6;
   }
 
-  public static buildHook(): IPlanHook {
+  public static hookNumbers(): IPlanHookNumbers {
     const summer = tariffSchedules.SCHEDULE_8.seasons.summer;
     const spread = summer.energyOnPeakPerKwh - summer.energyOffPeakPerKwh;
-    const equivalentKwh = Math.round(summer.demandRatePerKw / spread);
 
     return {
-      title: `$${summer.demandRatePerKw.toFixed(2)} vs ${(spread * 100).toFixed(1)}¢: one kW of summer on-peak demand costs as much as shifting ~${equivalentKwh} kWh`,
+      demandRateLabel: `$${summer.demandRatePerKw.toFixed(2)}`,
+      spreadLabel: `${(spread * 100).toFixed(1)}¢`,
+      equivalentKwh: Math.round(summer.demandRatePerKw / spread)
+    };
+  }
+
+  public static buildHook(): IPlanHook {
+    const numbers = PlanHelper.hookNumbers();
+
+    return {
+      title: `${numbers.demandRateLabel} vs ${numbers.spreadLabel}: one kW of summer on-peak demand costs as much as shifting ~${numbers.equivalentKwh} kWh`,
       subtitle:
         'Three clocks disagree on when to act: the bill (on-peak demand), the price (PACE EDAM) and the carbon (marginal CO2). The LP plans the Torus Station against all three, live.'
     };
@@ -167,6 +179,62 @@ export class PlanHelper {
     );
   }
 
+  public static siteShortName(site: ISiteArchetype): string {
+    return site.name.replace(/^Simulated\s+/, '').replace(/\s*\(.*\)$/, '');
+  }
+
+  public static dialsSummary(controls: IPlanControls): string {
+    const site = SitesHelper.getArchetype(controls.siteId) as ISiteArchetype;
+    const schedule = controls.scheduleId === 'schedule-8' ? 'Schedule 8' : 'Schedule 6';
+
+    return `${PlanHelper.siteShortName(site)}, ${schedule}, CO2 $${controls.co2WeightPerKg.toFixed(2)}/kg, reserve ${PlanHelper.formatNumber(controls.wattsmartReserveKwh)} kWh`;
+  }
+
+  public static answer(controls: IPlanControls, result: IPlanResult): string {
+    const site = SitesHelper.getArchetype(controls.siteId) as ISiteArchetype;
+    const siteName = PlanHelper.siteShortName(site).toLowerCase();
+    const billChange = result.plannedBill.total - result.baselineBill.total;
+    const movedKwh = result.metrics?.trafficAvoidedKwh ?? 0;
+    const spinKwh = result.metrics?.spinThroughputKwh ?? 0;
+    const pulseKwh = result.metrics?.pulseThroughputKwh ?? 0;
+    const window = result.metrics?.rushHourWindows[0];
+    const windowLabel = window ? TimeLabelHelper.window(window.startLocalHour, window.endLocalHour) : 'rush hour';
+
+    if (result.status !== 'optimal') {
+      return `No plan fits these settings for the ${siteName}. Lower the Wattsmart reserve and it will solve again.`;
+    }
+
+    const moved = movedKwh > 0.5
+      ? `the grid draw moves ${PlanHelper.formatNumber(movedKwh)} kWh out of rush hour (${windowLabel})`
+      : 'the grid draw stays where it was in rush hour';
+    const bill = billChange < -0.5
+      ? `the bill falls ${PlanHelper.formatMoneyChange(billChange).replace('−', '')} over the 48 hours`
+      : 'the bill does not fall at these settings';
+    const roles = spinKwh > 0.5 && pulseKwh > 0.5
+      ? ' Spin takes the short spikes; Pulse holds the energy.'
+      : '';
+
+    return `Plan for the ${siteName}: ${moved} and ${bill}.${roles}`;
+  }
+
+  public static notices(controls: IPlanControls, result: IPlanResult, demandLabel: string): IPlanNotices {
+    const window = result.metrics?.rushHourWindows[0];
+    const windowLabel = window ? TimeLabelHelper.window(window.startLocalHour, window.endLocalHour) : 'rush hour';
+    const isOnPeakBasis = controls.scheduleId === 'schedule-8';
+    const spinKwh = result.metrics?.spinThroughputKwh ?? 0;
+    const pulseKwh = result.metrics?.pulseThroughputKwh ?? 0;
+
+    return {
+      clocks: isOnPeakBasis
+        ? `The bill only charges demand in the dark on-peak blocks, the price peaks in the evening and carbon peaks elsewhere. Rush hour, ${windowLabel}, is where the plan avoids the grid.`
+        : `On Schedule 6 every hour can set the demand charge, so the whole bill lane is hatched. Rush hour, ${windowLabel}, still marks where the plan avoids the grid.`,
+      load: `The green area is what the site buys with the station working. It dips under the black line in rush hour and never rises above the dashed ${demandLabel.toLowerCase()} line in billed hours.`,
+      dispatch: spinKwh > 0.5 && pulseKwh > 0.5
+        ? `Pulse moves ${PlanHelper.formatNumber(pulseKwh)} kWh in long blocks; Spin moves ${PlanHelper.formatNumber(spinKwh)} kWh in short, sharp bursts around the ramps.`
+        : 'Bars above zero feed the site; bars below zero charge from the grid.'
+    };
+  }
+
   public static buildViewModel(
     controls: IPlanControls,
     context: IPlanDateContext,
@@ -200,7 +268,9 @@ export class PlanHelper {
       spinMaxSocKwh: assets.spin.energyKwh,
       reserveFloorKwh: result.request.wattsmartReserveKwh > 0 ? pulseMinSocKwh + result.request.wattsmartReserveKwh : 0,
       maxReserveKwh: PlanHelper.maxReserveKwh(assets),
-      solveLabel: result.status === 'optimal' ? `Solved in ${Math.round(result.solveMs)} ms` : 'No feasible plan'
+      solveLabel: result.status === 'optimal' ? `Solved in ${Math.round(result.solveMs)} ms` : 'No feasible plan',
+      answer: PlanHelper.answer(controls, result),
+      notices: PlanHelper.notices(controls, result, `${isOnPeakBasis ? 'On-peak demand' : 'Demand'}`)
     };
   }
 
@@ -265,41 +335,36 @@ export class PlanHelper {
     const demandShare = billChange < 0 ? Math.round((demandChange / billChange) * 100) : 0;
     const co2ChangeKg = metrics ? metrics.plannedCo2Kg - metrics.baselineCo2Kg : 0;
     const window = context.rushHourWindows[0];
-    const windowLabel = window
-      ? `${PlanHelper.hourLabel(window.startLocalHour)}–${PlanHelper.hourLabel(window.endLocalHour)}`
-      : '';
+    const windowLabel = window ? TimeLabelHelper.window(window.startLocalHour, window.endLocalHour) : 'rush hour';
 
     return [
       {
         id: 'bill',
-        label:
-          controls.peakSoFarMode === 'fresh'
-            ? 'Bill change, 48 h as the month'
-            : 'Bill change, month to date + 48 h',
+        label: controls.peakSoFarMode === 'fresh' ? 'Bill change (48 h)' : 'Bill change (month to date + 48 h)',
         value: PlanHelper.formatMoneyChange(billChange),
-        detail: billChange < 0 ? `${demandShare}% from demand and facilities charges` : 'No saving at these settings',
+        detail: billChange < 0 ? `${demandShare}% of it from the demand and facilities charges` : 'No saving at these settings',
         source: `${PlanHelper.scheduleFor(controls.scheduleId).provenance.label}, base rates, riders excluded`,
         tone: billChange < -0.5 ? 'good' : billChange > 0.5 ? 'bad' : 'neutral'
       },
       {
         id: 'co2',
-        label: 'Marginal CO2 change, 48 h',
+        label: 'CO2 change',
         value: `${PlanHelper.signOf(co2ChangeKg)}${PlanHelper.formatNumber(Math.abs(co2ChangeKg))} kg`,
-        detail: `CO2 weight $${controls.co2WeightPerKg.toFixed(2)}/kg in the objective`,
+        detail: `Marginal CO2 over 48 h, with CO2 valued at $${controls.co2WeightPerKg.toFixed(2)} per kg`,
         source: mefIsPlaceholder
-          ? 'PLACEHOLDER marginal CO2 by hour (regression unavailable)'
-          : 'Siler-Evans marginal CO2 by hour × season, Δ fossil generation on EIA-930 PACE',
+          ? 'Placeholder marginal CO2 (regression unavailable)'
+          : 'Marginal CO2 regression on EIA-930 PACE data',
         tone: co2ChangeKg < -0.5 ? 'good' : co2ChangeKg > 0.5 ? 'bad' : 'neutral'
       },
       {
         id: 'traffic',
-        label: 'Traffic avoided',
+        label: 'Moved out of rush hour',
         value: `${PlanHelper.formatNumber(metrics?.trafficAvoidedKwh ?? 0)} kWh`,
-        detail: `Grid draw moved out of PACE's rush hour (${windowLabel} local, both days)`,
+        detail: `Grid draw shifted out of ${windowLabel}, both days`,
         source:
           window && !window.isAssumption
-            ? "Busiest 4 h of PACE's day-ahead forecast (EIA-930 / CAISO OASIS)"
-            : 'Assumed 4–8 p.m. window (no PACE forecast for this day)',
+            ? "Busiest 4 h of PACE's day-ahead forecast (EIA-930)"
+            : `Assumed ${windowLabel} window, no PACE forecast for this day`,
         tone: (metrics?.trafficAvoidedKwh ?? 0) > 0.5 ? 'good' : 'neutral'
       },
       {
@@ -308,9 +373,9 @@ export class PlanHelper {
         value: `${PlanHelper.formatNumber(metrics?.wattsmartHeldKwh ?? 0)} kWh`,
         detail:
           controls.wattsmartReserveKwh > 0
-            ? 'Pulse + Spin energy above the floor, every rush-hour interval'
-            : 'Minimum energy left in the station during rush hour (no reserve set)',
-        source: 'Wattsmart reserve constraint in the LP',
+            ? 'Lowest energy above the floor in any rush-hour interval'
+            : 'Lowest energy left in the station during rush hour, no reserve set',
+        source: 'Reserve constraint in the LP',
         tone: 'neutral'
       }
     ];
@@ -347,14 +412,6 @@ export class PlanHelper {
       day: 'numeric',
       year: 'numeric'
     });
-  }
-
-  private static hourLabel(hour: number): string {
-    const normalized = ((hour % 24) + 24) % 24;
-    const suffix = normalized < 12 ? 'a.m.' : 'p.m.';
-    const displayHour = normalized % 12 === 0 ? 12 : normalized % 12;
-
-    return `${displayHour} ${suffix}`;
   }
 
   private static formatNumber(value: number): string {

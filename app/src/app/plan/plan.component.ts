@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { AsyncPipe, CurrencyPipe, DecimalPipe, NgClass } from '@angular/common';
+import { AsyncPipe, CurrencyPipe, DecimalPipe } from '@angular/common';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSliderModule } from '@angular/material/slider';
@@ -27,13 +26,16 @@ import { PlanEngineHelper, PlanSolverService, placeholderMefSeries } from '@app/
 import { SitesHelper } from '@app/core/sites';
 import {
   AlertBannerComponent,
-  ScreenToolbarComponent,
-  SimulatedBadgeComponent
+  ChartFrameComponent,
+  FigureComponent,
+  SourceChipComponent,
+  TermComponent,
+  ThreeClocksComponent,
+  UnderTheHoodComponent
 } from '@app/shared/components';
 import { ISnapshotViewState } from '@app/shared/interfaces/snapshot-view-state.interfaces';
 import { SnapshotViewStateHelper } from '@app/shared/helpers/snapshot-view-state.helper';
 import {
-  ClockBandsComponent,
   DispatchChartComponent,
   LoadChartComponent,
   LpTextComponent
@@ -49,16 +51,17 @@ import { planBaseline, planDefaults } from './plan.constants';
     AsyncPipe,
     CurrencyPipe,
     DecimalPipe,
-    NgClass,
     MatButtonToggleModule,
-    MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatSliderModule,
     AlertBannerComponent,
-    ScreenToolbarComponent,
-    SimulatedBadgeComponent,
-    ClockBandsComponent,
+    ChartFrameComponent,
+    FigureComponent,
+    SourceChipComponent,
+    TermComponent,
+    ThreeClocksComponent,
+    UnderTheHoodComponent,
     DispatchChartComponent,
     LoadChartComponent,
     LpTextComponent
@@ -79,7 +82,7 @@ export class PlanComponent {
   );
   private _lastState: IPlanSolveState | null = null;
 
-  public readonly hook = PlanHelper.buildHook();
+  public dialsOpen = false;
   public readonly siteCards: IPlanSiteCard[] = PlanHelper.buildSiteCards();
   public readonly defaults = planDefaults;
   public controls = this._controls$.value;
@@ -138,6 +141,18 @@ export class PlanComponent {
 
   public constructor() {
     this._refreshAssetRows();
+  }
+
+  public get dialsSummary(): string {
+    return PlanHelper.dialsSummary(this.controls);
+  }
+
+  public siteShortName(site: ISiteArchetype): string {
+    return PlanHelper.siteShortName(site);
+  }
+
+  public onToggleDials(): void {
+    this.dialsOpen = !this.dialsOpen;
   }
 
   public onSiteSelect(site: ISiteArchetype): void {

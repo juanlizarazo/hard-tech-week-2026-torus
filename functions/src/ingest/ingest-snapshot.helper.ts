@@ -432,6 +432,18 @@ export class IngestSnapshotHelper {
     return Array.isArray(series) ? IngestSnapshotHelper.parseNumber(series[index] as string | number | null) : null;
   }
 
+  public static resolveLastGoodIds(pointer: Detour.Firestore.Snapshot.IPointer | null): string[] {
+    if (!pointer) {
+      return [];
+    }
+
+    if (pointer.lastGoodSnapshotIds && pointer.lastGoodSnapshotIds.length > 0) {
+      return pointer.lastGoodSnapshotIds;
+    }
+
+    return [pointer.currentSnapshotId, pointer.previousSnapshotId].filter((id): id is string => Boolean(id));
+  }
+
   public static parseArguments(argumentList: string[], defaultOutputDirectory: string): { isDryRun: boolean; outputDirectory: string } {
     const outIndex = argumentList.indexOf('--out');
 

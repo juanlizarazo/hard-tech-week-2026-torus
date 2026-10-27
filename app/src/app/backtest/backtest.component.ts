@@ -1,8 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatCardModule } from '@angular/material/card';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -13,9 +11,12 @@ import { ISiteArchetype, TariffScheduleId } from '@app/core/models';
 import { SitesHelper } from '@app/core/sites';
 import {
   AlertBannerComponent,
+  ChartFrameComponent,
+  FigureComponent,
   HourChartComponent,
-  ScreenToolbarComponent,
-  SimulatedBadgeComponent
+  SourceChipComponent,
+  TermComponent,
+  UnderTheHoodComponent
 } from '@app/shared/components';
 import { backtestScheduleOptions, backtestScreenSettings } from './backtest.constants';
 import { BacktestHelper } from './backtest.helper';
@@ -28,18 +29,19 @@ import { ComponentBarsComponent, MonthCalendarComponent } from './components';
   imports: [
     AsyncPipe,
     MatButtonToggleModule,
-    MatCardModule,
-    MatExpansionModule,
     MatFormFieldModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatSelectModule,
     AlertBannerComponent,
+    ChartFrameComponent,
     ComponentBarsComponent,
+    FigureComponent,
     HourChartComponent,
     MonthCalendarComponent,
-    ScreenToolbarComponent,
-    SimulatedBadgeComponent
+    SourceChipComponent,
+    TermComponent,
+    UnderTheHoodComponent
   ],
   templateUrl: './backtest.component.html',
   styleUrl: './backtest.component.scss'
@@ -57,6 +59,7 @@ export class BacktestComponent {
   public readonly controls$: Observable<IBacktestControls> = this._controls$.asObservable();
   public readonly kilowattFormat = (value: number): string => `${Math.round(value).toLocaleString('en-US')} kW`;
   public readonly formatNumber = BacktestHelper.formatNumber;
+  public readonly formatMoney = BacktestHelper.formatMoney;
 
   public readonly state$: Observable<IBacktestViewState> = BacktestViewStateHelper.fromSources(
     this._backtestService.sources$,
@@ -92,6 +95,6 @@ export class BacktestComponent {
   }
 
   public barWidth(percentOfLife: number): number {
-    return Math.min(100, Math.max(2, percentOfLife * 10));
+    return Math.min(100, Math.max(1, percentOfLife * 100));
   }
 }

@@ -1,4 +1,4 @@
-import { IFilledRect, IRect } from '../chart.interfaces';
+import { IFilledRect, IRect } from '../../charts/chart.interfaces';
 
 export interface IClockLane {
   title: string;

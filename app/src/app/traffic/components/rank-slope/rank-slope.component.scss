@@ -4,10 +4,6 @@
 
 .dt-rank-slope__figure {
   margin: 0;
-  padding: 16px;
-  background: var(--dt-viz-surface);
-  border: 1px solid var(--dt-viz-border);
-  border-radius: 12px;
   color: var(--dt-viz-ink);
   font-family: inherit;
   min-width: 0;
@@ -43,7 +39,7 @@
 }
 
 .dt-rank-slope__swatch-accent {
-  stroke: var(--dt-viz-2);
+  stroke: var(--dt-carbon-high);
   stroke-width: 3;
   stroke-linecap: round;
 }
@@ -86,7 +82,7 @@
 }
 
 .dt-rank-slope__line--accent {
-  stroke: var(--dt-viz-2);
+  stroke: var(--dt-carbon-high);
   stroke-width: 3;
   opacity: 1;
 }
@@ -99,7 +95,7 @@
 }
 
 .dt-rank-slope__dot {
-  fill: var(--dt-viz-2);
+  fill: var(--dt-carbon-high);
   stroke: var(--dt-viz-surface);
   stroke-width: 2;
 }

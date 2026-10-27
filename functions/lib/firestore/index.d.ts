@@ -20,10 +20,23 @@ declare global {
       note?: string;
     }
 
+    type RunStatus = 'flipped' | 'pinned-skip' | 'rejected' | 'failed';
+
+    interface ILastRun {
+      at: Timestamp;
+      status: RunStatus;
+      snapshotId?: string;
+      targetDate?: string;
+      message: string;
+    }
+
     interface IPointer {
       currentSnapshotId: string;
       previousSnapshotId: string | null;
       updatedAt: Timestamp;
+      lastGoodSnapshotIds?: string[];
+      pinnedSnapshotId?: string;
+      lastRun?: ILastRun;
     }
 
     interface IMonthEntry {

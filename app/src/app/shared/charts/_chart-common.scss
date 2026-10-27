@@ -14,8 +14,8 @@
 
 .chart__title {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: var(--dt-text-17);
+  font-weight: 800;
   color: var(--dt-theme--primary);
 }
 
@@ -88,19 +88,19 @@
 
 .chart__axis-text {
   fill: var(--dt-theme--chart-ink-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
 .chart__day-text {
   fill: var(--dt-theme--primary);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .chart__band-text {
-  fill: var(--dt-theme--error-dark);
-  font-size: 11px;
+  fill: var(--dt-rush-ink);
+  font-size: 12px;
   font-weight: 600;
 }
 

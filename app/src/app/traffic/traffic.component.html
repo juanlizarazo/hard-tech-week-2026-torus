@@ -1,376 +1,382 @@
-<dt-screen-toolbar
-  title="Traffic Report"
-  subtitle="What the PACE grid looks like for the day we are planning, and where every number came from."
-></dt-screen-toolbar>
+<div class="dt-page">
+  <header class="dt-page__head">
+    <p class="dt-page__step">Step 1 of 3</p>
+    <h1 class="dt-question">When is the grid jammed tomorrow?</h1>
+    @if (viewModel$ | async; as viewModel) {
+      @if (viewModel.answer.length > 0) {
+        <p class="dt-answer">
+          @for (sentence of viewModel.answer; track sentence) {
+            {{ sentence }}
+          }
+        </p>
+      }
+    }
+  </header>
 
-@if (viewModel$ | async; as viewModel) {
-  @switch (viewModel.state.status) {
-    @case ('loading') {
-      <mat-card class="dt-card" appearance="outlined">
-        <mat-card-content class="dt-traffic__state-content">
-          <mat-spinner diameter="28"></mat-spinner>
-          <span>Reading 2 years of PACE history…</span>
-        </mat-card-content>
-      </mat-card>
-    }
-    @case ('error') {
-      <dt-alert-banner [message]="viewModel.state.errorMessage"></dt-alert-banner>
-    }
-    @case ('empty') {
-      <mat-card class="dt-card" appearance="outlined">
-        <mat-card-content class="dt-traffic__state-content">
-          <mat-icon aria-hidden="true">inventory_2</mat-icon>
-          <span>No grid snapshot is available yet. Please check back shortly.</span>
-        </mat-card-content>
-      </mat-card>
-    }
-    @case ('ready') {
-      @if (viewModel.state.manifest; as manifest) {
-        @if (viewModel.state.report; as report) {
-          @if (viewModel.charts; as charts) {
-            <mat-card class="dt-card dt-traffic__section dt-traffic__insight" appearance="outlined">
-              <mat-card-content>
-                <p class="dt-traffic__label">Traffic report, {{ report.targetDateLabel }}</p>
-                <h2 class="dt-traffic__headline">{{ report.insights.headline }}</h2>
-                @for (sentence of report.insights.sentences; track sentence) {
-                  <p class="dt-traffic__sentence">{{ sentence }}</p>
-                }
-              </mat-card-content>
-            </mat-card>
-
-            <mat-card class="dt-card dt-traffic__section" appearance="outlined">
-              <mat-card-content>
-                <h2 class="dt-traffic__heading">Three clocks</h2>
-                <p class="dt-traffic__hint">
-                  Grid stress, price and carbon on the same hours. The shaded band is where they coincide.
+  @if (viewModel$ | async; as viewModel) {
+    @switch (viewModel.state.status) {
+      @case ('loading') {
+        <div class="dt-state" role="status">
+          <mat-spinner diameter="24"></mat-spinner>
+          <span>Reading two years of PACE grid data…</span>
+        </div>
+      }
+      @case ('error') {
+        <dt-alert-banner [message]="viewModel.state.errorMessage"></dt-alert-banner>
+      }
+      @case ('empty') {
+        <div class="dt-state">
+          <mat-icon aria-hidden="true">schedule</mat-icon>
+          <span>Grid data isn't loaded yet. Refresh in a minute.</span>
+        </div>
+      }
+      @case ('ready') {
+        @if (viewModel.state.manifest; as manifest) {
+          @if (viewModel.state.report; as report) {
+            @if (viewModel.charts; as charts) {
+              <section class="dt-section" aria-labelledby="traffic-clocks-title">
+                <h2 class="dt-section__title" id="traffic-clocks-title">Three clocks for {{ report.targetDateLabel }}</h2>
+                <p class="dt-section__lede">
+                  Grid stress, price and carbon for <dt-term key="PACE">PACE</dt-term>, hour by hour. Orange stripes mark the
+                  <dt-term key="RUSH_HOUR">rush hour</dt-term> on every chart.
                 </p>
 
-                <h3 class="dt-traffic__subheading">1. Grid stress: PACE load, net load and its own forecast</h3>
-                <dt-hour-chart
-                  title="PACE load, three days"
-                  yLabel="MW"
-                  [series]="charts.load.series"
-                  [bands]="charts.load.bands"
-                  [highlight]="charts.load.highlight"
-                  [xLabels]="charts.load.xLabels"
-                  [dividerIndices]="charts.load.dividerIndices"
-                  [estimateFromIndex]="charts.load.estimateFromIndex"
-                  [valueFormat]="megawattFormat"
-                ></dt-hour-chart>
-                <p class="dt-traffic__hint">
-                  The two earlier days are actuals. On {{ report.targetDateLabel }} the dashed line is PACE's forecast and
-                  net load is our estimate (forecast minus the trailing 7-day average of wind and solar for each hour).
-                  Where a weather forecast is in the snapshot, the second dashed line and shaded band are our own ridge
-                  forecast and its P10–P90 range for that day.
-                </p>
+                <dt-chart-frame title="Grid stress" [notice]="viewModel.notices?.load ?? ''">
+                  <div frame-controls class="dt-toggle-row">
+                    <button type="button" class="dt-chip-toggle" [attr.aria-pressed]="options.showAllDays" (click)="onToggle('showAllDays')">
+                      Show last 3 days
+                    </button>
+                    @if (viewModel.hasOurForecast) {
+                      <button type="button" class="dt-chip-toggle" [attr.aria-pressed]="options.showOurForecast" (click)="onToggle('showOurForecast')">
+                        Show our forecast
+                      </button>
+                    }
+                  </div>
+                  <dt-hour-chart
+                    title="PACE load and net load"
+                    yLabel="MW"
+                    [series]="charts.load.series"
+                    [bands]="charts.load.bands"
+                    [highlight]="charts.load.highlight"
+                    [xLabels]="charts.load.xLabels"
+                    [dividerIndices]="charts.load.dividerIndices"
+                    [estimateFromIndex]="charts.load.estimateFromIndex"
+                    [valueFormat]="megawattFormat"
+                  ></dt-hour-chart>
+                  <div how-to-read>
+                    <p class="dt-hint">Across: hours, local Utah time. Up: megawatts of demand across the whole PACE footprint.</p>
+                    <ul class="dt-list">
+                      <li>Solid dark line: actual load on the days before. Solid green: actual net load, which is load minus wind and solar.</li>
+                      <li>Dashed grey: PACE's own day-ahead forecast. Dotted green: our net load estimate for tomorrow, PACE's forecast minus the last week's average wind and solar for that hour.</li>
+                      <li>Purple band: the range our own forecast expects actual load to land in 8 times out of 10 (P10–P90). Turn on "Show our forecast" to see its middle line.</li>
+                      <li>Orange stripes: PACE's rush hour, the busiest four hours of its forecast. The station tries to keep the site off the grid here.</li>
+                      <li>Faded lines after the day divider are forecasts, not measurements.</li>
+                    </ul>
+                    <p class="dt-hint">What good looks like: a clear evening hump inside the stripes, and a narrow purple band around it.</p>
+                  </div>
+                </dt-chart-frame>
 
-                <h3 class="dt-traffic__subheading">2. Price: EDAM day-ahead</h3>
-                <dt-hour-chart
-                  title="EDAM day-ahead price"
-                  yLabel="$/MWh"
-                  [series]="charts.price.series"
-                  [highlight]="charts.price.highlight"
-                  [xLabels]="charts.price.xLabels"
-                  [valueFormat]="priceFormat"
-                ></dt-hour-chart>
-                @if (!report.hasPrices) {
-                  <p class="dt-traffic__hint">No EDAM price is in the snapshot for this day.</p>
-                }
-
-                <h3 class="dt-traffic__subheading">3. Carbon: marginal emissions with its interval</h3>
-                <dt-hour-chart
-                  title="Marginal CO2 by hour"
-                  yLabel="lb CO2/MWh"
-                  [series]="charts.carbon.series"
-                  [bands]="charts.carbon.bands"
-                  [highlight]="charts.carbon.highlight"
-                  [xLabels]="charts.carbon.xLabels"
-                  [valueFormat]="carbonFormat"
-                ></dt-hour-chart>
-                <p class="dt-traffic__hint">
-                  {{ report.season === 'summer' ? 'Summer' : 'Winter' }} hours of the day. Based on PACE fossil generation, the next MWh emits
-                  @if (report.fossilRange; as fossilRange) {
-                    {{ fossilRange.minLbPerMwh | number: '1.0-0' }}–{{ fossilRange.maxLbPerMwh | number: '1.0-0' }} lb;
+                <dt-chart-frame title="Grid price" [notice]="viewModel.notices?.price ?? ''">
+                  @if (report.hasPrices) {
+                    <dt-hour-chart
+                      title="Day-ahead price"
+                      yLabel="$/MWh"
+                      [series]="charts.price.series"
+                      [highlight]="charts.price.highlight"
+                      [xLabels]="charts.price.xLabels"
+                      [valueFormat]="priceFormat"
+                    ></dt-hour-chart>
+                  } @else {
+                    <p class="dt-state">Tomorrow's wholesale prices are not posted yet. They usually arrive around 2 p.m. Mountain time.</p>
                   }
-                  @if (report.demandRange; as demandRange) {
-                    measured against demand it averages {{ demandRange.meanLbPerMwh | number: '1.0-0' }} lb and swings hour
-                    to hour with a wide interval, because imports, exports and wind or solar absorb part of each change in
-                    demand. Treat the demand line as a cross-check and the import band as the uncertainty.
-                  }
-                </p>
-              </mat-card-content>
-            </mat-card>
+                  <div how-to-read>
+                    <p class="dt-hint">Across: hours of the planned day. Up: dollars per megawatt-hour.</p>
+                    <ul class="dt-list">
+                      <li>Blue line: the PACE day-ahead wholesale price (<dt-term key="LMP">LMP</dt-term>) from the <dt-term key="EDAM">EDAM</dt-term> market, set the day before.</li>
+                      <li>Orange stripes: PACE's rush hour.</li>
+                      <li>Utah businesses do not pay this price directly. It shows when power is costly for the grid as a whole, which is a different clock from the retail bill.</li>
+                    </ul>
+                    <p class="dt-hint">What good looks like: the station charges in the low stretches and avoids drawing in the high ones.</p>
+                  </div>
+                </dt-chart-frame>
 
-            <div class="dt-traffic__tiles">
-              <mat-card class="dt-card" appearance="outlined">
-                <mat-card-content>
-                  <p class="dt-traffic__label">Typical miss (MAPE)</p>
-                  <p class="dt-traffic__value">{{ report.score.mapePercent | number: '1.1-1' }}%</p>
-                  <p class="dt-traffic__hint">PACE day-ahead forecast vs actual load, every hour</p>
-                </mat-card-content>
-              </mat-card>
-              <mat-card class="dt-card" appearance="outlined">
-                <mat-card-content>
-                  <p class="dt-traffic__label">Low at the daily peak</p>
-                  <p class="dt-traffic__value">{{ report.score.peakUnderForecastRate | number: '1.0-0' }}% of days</p>
-                  <p class="dt-traffic__hint">Forecast below actual at the peak hour. On average PACE is {{ report.peakMissLabel }} the actual peak</p>
-                </mat-card-content>
-              </mat-card>
-              <mat-card class="dt-card" appearance="outlined">
-                <mat-card-content>
-                  <p class="dt-traffic__label">Bias</p>
-                  <p class="dt-traffic__value">{{ report.score.biasPercent | number: '1.1-1' }}%</p>
-                  <p class="dt-traffic__hint">Negative means PACE forecasts low on average</p>
-                </mat-card-content>
-              </mat-card>
-              <mat-card class="dt-card" appearance="outlined">
-                <mat-card-content>
-                  <p class="dt-traffic__label">Scored</p>
-                  <p class="dt-traffic__value">{{ report.score.hoursScored | number: '1.0-0' }} hours</p>
-                  <p class="dt-traffic__hint">{{ report.score.startDate }} to {{ report.score.endDate }}, {{ report.score.daysScored }} full days</p>
-                </mat-card-content>
-              </mat-card>
-            </div>
+                <dt-chart-frame title="Carbon" [notice]="viewModel.notices?.carbon ?? ''">
+                  <div frame-controls class="dt-toggle-row">
+                    <button type="button" class="dt-chip-toggle" [attr.aria-pressed]="options.showUncertainty" (click)="onToggle('showUncertainty')">
+                      Show uncertainty
+                    </button>
+                  </div>
+                  <dt-hour-chart
+                    title="Marginal CO2 by hour"
+                    yLabel="lb CO2/MWh"
+                    [series]="charts.carbon.series"
+                    [bands]="charts.carbon.bands"
+                    [highlight]="charts.carbon.highlight"
+                    [xLabels]="charts.carbon.xLabels"
+                    [valueFormat]="carbonFormat"
+                  ></dt-hour-chart>
+                  <div how-to-read>
+                    <p class="dt-hint">
+                      Across: hours of the day for the {{ report.season }} season. Up: pounds of CO2 from one more megawatt-hour of demand.
+                    </p>
+                    <ul class="dt-list">
+                      <li>Brown line: <dt-term key="MARGINAL_CO2">marginal CO2</dt-term> measured against PACE fossil generation. This is the number the plan uses.</li>
+                      <li>
+                        With "Show uncertainty" on: the brown band is its 95% interval; the dashed grey line is the same estimate measured against demand, with its own grey band.
+                      </li>
+                      <li>
+                        Blue band: the <dt-term key="IMPORT_BAND">import band</dt-term>, the gap between the two estimates. When imports, wind or solar absorb part of a change in demand, the demand estimate drops.
+                        @if (report.fossilRange; as fossilRange) {
+                          Against fossil generation the next MWh emits {{ fossilRange.minLbPerMwh | number: '1.0-0' }}–{{ fossilRange.maxLbPerMwh | number: '1.0-0' }} lb;
+                        }
+                        @if (report.demandRange; as demandRange) {
+                          against demand it averages {{ demandRange.meanLbPerMwh | number: '1.0-0' }} lb.
+                        }
+                      </li>
+                      <li>Orange stripes: PACE's rush hour.</li>
+                    </ul>
+                    <p class="dt-hint">What good looks like: read the band, not just the line. Hours whose bands overlap are not really different.</p>
+                  </div>
+                </dt-chart-frame>
+              </section>
 
-            @if (forecastViewModel$ | async; as forecastState) {
-              <mat-card class="dt-card dt-traffic__section" appearance="outlined">
-                <mat-card-content>
-                  <h2 class="dt-traffic__heading">Can we beat PACE's own forecast?</h2>
+              @if (forecastViewModel$ | async; as forecastState) {
+                <section class="dt-section" aria-labelledby="traffic-forecast-title">
+                  <h2 class="dt-section__title" id="traffic-forecast-title">Can we beat PACE's own forecast?</h2>
                   @switch (forecastState.status) {
                     @case ('loading') {
-                      <div class="dt-traffic__state-content">
+                      <div class="dt-state" role="status">
                         <mat-spinner diameter="20"></mat-spinner>
-                        <span>Fitting the ridge forecast…</span>
+                        <span>Fitting our forecast to two years of weather and load…</span>
                       </div>
                     }
                     @case ('error') {
                       <dt-alert-banner [message]="forecastState.errorMessage"></dt-alert-banner>
                     }
                     @case ('empty') {
-                      <p class="dt-traffic__hint">This snapshot has no weather forecasts yet, so we have no forecast of our own to compare. Run the weather ingest to add one.</p>
+                      <p class="dt-section__lede">
+                        Weather forecasts are not in this snapshot yet, so there is no forecast of our own to compare. PACE's own forecast misses by
+                        {{ report.score.mapePercent | number: '1.1-1' }}% in a typical hour.
+                      </p>
                     }
                     @case ('ready') {
                       @if (forecastState.forecast; as forecast) {
-                        <p class="dt-traffic__sentence">{{ forecastVerdict(forecast.comparison) }}</p>
-                        <div class="dt-traffic__table-wrap">
-                          <table class="dt-traffic__table dt-traffic__table--forecast">
-                            <thead>
-                              <tr>
-                                <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Forecast</th>
-                                <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">MAPE</th>
-                                <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Bias</th>
-                                <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Low at peak</th>
-                                <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Source</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              @for (row of forecast.comparison; track row.id) {
-                                <tr>
-                                  <td class="dt-traffic__cell">{{ row.label }}</td>
-                                  <td class="dt-traffic__cell">{{ row.score.mapePercent | number: '1.1-1' }}%</td>
-                                  <td class="dt-traffic__cell">{{ row.score.biasPercent | number: '1.1-1' }}%</td>
-                                  <td class="dt-traffic__cell">{{ row.score.peakUnderForecastRate | number: '1.0-0' }}%</td>
-                                  <td class="dt-traffic__cell">
-                                    @if (row.provenance.url) {
-                                      <a class="dt-traffic__chip" [href]="row.provenance.url" target="_blank" rel="noopener noreferrer">{{ row.provenance.kind }}</a>
-                                    } @else {
-                                      <span class="dt-traffic__chip">{{ row.provenance.kind }}</span>
-                                    }
-                                  </td>
-                                </tr>
-                              }
-                            </tbody>
-                          </table>
+                        <p class="dt-section__lede">{{ forecastVerdict(forecast.comparison) }}</p>
+                        <div class="dt-figures dt-figures--secondary">
+                          @for (row of forecast.comparison.slice(0, 2); track row.id) {
+                            <dt-figure size="small" [value]="(row.score.mapePercent | number: '1.1-1') + '%'" [label]="row.label + ', typical miss '">
+                              <dt-term figure-term key="MAPE">(MAPE)</dt-term>
+                            </dt-figure>
+                          }
+                          <dt-figure size="small" [value]="(forecast.coveragePercent | number: '1.0-0') + '%'" label="Hours inside our ">
+                            <dt-term figure-term key="P10_P90">P10–P90 band</dt-term>
+                          </dt-figure>
+                          <dt-figure
+                            size="small"
+                            [value]="(report.score.peakUnderForecastRate | number: '1.0-0') + '%'"
+                            label="Days PACE forecast its own peak too low"
+                          ></dt-figure>
                         </div>
-                        <p class="dt-traffic__hint">
-                          Actual demand fell inside our P10–P90 band on {{ forecast.coveragePercent | number: '1.0-0' }}% of scored hours.
-                          Scored {{ forecast.hoursScored | number: '1.0-0' }} common hours over the phase 03 window ({{ forecast.comparison[0].score.startDate }} to {{ forecast.comparison[0].score.endDate }}).
-                          Weather pulled {{ forecast.weatherPulledAt | date: 'MMM d, y' }}.
-                        </p>
-                        <mat-expansion-panel class="dt-traffic__forecast-method">
-                          <mat-expansion-panel-header>
-                            <mat-panel-title>How our forecast is made</mat-panel-title>
-                          </mat-expansion-panel-header>
-                          <ol class="dt-traffic__list">
+
+                        <dt-under-the-hood summary="How the forecasts were scored" [description]="(forecast.hoursScored | number: '1.0-0') + ' common hours'">
+                          <div class="dt-table-wrap">
+                            <table class="dt-table">
+                              <thead>
+                                <tr>
+                                  <th class="dt-table__cell dt-table__cell--head" scope="col">Forecast</th>
+                                  <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">MAPE</th>
+                                  <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Bias</th>
+                                  <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Low at peak</th>
+                                  <th class="dt-table__cell dt-table__cell--head" scope="col">Source</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                @for (row of forecast.comparison; track row.id) {
+                                  <tr>
+                                    <td class="dt-table__cell">{{ row.label }}</td>
+                                    <td class="dt-table__cell dt-table__cell--num">{{ row.score.mapePercent | number: '1.1-1' }}%</td>
+                                    <td class="dt-table__cell dt-table__cell--num">{{ row.score.biasPercent | number: '1.1-1' }}%</td>
+                                    <td class="dt-table__cell dt-table__cell--num">{{ row.score.peakUnderForecastRate | number: '1.0-0' }}%</td>
+                                    <td class="dt-table__cell">
+                                      <dt-source-chip [label]="row.provenance.label" [kind]="row.provenance.kind" [url]="row.provenance.url" [note]="row.provenance.note ?? ''"></dt-source-chip>
+                                    </td>
+                                  </tr>
+                                }
+                              </tbody>
+                            </table>
+                          </div>
+                          <p class="dt-hint">
+                            Scored over {{ forecast.comparison[0].score.startDate }} to {{ forecast.comparison[0].score.endDate }}. Actual demand fell
+                            inside our P10–P90 band on {{ forecast.coveragePercent | number: '1.0-0' }}% of scored hours.
+                            <dt-term key="BIAS">Bias</dt-term> below zero means a forecast runs low. Weather pulled {{ forecast.weatherPulledAt | date: 'MMM d, y' }}.
+                          </p>
+                          <h3 class="dt-subheading">PACE's own forecast, every hour</h3>
+                          <div class="dt-figures dt-figures--secondary">
+                            <dt-figure size="small" [value]="(report.score.mapePercent | number: '1.1-1') + '%'" label="Typical miss"></dt-figure>
+                            <dt-figure size="small" [value]="(report.score.biasPercent | number: '1.1-1') + '%'" label="Bias"></dt-figure>
+                            <dt-figure size="small" [value]="report.peakMissLabel" label="Average miss at the daily peak"></dt-figure>
+                            <dt-figure
+                              size="small"
+                              [value]="(report.score.hoursScored | number: '1.0-0') ?? ''"
+                              label="Hours scored"
+                              [detail]="report.score.startDate + ' to ' + report.score.endDate"
+                            ></dt-figure>
+                          </div>
+                          <h3 class="dt-subheading">How our forecast is made</h3>
+                          <ol class="dt-list">
                             @for (step of forecastMethodSteps; track step) {
                               <li>{{ step }}</li>
                             }
                           </ol>
-                          <h3 class="dt-traffic__subheading">Limitations</h3>
-                          <ul class="dt-traffic__list">
+                          <h3 class="dt-subheading">Limits of our forecast</h3>
+                          <ul class="dt-list">
                             @for (limitation of forecastLimitations; track limitation) {
                               <li>{{ limitation }}</li>
                             }
                           </ul>
-                          <p class="dt-traffic__hint">{{ forecast.featureCount }} input features, &lambda; = {{ forecast.lambda }}.</p>
-                          <p class="dt-traffic__hint">
-                            <a class="dt-traffic__chip" [href]="weatherWeightsProvenance.url" target="_blank" rel="noopener noreferrer">{{ weatherWeightsProvenance.kind }}</a>
-                            {{ weatherWeightsProvenance.note }}
-                          </p>
-                        </mat-expansion-panel>
+                          <p class="dt-hint">{{ forecast.featureCount }} input features, ridge penalty &lambda; = {{ forecast.lambda }}.</p>
+                          <div class="traffic__source-line">
+                            <dt-source-chip [label]="weatherWeightsProvenance.label" [kind]="weatherWeightsProvenance.kind" [url]="weatherWeightsProvenance.url"></dt-source-chip>
+                            <span class="dt-hint">{{ weatherWeightsProvenance.note }}</span>
+                          </div>
+                        </dt-under-the-hood>
                       }
                     }
                   }
-                </mat-card-content>
-              </mat-card>
-            }
+                </section>
+              }
 
-            <mat-card class="dt-card dt-traffic__section" appearance="outlined">
-              <mat-card-content>
-                <h2 class="dt-traffic__heading">Marginal vs average: the cleanest hours are not the same</h2>
-                <p class="dt-traffic__hint">
-                  Rank 1 is the cleanest hour. Average emissions divide all fossil emissions by all generation;
-                  marginal emissions are what the next MWh adds.
+              <section class="dt-section" aria-labelledby="traffic-ranking-title">
+                <h2 class="dt-section__title" id="traffic-ranking-title">The cleanest hour depends on how you count</h2>
+                <p class="dt-section__lede">
+                  <dt-term key="AVERAGE_CO2">Average CO2</dt-term> divides all fossil emissions by all generation.
+                  Marginal CO2 is what the next MWh adds. They rank the same 24 hours very differently.
                 </p>
-                <dt-rank-slope [rows]="report.ranking"></dt-rank-slope>
-              </mat-card-content>
-            </mat-card>
+                <dt-chart-frame title="Hour rank: average vs marginal CO2" [notice]="viewModel.notices?.ranking ?? ''">
+                  <div class="traffic__rank">
+                    <dt-rank-slope [rows]="report.ranking"></dt-rank-slope>
+                  </div>
+                  <div how-to-read>
+                    <p class="dt-hint">Each line is one hour of the day. Rank 1 is the cleanest hour, rank 24 the dirtiest.</p>
+                    <ul class="dt-list">
+                      <li>Left column: the hour's rank by average CO2. Right column: its rank by marginal CO2.</li>
+                      <li>Brown lines: the three hours whose rank changes most. Grey lines: every other hour.</li>
+                      <li>A steep line means the two measures disagree about that hour.</li>
+                    </ul>
+                    <p class="dt-hint">Why it matters: a battery that charges in the "cleanest" average hour can still be adding CO2 at the margin.</p>
+                  </div>
+                </dt-chart-frame>
+              </section>
 
-            <mat-card class="dt-card dt-traffic__section" appearance="outlined">
-              <mat-card-content>
-                <h2 class="dt-traffic__heading">How the carbon number is made</h2>
-                <ol class="dt-traffic__list">
-                  @for (step of methodSteps; track step) {
-                    <li>{{ step }}</li>
-                  }
-                </ol>
-                <div class="dt-traffic__table-wrap">
-                  <table class="dt-traffic__table">
-                    <thead>
-                      <tr>
-                        <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Fuel</th>
-                        <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Factor (assumption)</th>
-                        <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Source</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @for (factor of factors; track factor.fuelKey) {
+              <dt-under-the-hood summary="Under the hood" [description]="'Method, sources and data audit for snapshot ' + manifest.id">
+                <div class="traffic__hood-block">
+                  <h3 class="dt-subheading">How the carbon number is made</h3>
+                  <ol class="dt-list">
+                    @for (step of methodSteps; track step) {
+                      <li>{{ step }}</li>
+                    }
+                  </ol>
+                  <div class="dt-table-wrap">
+                    <table class="dt-table">
+                      <thead>
                         <tr>
-                          <td class="dt-traffic__cell">{{ factor.label }} ({{ factor.fuelKey }})</td>
-                          <td class="dt-traffic__cell">{{ factor.lbPerMwh | number: '1.0-0' }} lb/MWh</td>
-                          <td class="dt-traffic__cell">
-                            <a class="dt-traffic__chip" [href]="factor.provenance.url" target="_blank" rel="noopener noreferrer">
-                              {{ factor.provenance.kind }}
-                            </a>
-                          </td>
+                          <th class="dt-table__cell dt-table__cell--head" scope="col">Fuel</th>
+                          <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Factor (assumption)</th>
+                          <th class="dt-table__cell dt-table__cell--head" scope="col">Source</th>
                         </tr>
-                      }
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        @for (factor of factors; track factor.fuelKey) {
+                          <tr>
+                            <td class="dt-table__cell">{{ factor.label }}</td>
+                            <td class="dt-table__cell dt-table__cell--num">{{ factor.lbPerMwh | number: '1.0-0' }} lb/MWh</td>
+                            <td class="dt-table__cell">
+                              <dt-source-chip [label]="factor.provenance.label" [kind]="factor.provenance.kind" [url]="factor.provenance.url"></dt-source-chip>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                  <h3 class="dt-subheading">Limits of the carbon number</h3>
+                  <ul class="dt-list">
+                    @for (limitation of limitations; track limitation) {
+                      <li>{{ limitation }}</li>
+                    }
+                  </ul>
                 </div>
-                <h3 class="dt-traffic__subheading">Limitations</h3>
-                <ul class="dt-traffic__list">
-                  @for (limitation of limitations; track limitation) {
-                    <li>{{ limitation }}</li>
-                  }
-                </ul>
-              </mat-card-content>
-            </mat-card>
 
-            <mat-expansion-panel class="dt-traffic__audit">
-              <mat-expansion-panel-header>
-                <mat-panel-title>Sources and data audit</mat-panel-title>
-                <mat-panel-description>Snapshot {{ manifest.id }}</mat-panel-description>
-              </mat-expansion-panel-header>
-              <div class="dt-traffic__grid">
-                <mat-card class="dt-card" appearance="outlined">
-                  <mat-card-content>
-                    <p class="dt-traffic__label">Target date</p>
-                    <p class="dt-traffic__value">{{ manifest.targetDate }}</p>
-                    <p class="dt-traffic__hint">Timezone {{ manifest.timezone }}</p>
-                  </mat-card-content>
-                </mat-card>
-                <mat-card class="dt-card" appearance="outlined">
-                  <mat-card-content>
-                    <p class="dt-traffic__label">Grid history</p>
-                    <p class="dt-traffic__value">{{ manifest.gridRange.start }} to {{ manifest.gridRange.end }}</p>
-                    <p class="dt-traffic__hint">{{ manifest.gridMonths.length }} monthly files</p>
-                  </mat-card-content>
-                </mat-card>
-                <mat-card class="dt-card" appearance="outlined">
-                  <mat-card-content>
-                    <p class="dt-traffic__label">Price history</p>
-                    <p class="dt-traffic__value">{{ manifest.priceRange.start }} to {{ manifest.priceRange.end }}</p>
-                    <p class="dt-traffic__hint">{{ manifest.priceMonths.length }} monthly files</p>
-                  </mat-card-content>
-                </mat-card>
-                <mat-card class="dt-card" appearance="outlined">
-                  <mat-card-content>
-                    <p class="dt-traffic__label">Day-ahead forecast source</p>
-                    <p class="dt-traffic__value">{{ manifest.dayAheadForecastSource }}</p>
-                    <p class="dt-traffic__hint">{{ manifest.filteredRows }} rows filtered out</p>
-                  </mat-card-content>
-                </mat-card>
-              </div>
-
-              <div>
-                <h2 class="dt-traffic__heading">Provenance</h2>
-                <div class="dt-traffic__table-wrap">
-                  <table class="dt-traffic__table">
-                    <thead>
-                      <tr>
-                        <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Source</th>
-                        <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Kind</th>
-                        <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Series</th>
-                        <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Link</th>
-                        <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Note</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @for (source of manifest.sources; track source.id) {
-                        <tr>
-                          <td class="dt-traffic__cell">{{ source.label }}</td>
-                          <td class="dt-traffic__cell">{{ source.kind }}</td>
-                          <td class="dt-traffic__cell">{{ source.seriesId || '—' }}</td>
-                          <td class="dt-traffic__cell">
-                            @if (source.url) {
-                              <a [href]="source.url" target="_blank" rel="noopener noreferrer">Open</a>
-                            } @else {
-                              —
-                            }
-                          </td>
-                          <td class="dt-traffic__cell">{{ source.note || '—' }}</td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
+                <div class="traffic__hood-block">
+                  <h3 class="dt-subheading">This snapshot</h3>
+                  <div class="dt-figures dt-figures--secondary">
+                    <dt-figure size="small" [value]="manifest.targetDate" label="Planned day" [detail]="manifest.timezone"></dt-figure>
+                    <dt-figure size="small" [value]="manifest.gridMonths.length + ' months'" label="Grid history" [detail]="manifest.gridRange.start + ' to ' + manifest.gridRange.end"></dt-figure>
+                    <dt-figure size="small" [value]="manifest.priceMonths.length + ' months'" label="Price history" [detail]="manifest.priceRange.start + ' to ' + manifest.priceRange.end"></dt-figure>
+                    <dt-figure size="small" [value]="manifest.dayAheadForecastSource" label="PACE forecast source" [detail]="manifest.filteredRows + ' rows filtered out'"></dt-figure>
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <h2 class="dt-traffic__heading">Row counts by month</h2>
-                <div class="dt-traffic__table-wrap">
-                  <table class="dt-traffic__table">
-                    <thead>
-                      <tr>
-                        <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Series</th>
-                        <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Month</th>
-                        <th class="dt-traffic__cell dt-traffic__cell--head" scope="col">Rows</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @for (entry of manifest.gridMonths; track entry.month) {
+                <div class="traffic__hood-block">
+                  <h3 class="dt-subheading">Sources</h3>
+                  <div class="dt-table-wrap">
+                    <table class="dt-table">
+                      <thead>
                         <tr>
-                          <td class="dt-traffic__cell">Grid</td>
-                          <td class="dt-traffic__cell">{{ entry.month }}</td>
-                          <td class="dt-traffic__cell">{{ entry.rowCount }}</td>
+                          <th class="dt-table__cell dt-table__cell--head" scope="col">Source</th>
+                          <th class="dt-table__cell dt-table__cell--head" scope="col">Series</th>
+                          <th class="dt-table__cell dt-table__cell--head" scope="col">Note</th>
                         </tr>
-                      }
-                      @for (entry of manifest.priceMonths; track entry.month) {
-                        <tr>
-                          <td class="dt-traffic__cell">Price</td>
-                          <td class="dt-traffic__cell">{{ entry.month }}</td>
-                          <td class="dt-traffic__cell">{{ entry.rowCount }}</td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        @for (source of manifest.sources; track source.id) {
+                          <tr>
+                            <td class="dt-table__cell">
+                              <dt-source-chip [label]="source.label" [kind]="source.kind" [url]="source.url"></dt-source-chip>
+                            </td>
+                            <td class="dt-table__cell">{{ source.seriesId || '—' }}</td>
+                            <td class="dt-table__cell">{{ source.note || '—' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            </mat-expansion-panel>
+
+                <div class="traffic__hood-block">
+                  <h3 class="dt-subheading">Rows by month</h3>
+                  <div class="dt-table-wrap traffic__rows">
+                    <table class="dt-table">
+                      <thead>
+                        <tr>
+                          <th class="dt-table__cell dt-table__cell--head" scope="col">Series</th>
+                          <th class="dt-table__cell dt-table__cell--head" scope="col">Month</th>
+                          <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Rows</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (entry of manifest.gridMonths; track entry.month) {
+                          <tr>
+                            <td class="dt-table__cell">Grid</td>
+                            <td class="dt-table__cell">{{ entry.month }}</td>
+                            <td class="dt-table__cell dt-table__cell--num">{{ entry.rowCount | number: '1.0-0' }}</td>
+                          </tr>
+                        }
+                        @for (entry of manifest.priceMonths; track entry.month) {
+                          <tr>
+                            <td class="dt-table__cell">Price</td>
+                            <td class="dt-table__cell">{{ entry.month }}</td>
+                            <td class="dt-table__cell dt-table__cell--num">{{ entry.rowCount | number: '1.0-0' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </dt-under-the-hood>
+            }
           }
         }
       }
     }
   }
-}
+</div>

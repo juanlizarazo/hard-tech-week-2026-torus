@@ -1,8 +1,7 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { IPlanInterval, IRushHourWindow, TariffScheduleId } from '@app/core/models';
-import { SimulatedBadgeComponent } from '@app/shared/components';
-import { ChartHelper } from '../chart.helper';
-import { chartColors, chartSettings } from '../chart.constants';
+import { ChartHelper } from '../../charts/chart.helper';
+import { chartColors, chartSettings } from '../../charts/chart.constants';
 import {
   IChartTooltip,
   IFilledRect,
@@ -10,17 +9,16 @@ import {
   ILinearScale,
   ITooltipRow,
   IWindowRange
-} from '../chart.interfaces';
-import { ResponsiveChartDirective } from '../responsive-chart.directive';
-import { IClockLane, IHeatLaneView, IHeatLegend, ILabeledRect } from './clock-bands.interfaces';
+} from '../../charts/chart.interfaces';
+import { ResponsiveChartDirective } from '../../charts/responsive-chart.directive';
+import { IClockLane, IHeatLaneView, IHeatLegend, ILabeledRect } from './three-clocks.interfaces';
 
 @Component({
-  selector: 'dt-clock-bands',
-  imports: [SimulatedBadgeComponent],
-  templateUrl: './clock-bands.component.html',
-  styleUrl: './clock-bands.component.scss'
+  selector: 'dt-three-clocks',
+  templateUrl: './three-clocks.component.html',
+  styleUrl: './three-clocks.component.scss'
 })
-export class ClockBandsComponent extends ResponsiveChartDirective implements OnChanges {
+export class ThreeClocksComponent extends ResponsiveChartDirective implements OnChanges {
   private static _instanceCount = 0;
 
   @Input({ required: true }) public intervals: IPlanInterval[] = [];
@@ -32,7 +30,7 @@ export class ClockBandsComponent extends ResponsiveChartDirective implements OnC
   @Input() public mefIsPlaceholder = false;
 
   public readonly colors = chartColors;
-  public readonly idPrefix = `dt-clock-${ClockBandsComponent._instanceCount++}`;
+  public readonly idPrefix = `dt-three-clocks-${ThreeClocksComponent._instanceCount++}`;
   public readonly stripHeight = 24;
   public readonly legendWidth = 64;
   public viewHeight = 300;
@@ -100,7 +98,7 @@ export class ClockBandsComponent extends ResponsiveChartDirective implements OnC
       {
         label: interval.isOnPeak ? 'On-peak energy' : 'Off-peak energy',
         value: `$${interval.energyPricePerKwh.toFixed(4)}/kWh`,
-        swatch: interval.isOnPeak ? chartColors.RUSH : ''
+        swatch: interval.isOnPeak ? chartColors.BILL : ''
       },
       {
         label: 'EDAM day-ahead',
@@ -130,7 +128,7 @@ export class ClockBandsComponent extends ResponsiveChartDirective implements OnC
   protected render(): void {
     const intervals = this.intervals ?? [];
     const narrow = this.isNarrow;
-    this.plotLeft = narrow ? 8 : 136;
+    this.plotLeft = narrow ? 8 : 112;
     this.plotRight = this.viewWidth - 12;
     this.stripsTop = 28 + (narrow ? 18 : 0);
     this.isAllHoursDemand = this.scheduleId === 'schedule-6';
@@ -143,12 +141,12 @@ export class ClockBandsComponent extends ResponsiveChartDirective implements OnC
     this.axisY = lanes[2].captionY + (narrow ? 34 : 18);
     this.viewHeight = this.axisY + 34;
 
-    const billNote = this.isAllHoursDemand ? '' : 'On-peak demand + energy window';
-    lanes[0].title = 'Bill clock';
-    lanes[0].caption = [billNote, this.billCaption].filter((part) => !!part).join(' · ');
-    lanes[1].title = 'Price clock';
-    lanes[1].caption = 'PACE EDAM day-ahead price (CAISO OASIS)';
-    lanes[2].title = 'Carbon clock';
+    const billNote = this.isAllHoursDemand ? '' : narrow ? 'Dark: on-peak hours' : 'Dark blocks: on-peak hours, when demand is billed';
+    lanes[0].title = 'Bill';
+    lanes[0].caption = narrow ? billNote || this.billCaption : [billNote, this.billCaption].filter((part) => !!part).join('. ');
+    lanes[1].title = 'Grid price';
+    lanes[1].caption = narrow ? 'Darker is pricier' : 'Day-ahead wholesale price in PACE (EDAM), darker is pricier';
+    lanes[2].title = 'Carbon';
     lanes[2].caption = this.carbonCaption;
     this.billLane = lanes[0];
     this.placeholderX = narrow ? lanes[2].titleX + 86 : lanes[2].titleX;
@@ -173,7 +171,7 @@ export class ClockBandsComponent extends ResponsiveChartDirective implements OnC
       startUtcs,
       this.rushHourWindows ?? [],
       xScale,
-      narrow ? 'Rush hour' : 'PACE rush hour · Wattsmart window'
+      'Rush hour'
     );
     this.billSegments = this._buildBillSegments(intervals, xScale, lanes[0]);
 
@@ -294,7 +292,7 @@ export class ClockBandsComponent extends ResponsiveChartDirective implements OnC
 
     return {
       visible,
-      x: narrow ? this.plotLeft + 40 : this.plotRight - reservedRight - this.legendWidth,
+      x: narrow ? this.plotLeft + 40 : Math.min(this.plotRight - reservedRight - this.legendWidth, lane.captionX + lane.caption.length * 6.2 + 56),
       y: narrow ? lane.captionY + 10 : lane.captionY - 8,
       minLabel,
       maxLabel

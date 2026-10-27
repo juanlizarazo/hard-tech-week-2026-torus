@@ -1,21 +1,6 @@
-@if (state$ | async; as state) {
-  @switch (state.status) {
-    @case ('ready') {
-      @if (state.manifest; as manifest) {
-        <span class="dt-snapshot-badge">
-          <mat-icon class="dt-snapshot-badge__icon" aria-hidden="true">cloud_done</mat-icon>
-          <span>Snapshot pulled {{ manifest.pulledAt.toDate() | date: 'MMM d, y' }} · target {{ manifest.targetDate }}</span>
-        </span>
-      }
-    }
-    @case ('loading') {
-      <span class="dt-snapshot-badge dt-snapshot-badge--muted">Loading snapshot…</span>
-    }
-    @default {
-      <span class="dt-snapshot-badge dt-snapshot-badge--muted">
-        <mat-icon class="dt-snapshot-badge__icon" aria-hidden="true">cloud_off</mat-icon>
-        <span>snapshot unavailable</span>
-      </span>
-    }
-  }
+@if (view$ | async; as view) {
+  <span class="dt-snapshot-badge" [class]="'dt-snapshot-badge--' + view.tone" [attr.title]="view.detail || null">
+    <mat-icon class="dt-snapshot-badge__icon" aria-hidden="true">{{ view.icon }}</mat-icon>
+    <span class="dt-snapshot-badge__label">{{ view.label }}</span>
+  </span>
 }

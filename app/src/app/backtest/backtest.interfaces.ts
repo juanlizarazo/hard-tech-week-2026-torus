@@ -18,7 +18,7 @@ export interface IMonthCalendarCell {
 export interface IComponentBar {
   strategyId: string;
   strategyLabel: string;
-  colorIndex: number;
+  color: string;
   savings: number;
 }
 
@@ -42,16 +42,24 @@ export interface IBacktestViewState {
 }
 
 export interface IBacktestTile {
+  id: string;
   label: string;
   value: string;
   hint: string;
+  tone: 'good' | 'bad' | 'neutral';
   source: IProvenance;
+}
+
+export interface IBacktestLegendItem {
+  id: string;
+  label: string;
+  color: string;
 }
 
 export interface IBacktestCycleRow {
   strategyId: string;
   strategyLabel: string;
-  colorIndex: number;
+  color: string;
   pulseCycles: number;
   spinCycles: number;
   pulsePercentOfLife: number;
@@ -78,15 +86,22 @@ export interface IBacktestDayCharts {
 }
 
 export interface IBacktestViewModel {
-  lead: string;
-  tiles: IBacktestTile[];
+  answer: string;
+  leadTiles: IBacktestTile[];
+  secondaryTiles: IBacktestTile[];
   monthLabel: string;
   peakLabel: string;
+  calendarNotice: string;
+  componentNotice: string;
+  cyclesNotice: string;
+  dayNotice: string;
   calendarCells: IMonthCalendarCell[];
   barGroups: IComponentBarGroup[];
-  legend: { id: string; label: string; colorIndex: number }[];
+  legend: IBacktestLegendItem[];
   cycleRows: IBacktestCycleRow[];
   dayCharts: IBacktestDayCharts;
   sourceRows: IProvenance[];
-  isCapturePending: boolean;
+  leadName: string;
+  shaverName: string;
+  oracleName: string;
 }

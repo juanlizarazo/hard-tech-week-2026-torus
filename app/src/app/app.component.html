@@ -1,3 +1,18 @@
+<svg class="dt-shell__defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="dt-rush-stripes" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="8" height="8" fill="#fef3e5"></rect>
+      <rect width="3.5" height="8" fill="#fbd7a8"></rect>
+    </pattern>
+    <pattern id="dt-rush-stripes-overlay" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="8" height="8" fill="#f28500" fill-opacity="0.08"></rect>
+      <rect width="3" height="8" fill="#f28500" fill-opacity="0.7"></rect>
+    </pattern>
+  </defs>
+</svg>
+
+<a class="dt-shell__skip" href="#main">Skip to content</a>
+
 <div class="dt-shell">
   <div class="dt-shell__progress">
     @if (isLoading$ | async) {
@@ -6,27 +21,51 @@
   </div>
 
   <header class="dt-shell__header">
-    <div class="dt-shell__header-inner">
-      <div class="dt-shell__brand">
-        <span class="dt-shell__brand-name">DETOUR</span>
-        <span class="dt-shell__tagline">Day-ahead rush-hour planner for a simulated Torus Station</span>
+    <div class="dt-shell__bar">
+      <a class="dt-shell__brand" routerLink="/start" aria-label="DETOUR, start here">
+        <span class="dt-shell__plate">DETOUR</span>
+        <span class="dt-shell__tagline">Rush-hour planner for a Torus Station</span>
+      </a>
+      <div class="dt-shell__badges">
+        <dt-snapshot-badge></dt-snapshot-badge>
+        <dt-simulated-badge></dt-simulated-badge>
       </div>
-      <dt-snapshot-badge></dt-snapshot-badge>
     </div>
-    <nav mat-tab-nav-bar class="dt-shell__nav" [tabPanel]="tabPanel" aria-label="Primary">
-      @for (link of links; track link.path) {
-        <a mat-tab-link [routerLink]="link.path" routerLinkActive #active="routerLinkActive" [active]="active.isActive">
-          {{ link.label }}
-        </a>
-      }
+    <nav class="dt-shell__nav" aria-label="Steps">
+      <ol class="dt-shell__steps">
+        @for (link of links; track link.path) {
+          <li class="dt-shell__step-item">
+            <a
+              class="dt-shell__step"
+              [routerLink]="link.path"
+              routerLinkActive="dt-shell__step--active"
+              ariaCurrentWhenActive="page"
+            >
+              @if (link.step) {
+                <span class="dt-shell__step-number" aria-hidden="true">{{ link.step }}</span>
+              } @else {
+                <span class="dt-shell__step-number dt-shell__step-number--start" aria-hidden="true"></span>
+              }
+              <span class="dt-shell__step-text">
+                <span class="dt-shell__step-label">{{ link.label }}</span>
+                <span class="dt-shell__step-description">{{ link.description }}</span>
+              </span>
+            </a>
+          </li>
+        }
+      </ol>
     </nav>
   </header>
 
-  <mat-tab-nav-panel #tabPanel class="dt-shell__content">
-    <main class="dt-shell__main">
-      <router-outlet />
-    </main>
-  </mat-tab-nav-panel>
+  <main class="dt-shell__main" id="main" tabindex="-1">
+    <router-outlet />
+  </main>
 
-  <footer class="dt-shell__footer">Simulated Torus Station — not a Torus product claim</footer>
+  <footer class="dt-shell__footer">
+    <p class="dt-shell__footer-text">
+      Simulated Torus Station. Grid data is real and public; site loads and asset figures are simulated or assumed.
+    </p>
+  </footer>
 </div>
+
+<dt-side-panel></dt-side-panel>

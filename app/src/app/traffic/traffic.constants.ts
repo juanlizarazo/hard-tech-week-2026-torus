@@ -5,6 +5,12 @@ export const trafficConfig = {
   WINDOW_DAYS: 3,
 };
 
+export const trafficChartDefaults = {
+  showAllDays: false,
+  showOurForecast: false,
+  showUncertainty: false,
+};
+
 export const trafficClocks = {
   STRESS: 'grid stress',
   PRICE: 'price',
@@ -13,7 +19,7 @@ export const trafficClocks = {
 
 export const trafficLimitations = [
   'Fuel-level, not unit-level: EIA-930 reports coal and gas totals, not which plant moved.',
-  'Imports are not attributed. The shaded import band shows how much lower the number gets when demand changes are partly met by imports.',
+  'Imports are not attributed. The import band shows how much lower the number gets when demand changes are partly met by imports.',
   'One gas factor covers combined-cycle and combustion turbines, so hours when a peaker is on the margin are understated.',
   'Midday coal must-run and solar curtailment make the midday number noisy; read the interval, not the line.',
   'A linear factor assumes small changes in load. It is not a forecast of what a large battery would displace.',
@@ -40,7 +46,7 @@ export const forecastMethodSteps = [
 ];
 
 export const forecastLimitations = [
-  'Demand, not net load: the forecast targets the same quantity as PACE’s own day-ahead forecast. The load chart’s net-load line stays phase 03’s trailing-average estimate.',
+  'Demand, not net load: the forecast targets the same quantity as PACE’s own day-ahead forecast. The net-load line on the grid stress chart is still a trailing-average estimate.',
   'Three weather points stand in for the whole PACE footprint, weighted by county population, not by actual load share.',
   'Monthly blocked cross-validation is an approximation of a true day-ahead backtest: later months’ load (never their weather) is visible during fitting.',
   'A linear model with hand-picked features. It will miss non-linear effects a more complex model could capture.',
