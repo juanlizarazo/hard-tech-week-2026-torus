@@ -2,8 +2,9 @@
 
 <!-- AGENTS.md points here; agents read it before building any feature. Official bounty card: brief/torus-bounty.md. Deep research: research/. -->
 
-**Event:** Hard Tech Week 2026 Hackathon · Mon Oct 26 ~5 PM to Wed Oct 28 5 PM · Aernata, 250 E 200 S Ste 320, Salt Lake City
-**Format:** Solo · ~42 build hours · one-on-one demo to Torus judges, Wed Oct 28 5–6 PM, under 5 minutes plus questions · winners announced Thu Oct 29, 9:15 AM, Zero Gravity Summit main stage
+**Event:** Hard Tech Hackathon, Hard Tech Week 2026 (47G + Utah Tech Week) · kickoff Mon Oct 26 4–5 PM, build Mon–Wed · Aernata, 250 E 200 S Ste 320, Salt Lake City
+**Format:** Solo · ~42 build hours · present to sponsor judges Wed Oct 28 5–6 PM (one-on-one per the talk; no official time limit published — target under 5 minutes) · winners announced Thu Oct 29, 9:15 AM, Zero Gravity Summit main stage
+**Event judges (kickoff deck):** Ryan Byrd (former CTO of Entrata, Aptive and Pattern) · Angela Smith (COO, Nucleus Fund) · Nicole Witmyer (Strategic Events Leader, Torus) · Scott Holley (Executive Director, Lassonde Center, U of U) · Tanner Potter (Partner, Kickstart). "Each sponsor defines what winning looks like" — the Torus bounty is judged by Torus. Don't assume a grid engineer is in the room: the insight has to land for a non-specialist too
 **Prize:** Torus bounty, $5,000 · **Option 1: Rush Hour for Electrons**
 
 ---
@@ -18,7 +19,7 @@ The grid has a rush hour: demand spikes, prices jump, solar fades, and most soft
 
 ## 3. Judging rubric — everything follows from this
 
-No weights published. Official card: **creativity, clarity of insight, and execution**. Live talk: "the more technical and insightful you can go, the better."
+No weights published. Official card: **creativity, clarity of insight, and execution**. Card also says: "We care more about engineering skill and creativity." Live talk: judged on "creativity, technical complexity, and a complete solution," and "the more technical and insightful you can go, the better." The card is the written rule; the talk version says the same thing with more emphasis on depth.
 
 | Criterion | Weight | How to win it |
 |-----------|--------|---------------|
@@ -28,14 +29,20 @@ No weights published. Official card: **creativity, clarity of insight, and execu
 
 ## 4. Hard requirements
 
+From the bounty card:
+
+- Build software that knows when the grid is jammed and stays out of traffic
 - Free and open-source data only
-- Simulated data is fine if labeled — every synthetic chart carries a "SIMULATED — seed 42" badge
-- Software that knows when the grid is jammed and stays out of traffic
+- Simulated data is fine if labeled
+
+Self-imposed:
+
+- Every synthetic chart carries a "SIMULATED — seed 42" badge
 - Never call an upstream API live during the demo — serve a cached, frozen snapshot with its pull date shown
 
 ## 5. Data provided
 
-None provided. All sources are free and public; see `research/torus-option-1-build-brief.md` §3 for access and limits.
+No files provided. The card suggests EIA · CAISO · ERCOT · Open-Meteo · Electricity Maps. All sources are free and public; see `research/torus-option-1-build-brief.md` §3 for access and limits.
 
 - **EIA API v2 / EIA-930** — PACE hourly demand, PACE's own day-ahead forecast, generation by fuel, interchange. Free key. UTC hour-ending, paginates at 5,000 rows
 - **CAISO OASIS** — PACE EDAM day-ahead prices (`ELAP_PACE-APND`). No auth, zipped CSV, 31 days per request
