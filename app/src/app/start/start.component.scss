@@ -32,21 +32,21 @@
 }
 
 .start__versus-big {
-  font-size: clamp(4rem, 13vw, 9rem);
+  font-size: clamp(3rem, 8vw, 5rem);
   line-height: 0.9;
   font-weight: 800;
   letter-spacing: -0.035em;
 }
 
 .start__versus-vs {
-  padding-bottom: 28px;
+  padding-bottom: 30px;
   font-size: var(--dt-text-21);
   font-weight: 600;
   color: var(--dt-muted);
 }
 
 .start__versus-small {
-  font-size: clamp(2.25rem, 6vw, 3.5rem);
+  font-size: clamp(2.25rem, 6vw, 3.75rem);
   line-height: 0.95;
   font-weight: 800;
   letter-spacing: -0.02em;

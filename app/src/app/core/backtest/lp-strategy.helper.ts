@@ -87,6 +87,7 @@ export class LpStrategyHelper {
       billedPeakKw: 0,
       billedLoadPeakKw: LpStrategyHelper.recentBilledLoadPeakKw(input),
       facilitiesPeakKw: 0,
+      facilitiesLoadPeakKw: LpStrategyHelper.recentAverageDailyPeakKw(input),
     };
 
     for (const [startIndex, endIndex] of LpStrategyHelper.dayRanges(input.intervals)) {
@@ -145,6 +146,23 @@ export class LpStrategyHelper {
     }
 
     return peakKw;
+  }
+
+  public static recentAverageDailyPeakKw(input: IBacktestInput): number {
+    const firstDate = input.intervals[0]?.localDate;
+
+    if (!firstDate) {
+      return 0;
+    }
+
+    let totalKw = 0;
+
+    for (let daysBack = 1; daysBack <= backtestSettings.RECENT_LOAD_PEAK_DAYS; daysBack++) {
+      const loads = SiteGeneratorHelper.generateDay(input.site, TimeHelper.addDays(firstDate, -daysBack));
+      totalKw += Math.max(...loads.map((load: ISiteLoadInterval) => load.kw));
+    }
+
+    return totalKw / backtestSettings.RECENT_LOAD_PEAK_DAYS;
   }
 
   public static async solveWithFallback(solver: ILpSolver, lpInput: ILpInput): Promise<IPlanInterval[]> {

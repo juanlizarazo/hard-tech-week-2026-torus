@@ -42,7 +42,11 @@ export class PlanReplayHelper {
         state.billedLoadPeakKw = Math.max(state.billedLoadPeakKw, load);
       }
 
-      const chargeCapKw = billedMask[t] ? Math.max(state.billedPeakKw, state.billedLoadPeakKw) : Number.POSITIVE_INFINITY;
+      state.facilitiesLoadPeakKw = Math.max(state.facilitiesLoadPeakKw, load);
+      const facilitiesChargeCapKw = Math.max(state.facilitiesPeakKw, state.facilitiesLoadPeakKw, billedCapKw);
+      const chargeCapKw = billedMask[t]
+        ? Math.min(Math.max(state.billedPeakKw, state.billedLoadPeakKw), facilitiesChargeCapKw)
+        : facilitiesChargeCapKw;
       let chargeExcessKw = load - spinNetKw - pulseNetKw - chargeCapKw;
 
       if (chargeExcessKw > 0 && spinNetKw < 0) {
@@ -88,6 +92,26 @@ export class PlanReplayHelper {
         const spinExtraKw = Math.max(0, Math.min(excessKw, limits.spinDischargeMaxKw - spinNetKw));
         spinNetKw += spinExtraKw;
         excessKw -= spinExtraKw;
+      }
+
+      let facilitiesExcessKw = load - spinNetKw - pulseNetKw - facilitiesChargeCapKw;
+
+      if (facilitiesExcessKw > 0) {
+        const guardKw = NaiveShaverHelper.maxPulseDischarge(
+          pulse,
+          state.pulseSocKwh,
+          guardFloorKwh,
+          state.pulseNetKw,
+          pulseNetKw + facilitiesExcessKw,
+          stepHours,
+        );
+        const pulseExtraKw = Math.max(0, guardKw - pulseNetKw);
+        pulseNetKw += pulseExtraKw;
+        facilitiesExcessKw -= pulseExtraKw;
+      }
+
+      if (facilitiesExcessKw > 0) {
+        spinNetKw += Math.max(0, Math.min(facilitiesExcessKw, limits.spinDischargeMaxKw - spinNetKw));
       }
 
       [spinNetKw, pulseNetKw] = PlanReplayHelper.avoidExport(load, spinNetKw, pulseNetKw, limits);

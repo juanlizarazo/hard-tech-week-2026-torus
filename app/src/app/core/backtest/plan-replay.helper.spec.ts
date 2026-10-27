@@ -30,7 +30,7 @@ const replayInput = (loadKw: number[], planned: IPlanInterval[], pulseSocKwh: nu
   rushHourMask: loadKw.map(() => false),
   wattsmartReserveKwh: 0,
   stepHours: 0.25,
-  state: { pulseSocKwh, spinSocKwh, pulseNetKw: 0, billedPeakKw: 0, billedLoadPeakKw: 0, facilitiesPeakKw: 0 },
+  state: { pulseSocKwh, spinSocKwh, pulseNetKw: 0, billedPeakKw: 0, billedLoadPeakKw: 0, facilitiesPeakKw: 0, facilitiesLoadPeakKw: 0 },
 });
 
 describe('plan replay with a real-time cap', () => {
@@ -61,5 +61,21 @@ describe('plan replay with a real-time cap', () => {
     expect(dischargedKwh).toBeLessThanOrEqual(60 * assets.pulse.dischargeEfficiency + epsilon);
     expect(dischargedKwh).toBeLessThan(200 * 0.25 * loadKw.length);
     expect(result.intervals[result.intervals.length - 1].gridKw).toBeGreaterThan(1300);
+  });
+
+  it('never lets charging in unbilled hours lift the grid above the highest load seen so far', () => {
+    const loadKw = new Array(8).fill(1000);
+    const planned = loadKw.map(() => ({ ...plannedInterval(1400), pulseChargeKw: 400 }));
+    const input = replayInput(loadKw, planned, 1000, 0);
+    const result = PlanReplayHelper.replayDay({
+      ...input,
+      billedMask: loadKw.map(() => false),
+      state: { ...input.state, facilitiesLoadPeakKw: 1000 },
+    });
+
+    result.intervals.forEach((interval: IPlanInterval) => {
+      expect(interval.gridKw).toBeLessThanOrEqual(1000 + epsilon);
+    });
+    expect(result.state.facilitiesPeakKw).toBeLessThanOrEqual(1000 + epsilon);
   });
 });

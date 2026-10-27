@@ -168,6 +168,7 @@ export interface IReplayState {
   billedPeakKw: number;
   billedLoadPeakKw: number;
   facilitiesPeakKw: number;
+  facilitiesLoadPeakKw: number;
 }
 
 export interface IReplayDayInput {

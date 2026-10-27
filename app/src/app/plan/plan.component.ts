@@ -188,6 +188,12 @@ export class PlanComponent {
   }
 
   public onTryChip(chip: IPlanTryChip): void {
+    if (chip.changes.siteId) {
+      this.onSiteChange(chip.changes.siteId);
+
+      return;
+    }
+
     this._update(PlanDeltaHelper.chipChanges(chip, this.maxReserveKwh));
   }
 

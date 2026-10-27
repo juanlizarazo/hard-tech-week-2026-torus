@@ -35,10 +35,10 @@ export const planTryChips: IPlanTryChip[] = [
     changes: { scheduleId: 'schedule-6' }
   },
   {
-    id: 'carbon',
-    label: 'Price carbon at $0.50/kg',
-    effect: 'PACE carbon barely varies by hour, so the bill still wins. Watch CO2 stay flat.',
-    changes: { co2WeightPerKg: 0.5 }
+    id: 'ski-resort',
+    label: 'Try the ski resort',
+    effect: 'A 0.9 MW site: a smaller peak, so a smaller prize.',
+    changes: { siteId: 'ski-resort' }
   },
   {
     id: 'july-peak',
