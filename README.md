@@ -4,8 +4,6 @@
 
 Built solo for the Torus bounty (Option 1: Rush Hour for Electrons) at the Hard Tech Hackathon, Hard Tech Week 2026, Salt Lake City.
 
-> 🚧 In progress — built Oct 26–28, 2026.
-
 ## The problem
 
 The grid has a rush hour: demand spikes, prices jump, solar fades. A Torus site (a Nova Spin flywheel plus a Nova Pulse battery, behind the meter at a Utah business) lives on three clocks that disagree:
@@ -24,22 +22,69 @@ On top of that, a Wattsmart demand-response call can drain the battery right bef
 
 ## Demo flow
 
-1. **Start here** (`/`). The three-clocks strip shows tomorrow's bill, price and carbon by hour, with rush hour in orange stripes. Hover any dotted word for a definition.
-2. **① Tomorrow's grid** (`/traffic`). When the grid is jammed tomorrow, whether price and carbon agree, and how our forecast scores against PACE's own. Open an ⓘ for a how-to-read panel.
-3. **② Tomorrow's plan** (`/plan`). Pick a site, then move the CO2 weight and Wattsmart reserve dials or switch Schedule 8/6. The LP re-solves in the browser in milliseconds. The LP text is under "Under the hood".
+1. **Start here** (`/start`). "$16.84 vs 3.1¢": one kW of summer on-peak demand costs as much as shifting about 550 kWh. Below it, the three-clocks strip shows the planning day's bill, price and carbon by hour, with rush hour in orange stripes. Hover any dotted word for a definition.
+2. **① The grid** (`/traffic`). When the grid is jammed, whether price and carbon agree, how our forecast scores against PACE's own, and why marginal and average CO2 rank the hours differently. Open an ⓘ for a how-to-read panel.
+3. **② The plan** (`/plan`). Pick a site, then use a "Try this" chip or move the CO2 weight and Wattsmart reserve dials, or switch Schedule 8/6. The LP re-solves in the browser in milliseconds and each figure shows its change from the last solve. The LP text is under "Under the hood".
 4. **③ July's proof** (`/backtest`). July replayed day by day: DETOUR against no storage, a simple shaver and perfect hindsight, with the capture rate.
+5. **Architecture** (back on `/start`, "How DETOUR works"). The pipeline below, drawn in the app.
 
-## Data refresh
+Every screen ends with a "Next stop" link, so the demo walks Start → ① → ② → ③ → back to Start.
 
-`refreshSnapshot`, a scheduled Cloud Function, pulls fresh grid data every day at 3 p.m. Mountain, after OASIS posts tomorrow's day-ahead market. It always writes a new snapshot, but the app only switches to it once it passes validation: a newer target day, every hour of that day with a forecast and a price, and no empty or truncated pulls. The last five good snapshots are kept as fallbacks.
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph Sources["Free public data"]
+    EIA930["EIA-930<br/>PACE load, forecast, fuel mix"]
+    OASIS["CAISO OASIS<br/>EDAM day-ahead prices"]
+    METEO["Open-Meteo<br/>Wasatch Front weather"]
+    RMP["RMP tariffs<br/>Schedules 6 and 8"]
+    EIA860["EIA-860<br/>PACE power plants"]
+  end
+  FN["refreshSnapshot<br/>Cloud Function, daily 3 p.m. MT<br/>validate, then pin"]
+  FS[("Firestore snapshot<br/>frozen for the demo")]
+  subgraph Browser["In the browser"]
+    TARIFF["Tariff engine"]
+    MEF["MEF regression"]
+    RIDGE["Ridge forecast"]
+    SITE["Site generator, seed 42"]
+    LP["LP text + HiGHS WASM"]
+    REPLAY["July replay, real-time cap"]
+  end
+  subgraph Screens["Four screens"]
+    START["Start"]
+    GRID["① Grid"]
+    PLAN["② Plan"]
+    PROOF["③ July's proof"]
+  end
+  EIA930 --> FN
+  OASIS --> FN
+  METEO --> FN
+  RMP --> FN
+  EIA860 --> FN
+  FN --> FS
+  FS --> TARIFF & MEF & RIDGE & SITE
+  TARIFF & MEF & RIDGE & SITE --> LP
+  LP --> REPLAY
+  TARIFF & MEF & RIDGE & SITE & LP & REPLAY --> Screens
+```
+
+No upstream API is called while the app is in use: every screen reads the pinned snapshot and does its maths on the device.
+
+## Data refresh and pin
+
+`refreshSnapshot`, a scheduled Cloud Function, pulls fresh grid data every day at 3 p.m. Mountain, after OASIS posts the next day's day-ahead market. It always writes a new snapshot, but the app only switches to it once it passes validation: a newer target day, every hour of that day with a forecast and a price, and no empty or truncated pulls. The last five good snapshots are kept as fallbacks.
 
 ```bash
-yarn --cwd functions snapshot:status      # what the app is serving, plus the last run
-yarn --cwd functions snapshot:pin [id]    # freeze the demo on a known-good snapshot
-yarn --cwd functions snapshot:unpin
-yarn --cwd functions snapshot:rollback    # back to the previous good snapshot
-yarn --cwd functions ingest [--dry-run]   # run the same ingest by hand
+yarn --cwd functions snapshot:status         # what the app is serving, plus the last run
+yarn --cwd functions snapshot:pin [id]       # freeze the demo on a known-good snapshot
+yarn --cwd functions snapshot:unpin          # follow the daily refresh again
+yarn --cwd functions snapshot:promote <id>   # serve a specific snapshot
+yarn --cwd functions snapshot:rollback       # back to the previous good snapshot
+yarn --cwd functions ingest [--dry-run]      # run the same ingest by hand
 ```
+
+Demo day: let the 3 p.m. refresh run, check `snapshot:status` shows the new snapshot, then `snapshot:pin` it so nothing changes during judging.
 
 ## Run locally
 

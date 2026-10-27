@@ -8,6 +8,10 @@ import { MatSliderModule } from '@angular/material/slider';
 import {
   BehaviorSubject,
   asapScheduler,
+  concat,
+  filter,
+  pairwise,
+  timer,
   Observable,
   catchError,
   combineLatest,
@@ -29,6 +33,7 @@ import {
   AlertBannerComponent,
   ChartFrameComponent,
   FigureComponent,
+  NextStopComponent,
   SourceChipComponent,
   TermComponent,
   ThreeClocksComponent,
@@ -41,10 +46,11 @@ import {
   LoadChartComponent,
   LpTextComponent
 } from './components';
-import { IAssetRow, IPlanControls, IPlanDateContext, IPlanSiteCard, IPlanSolveState } from './plan.interfaces';
+import { IAssetRow, IPlanControls, IPlanDeltaState, IPlanHook, IPlanTryChip, IPlanViewModel, IPlanDateContext, IPlanSiteCard, IPlanSolveState } from './plan.interfaces';
 import { PeakSoFarMode, PlanDateMode } from './plan.types';
 import { PlanHelper } from './plan.helper';
-import { planBaseline, planDefaults } from './plan.constants';
+import { planBaseline, planDefaults, planDeltaSettings } from './plan.constants';
+import { PlanDeltaHelper } from './plan-delta.helper';
 
 @Component({
   selector: 'dt-plan',
@@ -60,6 +66,7 @@ import { planBaseline, planDefaults } from './plan.constants';
     AlertBannerComponent,
     ChartFrameComponent,
     FigureComponent,
+    NextStopComponent,
     SourceChipComponent,
     TermComponent,
     ThreeClocksComponent,
@@ -116,6 +123,11 @@ export class PlanComponent {
     shareReplay(1)
   );
 
+  public readonly hook$: Observable<IPlanHook> = combineLatest([this.dates$, this._controls$]).pipe(
+    map(([dates, controls]) => PlanHelper.buildHook(dates[controls.dateMode])),
+    distinctUntilChanged((previous, current) => previous.subtitle === current.subtitle)
+  );
+
   private readonly _dateContext$: Observable<IPlanDateContext> = combineLatest([
     this.dates$,
     this._controls$.pipe(
@@ -143,6 +155,22 @@ export class PlanComponent {
     shareReplay(1)
   );
 
+  public readonly tryChips: IPlanTryChip[] = PlanDeltaHelper.chips();
+
+  public readonly deltas$: Observable<IPlanDeltaState> = this.solve$.pipe(
+    filter((state: IPlanSolveState) => state.status === 'ready' && state.viewModel !== null),
+    map((state: IPlanSolveState) => state.viewModel as IPlanViewModel),
+    distinctUntilChanged(),
+    pairwise(),
+    switchMap(([previous, current]) =>
+      concat(
+        of(PlanDeltaHelper.deltaState(previous.tiles, current.tiles)),
+        timer(planDeltaSettings.VISIBLE_MS).pipe(map(() => PlanDeltaHelper.emptyState()))
+      )
+    ),
+    startWith(PlanDeltaHelper.emptyState())
+  );
+
   public constructor() {
     this._refreshAssetRows();
   }
@@ -153,6 +181,14 @@ export class PlanComponent {
 
   public siteShortName(site: ISiteArchetype): string {
     return PlanHelper.siteShortName(site);
+  }
+
+  public isChipActive(chip: IPlanTryChip): boolean {
+    return PlanDeltaHelper.chipIsActive(chip, this.controls, this.maxReserveKwh);
+  }
+
+  public onTryChip(chip: IPlanTryChip): void {
+    this._update(PlanDeltaHelper.chipChanges(chip, this.maxReserveKwh));
   }
 
   public onToggleDials(): void {
