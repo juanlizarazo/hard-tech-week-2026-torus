@@ -37,7 +37,7 @@ export const planTryChips: IPlanTryChip[] = [
   {
     id: 'carbon',
     label: 'Price carbon at $0.50/kg',
-    effect: 'See whether carbon or the bill wins.',
+    effect: 'PACE carbon barely varies by hour, so the bill still wins. Watch CO2 stay flat.',
     changes: { co2WeightPerKg: 0.5 }
   },
   {

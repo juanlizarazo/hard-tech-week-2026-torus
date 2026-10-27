@@ -1,7 +1,7 @@
 <div class="dt-page">
   <header class="dt-page__head">
     <p class="dt-page__step">Step 2 of 3</p>
-    <h1 class="dt-question">What should the <dt-term key="TORUS_STATION">Torus Station</dt-term> do {{ (day$ | async)?.word }}?</h1>
+    <h1 class="dt-question">What should the <dt-term key="TORUS_STATION">Torus Station</dt-term> do {{ headingDay(solve$ | async, (day$ | async)?.word) }}?</h1>
     @if (solve$ | async; as solve) {
       @if (solve.viewModel; as viewModel) {
         <p class="dt-answer" aria-live="polite">{{ viewModel.answer }}</p>

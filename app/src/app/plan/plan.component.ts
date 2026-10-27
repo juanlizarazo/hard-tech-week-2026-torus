@@ -211,6 +211,12 @@ export class PlanComponent {
     }
   }
 
+  public headingDay(solve: IPlanSolveState | null, planningDayWord: string | undefined): string {
+    const viewModel = solve?.viewModel ?? null;
+
+    return PlanHelper.dayPhrase(viewModel?.controls.dateMode ?? null, planningDayWord ?? 'tomorrow', viewModel?.dateLabel ?? '');
+  }
+
   public onDateModeChange(dateMode: PlanDateMode): void {
     this._update({ dateMode });
   }

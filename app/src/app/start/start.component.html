@@ -1,11 +1,17 @@
 <div class="dt-page">
   <section class="start__hero" aria-labelledby="start-headline">
     <h1 class="start__headline" id="start-headline">The grid has a rush hour. DETOUR plans a <dt-term key="TORUS_STATION">Torus Station</dt-term> around it.</h1>
-    <p class="start__versus">
-      <span class="start__versus-big">{{ hook.demandRateLabel }}</span>
-      <span class="start__versus-vs">vs</span>
-      <span class="start__versus-small">{{ hook.spreadLabel }}</span>
-    </p>
+    <div class="start__versus">
+      <p class="start__versus-block">
+        <span class="start__versus-big">{{ hook.demandRateLabel }}</span>
+        <span class="start__versus-caption">for one kW of peak, every month</span>
+      </p>
+      <span class="start__versus-vs" aria-hidden="true">vs</span>
+      <p class="start__versus-block">
+        <span class="start__versus-small">{{ hook.spreadLabel }}</span>
+        <span class="start__versus-caption">for moving one kWh to a cheaper hour</span>
+      </p>
+    </div>
     <p class="start__hook">
       One kW of summer <dt-term key="ON_PEAK_DEMAND">on-peak demand</dt-term> costs <span class="dt-num">{{ hook.demandRateLabel }}</span> a month.
       Moving one kWh to a cheaper hour saves <span class="dt-num">{{ hook.spreadLabel }}</span>.

@@ -15,7 +15,7 @@ export class LpStrategyHelper {
       id: 'detour',
       label: 'DETOUR',
       description:
-        "Plans each day the afternoon before on a load forecast (the mean of the same day one and two weeks earlier), then runs it against the real load with a live cap: when the site would pass the planned peak or the month's peak so far, Spin and then Pulse discharge more, without touching the Wattsmart reserve.",
+        "Plans each day the afternoon before on a load forecast (the highest load on the same weekday over the last four weeks), then runs it against the real load with a live cap: when the site would pass the planned peak or the month's peak so far, Spin and then Pulse discharge more, without touching the Wattsmart reserve.",
       role: 'realistic',
       run: (input: IBacktestInput): Promise<IPlanInterval[]> => LpStrategyHelper.runForecastRolling(solver, input),
     };

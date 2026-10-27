@@ -239,11 +239,15 @@ export class PlantMapHelper {
     const fossilAtPeak = PlantMapHelper.percent(PlantMapHelper.fossilShare(peak));
 
     if (solarAtPeak - solarAtRush >= 5 && fossilAtRush > fossilAtPeak) {
-      return `Solar makes ${solarAtPeak}% of PACE's power at ${peakLabel} but ${solarAtRush < 1 ? 'almost none' : `only ${solarAtRush}%`} across the ${rushLabel}, so coal and gas carry ${fossilAtRush}% of it, up from ${fossilAtPeak}%. That is why an evening kWh is dirtier.`;
+      return `Solar makes ${solarAtPeak}% of PACE's power at ${peakLabel} but ${solarAtRush < 1 ? 'almost none' : `only ${solarAtRush}%`} across the ${rushLabel}, so coal and gas carry ${fossilAtRush}% of it, up from ${fossilAtPeak}%. When solar is gone, fossil plants answer the next kWh.`;
     }
 
     if (fossilAtRush > fossilAtPeak) {
-      return `Coal and gas carry ${fossilAtRush}% of PACE's power across the ${rushLabel}, up from ${fossilAtPeak}% at ${peakLabel}, while solar stays small. That is why an evening kWh is dirtier.`;
+      return `Coal and gas carry ${fossilAtRush}% of PACE's power across the ${rushLabel}, up from ${fossilAtPeak}% at ${peakLabel}, while solar stays small. Fossil plants carry more of the load in the rush.`;
+    }
+
+    if (fossilAtRush < fossilAtPeak) {
+      return `Coal and gas carry ${fossilAtRush}% of PACE's power across the ${rushLabel}, down from ${fossilAtPeak}% at ${peakLabel}: wind and hydro cover more of the rush today, so the usual pattern does not hold.`;
     }
 
     return `Coal and gas carry ${fossilAtRush}% of PACE's power across the ${rushLabel} and ${fossilAtPeak}% at ${peakLabel}: over the last ${mix.dayCount} days the mix barely changes into the rush.`;
