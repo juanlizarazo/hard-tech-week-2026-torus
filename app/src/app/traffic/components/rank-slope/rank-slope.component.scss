@@ -1,0 +1,263 @@
+:host {
+  display: block;
+  min-width: 0;
+  color-scheme: light;
+  --dt-rs-accent: #eb6834;
+  --dt-rs-muted-line: #a8a69f;
+  --dt-rs-ink: #0b0b0b;
+  --dt-rs-ink-secondary: #52514e;
+  --dt-rs-muted: #6f6d67;
+  --dt-rs-grid: #e1e0d9;
+  --dt-rs-axis: #c3c2b7;
+  --dt-rs-surface: #fcfcfb;
+  --dt-rs-border: rgba(11, 11, 11, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :host-context(:root:not([data-theme='light'])) {
+    color-scheme: dark;
+    --dt-rs-accent: #d95926;
+    --dt-rs-muted-line: #5b5a55;
+    --dt-rs-ink: #f0efec;
+    --dt-rs-ink-secondary: #c3c2b7;
+    --dt-rs-muted: #a09e97;
+    --dt-rs-grid: #2c2c2a;
+    --dt-rs-axis: #383835;
+    --dt-rs-surface: #1a1a19;
+    --dt-rs-border: rgba(255, 255, 255, 0.1);
+  }
+}
+
+:host-context(:root[data-theme='dark']) {
+  color-scheme: dark;
+  --dt-rs-accent: #d95926;
+  --dt-rs-muted-line: #5b5a55;
+  --dt-rs-ink: #f0efec;
+  --dt-rs-ink-secondary: #c3c2b7;
+  --dt-rs-muted: #a09e97;
+  --dt-rs-grid: #2c2c2a;
+  --dt-rs-axis: #383835;
+  --dt-rs-surface: #1a1a19;
+  --dt-rs-border: rgba(255, 255, 255, 0.1);
+}
+
+.rs-figure {
+  margin: 0;
+  padding: 16px;
+  background: var(--dt-rs-surface);
+  border: 1px solid var(--dt-rs-border);
+  border-radius: 12px;
+  color: var(--dt-rs-ink);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  min-width: 0;
+}
+
+.rs-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.rs-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  font-size: 13px;
+  color: var(--dt-rs-ink-secondary);
+}
+
+.rs-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rs-legend-swatch {
+  width: 24px;
+  height: 12px;
+  flex: none;
+}
+
+.rs-swatch-accent {
+  stroke: var(--dt-rs-accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.rs-swatch-muted {
+  stroke: var(--dt-rs-muted-line);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.rs-plot {
+  position: relative;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.rs-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: pan-y;
+}
+
+.rs-head {
+  fill: var(--dt-rs-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rs-head-sub {
+  fill: var(--dt-rs-muted);
+  font-size: 12px;
+}
+
+.rs-line {
+  stroke: var(--dt-rs-muted-line);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+.rs-line--accent {
+  stroke: var(--dt-rs-accent);
+  stroke-width: 3;
+  opacity: 1;
+}
+
+.rs-line--hover {
+  stroke: var(--dt-rs-ink);
+  stroke-width: 2.5;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.rs-dot {
+  fill: var(--dt-rs-accent);
+  stroke: var(--dt-rs-surface);
+  stroke-width: 2;
+}
+
+.rs-rank {
+  fill: var(--dt-rs-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rs-label {
+  fill: var(--dt-rs-ink);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rs-hit {
+  stroke: transparent;
+  stroke-width: 12;
+  cursor: pointer;
+  outline: none;
+
+  &:focus-visible {
+    stroke: var(--dt-rs-ink);
+    stroke-opacity: 0.25;
+  }
+}
+
+.rs-tooltip {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 24px);
+  min-width: 150px;
+  padding: 8px 10px;
+  background: var(--dt-rs-surface);
+  border: 1px solid var(--dt-rs-axis);
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+  font-size: 12px;
+  color: var(--dt-rs-ink-secondary);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.rs-tooltip-title {
+  font-weight: 600;
+  color: var(--dt-rs-ink);
+  margin-bottom: 4px;
+}
+
+.rs-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rs-tooltip-value {
+  color: var(--dt-rs-ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rs-tooltip-note {
+  margin-top: 4px;
+}
+
+.rs-table-details {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--dt-rs-ink-secondary);
+}
+
+.rs-table-summary {
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.rs-table-scroll {
+  max-height: 260px;
+  overflow: auto;
+  margin-top: 6px;
+}
+
+.rs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.rs-th {
+  text-align: left;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--dt-rs-grid);
+  color: var(--dt-rs-ink);
+}
+
+.rs-th--row {
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.rs-td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--dt-rs-grid);
+}
+
+.rs-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 599.98px) {
+  .rs-figure {
+    padding: 12px;
+  }
+}

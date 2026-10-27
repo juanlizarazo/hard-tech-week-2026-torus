@@ -3,18 +3,18 @@
   subtitle="What the PACE grid looks like for the day we are planning, and where every number came from."
 ></dt-screen-toolbar>
 
-@if (state$ | async; as state) {
-  @switch (state.status) {
+@if (viewModel$ | async; as viewModel) {
+  @switch (viewModel.state.status) {
     @case ('loading') {
       <mat-card class="dt-card traffic__state" appearance="outlined">
         <mat-card-content class="traffic__state-content">
           <mat-spinner diameter="28"></mat-spinner>
-          <span>Reading the frozen snapshot…</span>
+          <span>Reading 2 years of PACE history…</span>
         </mat-card-content>
       </mat-card>
     }
     @case ('error') {
-      <dt-alert-banner [message]="state.errorMessage"></dt-alert-banner>
+      <dt-alert-banner [message]="viewModel.state.errorMessage"></dt-alert-banner>
     }
     @case ('empty') {
       <mat-card class="dt-card traffic__state" appearance="outlined">
@@ -25,113 +25,267 @@
       </mat-card>
     }
     @case ('ready') {
-      @if (state.manifest; as manifest) {
-        <div class="traffic__grid">
-          <mat-card class="dt-card" appearance="outlined">
-            <mat-card-content>
-              <p class="traffic__label">Target date</p>
-              <p class="traffic__value">{{ manifest.targetDate }}</p>
-              <p class="traffic__hint">Timezone {{ manifest.timezone }}</p>
-            </mat-card-content>
-          </mat-card>
-          <mat-card class="dt-card" appearance="outlined">
-            <mat-card-content>
-              <p class="traffic__label">Grid history</p>
-              <p class="traffic__value">{{ manifest.gridRange.start }} to {{ manifest.gridRange.end }}</p>
-              <p class="traffic__hint">{{ manifest.gridMonths.length }} monthly files</p>
-            </mat-card-content>
-          </mat-card>
-          <mat-card class="dt-card" appearance="outlined">
-            <mat-card-content>
-              <p class="traffic__label">Price history</p>
-              <p class="traffic__value">{{ manifest.priceRange.start }} to {{ manifest.priceRange.end }}</p>
-              <p class="traffic__hint">{{ manifest.priceMonths.length }} monthly files</p>
-            </mat-card-content>
-          </mat-card>
-          <mat-card class="dt-card" appearance="outlined">
-            <mat-card-content>
-              <p class="traffic__label">Day-ahead forecast source</p>
-              <p class="traffic__value">{{ manifest.dayAheadForecastSource }}</p>
-              <p class="traffic__hint">{{ manifest.filteredRows }} rows filtered out</p>
-            </mat-card-content>
-          </mat-card>
-        </div>
+      @if (viewModel.state.manifest; as manifest) {
+        @if (viewModel.state.report; as report) {
+          @if (viewModel.charts; as charts) {
+            <mat-card class="dt-card traffic__section traffic__insight" appearance="outlined">
+              <mat-card-content>
+                <p class="traffic__label">Traffic report, {{ report.targetDateLabel }}</p>
+                <h2 class="traffic__headline">{{ report.insights.headline }}</h2>
+                @for (sentence of report.insights.sentences; track sentence) {
+                  <p class="traffic__sentence">{{ sentence }}</p>
+                }
+              </mat-card-content>
+            </mat-card>
 
-        <mat-card class="dt-card traffic__section" appearance="outlined">
-          <mat-card-content>
-            <h2 class="traffic__heading">Provenance</h2>
-            <div class="traffic__table-wrap">
-              <table class="traffic__table">
-                <thead>
-                  <tr>
-                    <th scope="col">Source</th>
-                    <th scope="col">Kind</th>
-                    <th scope="col">Series</th>
-                    <th scope="col">Link</th>
-                    <th scope="col">Note</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (source of manifest.sources; track source.id) {
-                    <tr>
-                      <td>{{ source.label }}</td>
-                      <td>{{ source.kind }}</td>
-                      <td>{{ source.seriesId || '—' }}</td>
-                      <td>
-                        @if (source.url) {
-                          <a [href]="source.url" target="_blank" rel="noopener noreferrer">Open</a>
-                        } @else {
-                          —
-                        }
-                      </td>
-                      <td>{{ source.note || '—' }}</td>
-                    </tr>
+            <mat-card class="dt-card traffic__section" appearance="outlined">
+              <mat-card-content>
+                <h2 class="traffic__heading">Three clocks</h2>
+                <p class="traffic__hint">
+                  Grid stress, price and carbon on the same hours. The shaded band is where they coincide.
+                </p>
+
+                <h3 class="traffic__subheading">1. Grid stress: PACE load, net load and its own forecast</h3>
+                <dt-hour-chart
+                  title="PACE load, three days"
+                  yLabel="MW"
+                  [series]="charts.load.series"
+                  [bands]="charts.load.bands"
+                  [highlight]="charts.load.highlight"
+                  [xLabels]="charts.load.xLabels"
+                  [dividerIndices]="charts.load.dividerIndices"
+                  [estimateFromIndex]="charts.load.estimateFromIndex"
+                  [valueFormat]="megawattFormat"
+                ></dt-hour-chart>
+                <p class="traffic__hint">
+                  The two earlier days are actuals. On {{ report.targetDateLabel }} the dashed line is PACE's forecast and
+                  net load is our estimate (forecast minus the trailing 7-day average of wind and solar for each hour).
+                </p>
+
+                <h3 class="traffic__subheading">2. Price: EDAM day-ahead</h3>
+                <dt-hour-chart
+                  title="EDAM day-ahead price"
+                  yLabel="$/MWh"
+                  [series]="charts.price.series"
+                  [highlight]="charts.price.highlight"
+                  [xLabels]="charts.price.xLabels"
+                  [valueFormat]="priceFormat"
+                ></dt-hour-chart>
+                @if (!report.hasPrices) {
+                  <p class="traffic__hint">No EDAM price is in the snapshot for this day.</p>
+                }
+
+                <h3 class="traffic__subheading">3. Carbon: marginal emissions with its interval</h3>
+                <dt-hour-chart
+                  title="Marginal CO2 by hour"
+                  yLabel="lb CO2/MWh"
+                  [series]="charts.carbon.series"
+                  [bands]="charts.carbon.bands"
+                  [highlight]="charts.carbon.highlight"
+                  [xLabels]="charts.carbon.xLabels"
+                  [valueFormat]="carbonFormat"
+                ></dt-hour-chart>
+                <p class="traffic__hint">
+                  {{ report.season }} hours of the day. Based on PACE fossil generation, the next MWh emits
+                  @if (report.fossilRange; as fossilRange) {
+                    {{ fossilRange.minLbPerMwh | number: '1.0-0' }}–{{ fossilRange.maxLbPerMwh | number: '1.0-0' }} lb;
                   }
-                </tbody>
-              </table>
+                  @if (report.demandRange; as demandRange) {
+                    measured against demand it averages {{ demandRange.meanLbPerMwh | number: '1.0-0' }} lb and swings hour
+                    to hour with a wide interval, because imports, exports and wind or solar absorb part of each change in
+                    demand. Treat the demand line as a cross-check and the import band as the uncertainty.
+                  }
+                </p>
+              </mat-card-content>
+            </mat-card>
+
+            <div class="traffic__tiles">
+              <mat-card class="dt-card" appearance="outlined">
+                <mat-card-content>
+                  <p class="traffic__label">Typical miss (MAPE)</p>
+                  <p class="traffic__value">{{ report.score.mapePercent | number: '1.1-1' }}%</p>
+                  <p class="traffic__hint">PACE day-ahead forecast vs actual load, every hour</p>
+                </mat-card-content>
+              </mat-card>
+              <mat-card class="dt-card" appearance="outlined">
+                <mat-card-content>
+                  <p class="traffic__label">Low at the daily peak</p>
+                  <p class="traffic__value">{{ report.score.peakUnderForecastRate | number: '1.0-0' }}% of days</p>
+                  <p class="traffic__hint">Forecast below actual at the peak hour. On average PACE is {{ absoluteValue(report.score.meanPeakMissMw) | number: '1.0-0' }} MW {{ report.score.meanPeakMissMw < 0 ? 'above' : 'below' }} the actual peak</p>
+                </mat-card-content>
+              </mat-card>
+              <mat-card class="dt-card" appearance="outlined">
+                <mat-card-content>
+                  <p class="traffic__label">Bias</p>
+                  <p class="traffic__value">{{ report.score.biasPercent | number: '1.1-1' }}%</p>
+                  <p class="traffic__hint">Negative means PACE forecasts low on average</p>
+                </mat-card-content>
+              </mat-card>
+              <mat-card class="dt-card" appearance="outlined">
+                <mat-card-content>
+                  <p class="traffic__label">Scored</p>
+                  <p class="traffic__value">{{ report.score.hoursScored | number: '1.0-0' }} hours</p>
+                  <p class="traffic__hint">{{ report.score.startDate }} to {{ report.score.endDate }}, {{ report.score.daysScored }} full days</p>
+                </mat-card-content>
+              </mat-card>
             </div>
-          </mat-card-content>
-        </mat-card>
 
-        <mat-card class="dt-card traffic__section" appearance="outlined">
-          <mat-card-content>
-            <h2 class="traffic__heading">Row counts by month</h2>
-            <div class="traffic__table-wrap">
-              <table class="traffic__table">
-                <thead>
-                  <tr>
-                    <th scope="col">Series</th>
-                    <th scope="col">Month</th>
-                    <th scope="col">Rows</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (entry of manifest.gridMonths; track entry.month) {
-                    <tr>
-                      <td>Grid</td>
-                      <td>{{ entry.month }}</td>
-                      <td>{{ entry.rowCount }}</td>
-                    </tr>
+            <mat-card class="dt-card traffic__section" appearance="outlined">
+              <mat-card-content>
+                <h2 class="traffic__heading">Marginal vs average: the cleanest hours are not the same</h2>
+                <p class="traffic__hint">
+                  Rank 1 is the cleanest hour. Average emissions divide all fossil emissions by all generation;
+                  marginal emissions are what the next MWh adds.
+                </p>
+                <dt-rank-slope [rows]="report.ranking"></dt-rank-slope>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="dt-card traffic__section" appearance="outlined">
+              <mat-card-content>
+                <h2 class="traffic__heading">How the carbon number is made</h2>
+                <ol class="traffic__list">
+                  @for (step of methodSteps; track step) {
+                    <li>{{ step }}</li>
                   }
-                  @for (entry of manifest.priceMonths; track entry.month) {
-                    <tr>
-                      <td>Price</td>
-                      <td>{{ entry.month }}</td>
-                      <td>{{ entry.rowCount }}</td>
-                    </tr>
+                </ol>
+                <div class="traffic__table-wrap">
+                  <table class="traffic__table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Fuel</th>
+                        <th scope="col">Factor (assumption)</th>
+                        <th scope="col">Source</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (factor of factors; track factor.fuelKey) {
+                        <tr>
+                          <td>{{ factor.label }} ({{ factor.fuelKey }})</td>
+                          <td>{{ factor.lbPerMwh | number: '1.0-0' }} lb/MWh</td>
+                          <td>
+                            <a class="traffic__chip" [href]="factor.provenance.url" target="_blank" rel="noopener noreferrer">
+                              {{ factor.provenance.kind }}
+                            </a>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+                <h3 class="traffic__subheading">Limitations</h3>
+                <ul class="traffic__list">
+                  @for (limitation of limitations; track limitation) {
+                    <li>{{ limitation }}</li>
                   }
-                </tbody>
-              </table>
+                </ul>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-expansion-panel class="traffic__audit">
+              <mat-expansion-panel-header>
+                <mat-panel-title>Sources and data audit</mat-panel-title>
+                <mat-panel-description>Snapshot {{ manifest.id }}</mat-panel-description>
+              </mat-expansion-panel-header>
+              <div class="traffic__grid">
+                <mat-card class="dt-card" appearance="outlined">
+                  <mat-card-content>
+                    <p class="traffic__label">Target date</p>
+                    <p class="traffic__value">{{ manifest.targetDate }}</p>
+                    <p class="traffic__hint">Timezone {{ manifest.timezone }}</p>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card class="dt-card" appearance="outlined">
+                  <mat-card-content>
+                    <p class="traffic__label">Grid history</p>
+                    <p class="traffic__value">{{ manifest.gridRange.start }} to {{ manifest.gridRange.end }}</p>
+                    <p class="traffic__hint">{{ manifest.gridMonths.length }} monthly files</p>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card class="dt-card" appearance="outlined">
+                  <mat-card-content>
+                    <p class="traffic__label">Price history</p>
+                    <p class="traffic__value">{{ manifest.priceRange.start }} to {{ manifest.priceRange.end }}</p>
+                    <p class="traffic__hint">{{ manifest.priceMonths.length }} monthly files</p>
+                  </mat-card-content>
+                </mat-card>
+                <mat-card class="dt-card" appearance="outlined">
+                  <mat-card-content>
+                    <p class="traffic__label">Day-ahead forecast source</p>
+                    <p class="traffic__value">{{ manifest.dayAheadForecastSource }}</p>
+                    <p class="traffic__hint">{{ manifest.filteredRows }} rows filtered out</p>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+
+            <div>
+              <h2 class="traffic__heading">Provenance</h2>
+              <div class="traffic__table-wrap">
+                <table class="traffic__table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Source</th>
+                      <th scope="col">Kind</th>
+                      <th scope="col">Series</th>
+                      <th scope="col">Link</th>
+                      <th scope="col">Note</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (source of manifest.sources; track source.id) {
+                      <tr>
+                        <td>{{ source.label }}</td>
+                        <td>{{ source.kind }}</td>
+                        <td>{{ source.seriesId || '—' }}</td>
+                        <td>
+                          @if (source.url) {
+                            <a [href]="source.url" target="_blank" rel="noopener noreferrer">Open</a>
+                          } @else {
+                            —
+                          }
+                        </td>
+                        <td>{{ source.note || '—' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </mat-card-content>
-        </mat-card>
 
-        <mat-card class="dt-card traffic__section traffic__placeholder" appearance="outlined">
-          <mat-card-content class="traffic__state-content">
-            <mat-icon aria-hidden="true">traffic</mat-icon>
-            <span>Tomorrow's PACE rush hour arrives in phase 03.</span>
-          </mat-card-content>
-        </mat-card>
+            <div>
+              <h2 class="traffic__heading">Row counts by month</h2>
+              <div class="traffic__table-wrap">
+                <table class="traffic__table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Series</th>
+                      <th scope="col">Month</th>
+                      <th scope="col">Rows</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (entry of manifest.gridMonths; track entry.month) {
+                      <tr>
+                        <td>Grid</td>
+                        <td>{{ entry.month }}</td>
+                        <td>{{ entry.rowCount }}</td>
+                      </tr>
+                    }
+                    @for (entry of manifest.priceMonths; track entry.month) {
+                      <tr>
+                        <td>Price</td>
+                        <td>{{ entry.month }}</td>
+                        <td>{{ entry.rowCount }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            </mat-expansion-panel>
+          }
+        }
       }
     }
   }

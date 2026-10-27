@@ -1,0 +1,93 @@
+import { Component, Input, OnChanges } from '@angular/core';
+import { IRankSlopeLine, IRankSlopeRow } from './rank-slope.interfaces';
+
+@Component({
+  selector: 'dt-rank-slope',
+  templateUrl: './rank-slope.component.html',
+  styleUrl: './rank-slope.component.scss'
+})
+export class RankSlopeComponent implements OnChanges {
+  @Input() public rows: IRankSlopeRow[] = [];
+
+  public readonly width = 420;
+  public readonly leftX = 138;
+  public readonly rightX = 282;
+  public readonly topY = 52;
+  public readonly rowHeight = 17;
+
+  public lines: IRankSlopeLine[] = [];
+  public height = 480;
+  public activeHour: number | null = null;
+  public ariaSummary = '';
+
+  public get activeLine(): IRankSlopeLine | null {
+    return this.lines.find((line: IRankSlopeLine): boolean => line.hour === this.activeHour) ?? null;
+  }
+
+  public get tooltipTopPercent(): number {
+    const line = this.activeLine;
+
+    if (!line) {
+      return 0;
+    }
+
+    return (Math.min(line.averageY, line.marginalY) / this.height) * 100;
+  }
+
+  public ngOnChanges(): void {
+    this.height = this.topY + Math.max(this.rows.length, 1) * this.rowHeight + 8;
+    const biggestChanges = [...this.rows]
+      .sort((first: IRankSlopeRow, second: IRankSlopeRow): number =>
+        Math.abs(second.marginalRank - second.averageRank) - Math.abs(first.marginalRank - first.averageRank)
+      )
+      .slice(0, 3)
+      .map((row: IRankSlopeRow): number => row.hour);
+
+    this.lines = this.rows.map((row: IRankSlopeRow): IRankSlopeLine => {
+      const change = row.marginalRank - row.averageRank;
+
+      return {
+        hour: row.hour,
+        hourLabel: row.hourLabel,
+        averageRank: row.averageRank,
+        marginalRank: row.marginalRank,
+        averageY: this._rankY(row.averageRank),
+        marginalY: this._rankY(row.marginalRank),
+        change,
+        isHighlighted: biggestChanges.includes(row.hour),
+        changeText: this._changeText(change),
+        description:
+          `${row.hourLabel}: average rank ${row.averageRank} (${Math.round(row.averageLbPerMwh)} lb/MWh), ` +
+          `marginal rank ${row.marginalRank} (${Math.round(row.marginalLbPerMwh)} lb/MWh)`
+      };
+    });
+    const highlighted = this.lines.filter((line: IRankSlopeLine): boolean => line.isHighlighted);
+    this.ariaSummary =
+      'Slope chart of hourly CO2 rank, average versus marginal emissions, 1 is cleanest. Biggest changes: ' +
+      highlighted.map((line: IRankSlopeLine): string => `${line.hourLabel} ${line.averageRank} to ${line.marginalRank}`).join(', ');
+  }
+
+  public activate(hour: number): void {
+    this.activeHour = hour;
+  }
+
+  public deactivate(): void {
+    this.activeHour = null;
+  }
+
+  public formatChange(change: number): string {
+    return change > 0 ? `+${change}` : `${change}`;
+  }
+
+  private _changeText(change: number): string {
+    if (change === 0) {
+      return 'no change';
+    }
+
+    return change < 0 ? `${Math.abs(change)} places cleaner on marginal` : `${change} places dirtier on marginal`;
+  }
+
+  private _rankY(rank: number): number {
+    return this.topY + (rank - 1) * this.rowHeight + this.rowHeight / 2;
+  }
+}

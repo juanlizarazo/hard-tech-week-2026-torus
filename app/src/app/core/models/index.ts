@@ -1,6 +1,7 @@
 export * from './asset.interfaces';
 export * from './emissions.interfaces';
 export * from './emissions.types';
+export * from './forecast.interfaces';
 export * from './plan.interfaces';
 export * from './provenance.interfaces';
 export * from './provenance.types';

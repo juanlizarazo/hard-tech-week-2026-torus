@@ -1,0 +1,119 @@
+<figure class="rs-figure">
+  <figcaption class="rs-title">Hour rank: average vs marginal CO2</figcaption>
+  <ul class="rs-legend">
+    <li class="rs-legend-item">
+      <svg class="rs-legend-swatch" viewBox="0 0 24 12" aria-hidden="true">
+        <line x1="1" y1="6" x2="23" y2="6" class="rs-swatch-accent"></line>
+      </svg>
+      <span>Biggest rank change (labelled)</span>
+    </li>
+    <li class="rs-legend-item">
+      <svg class="rs-legend-swatch" viewBox="0 0 24 12" aria-hidden="true">
+        <line x1="1" y1="6" x2="23" y2="6" class="rs-swatch-muted"></line>
+      </svg>
+      <span>Other hours</span>
+    </li>
+  </ul>
+
+  <div class="rs-plot">
+    <svg
+      class="rs-svg"
+      [attr.viewBox]="'0 0 ' + width + ' ' + height"
+      preserveAspectRatio="xMidYMin meet"
+      role="img"
+      [attr.aria-label]="ariaSummary"
+      (pointerleave)="deactivate()"
+    >
+      <text class="rs-head" [attr.x]="leftX" y="16" text-anchor="middle">Average</text>
+      <text class="rs-head" [attr.x]="rightX" y="16" text-anchor="middle">Marginal</text>
+      <text class="rs-head-sub" [attr.x]="width / 2" y="34" text-anchor="middle">rank 1 = cleanest hour</text>
+
+      @for (line of lines; track line.hour) {
+        @if (!line.isHighlighted) {
+          <line
+            class="rs-line"
+            [class.rs-line--active]="line.hour === activeHour"
+            [attr.x1]="leftX"
+            [attr.y1]="line.averageY"
+            [attr.x2]="rightX"
+            [attr.y2]="line.marginalY"
+          ></line>
+          <text class="rs-rank" [attr.x]="leftX - 10" [attr.y]="line.averageY + 4" text-anchor="end">{{ line.averageRank }}</text>
+          <text class="rs-rank" [attr.x]="rightX + 10" [attr.y]="line.marginalY + 4" text-anchor="start">{{ line.marginalRank }}</text>
+        }
+      }
+
+      @for (line of lines; track line.hour) {
+        @if (line.isHighlighted) {
+          <line
+            class="rs-line rs-line--accent"
+            [attr.x1]="leftX"
+            [attr.y1]="line.averageY"
+            [attr.x2]="rightX"
+            [attr.y2]="line.marginalY"
+          ></line>
+          <circle class="rs-dot" [attr.cx]="leftX" [attr.cy]="line.averageY" r="4"></circle>
+          <circle class="rs-dot" [attr.cx]="rightX" [attr.cy]="line.marginalY" r="4"></circle>
+          <text class="rs-label" [attr.x]="leftX - 10" [attr.y]="line.averageY + 4" text-anchor="end">{{ line.hourLabel }} #{{ line.averageRank }}</text>
+          <text class="rs-label" [attr.x]="rightX + 10" [attr.y]="line.marginalY + 4" text-anchor="start">#{{ line.marginalRank }} {{ line.hourLabel }}</text>
+        }
+      }
+
+      @if (activeLine; as active) {
+        <line class="rs-line rs-line--hover" [attr.x1]="leftX" [attr.y1]="active.averageY" [attr.x2]="rightX" [attr.y2]="active.marginalY"></line>
+      }
+
+      @for (line of lines; track line.hour) {
+        <line
+          class="rs-hit"
+          tabindex="0"
+          [attr.aria-label]="line.description"
+          [attr.x1]="leftX"
+          [attr.y1]="line.averageY"
+          [attr.x2]="rightX"
+          [attr.y2]="line.marginalY"
+          (pointerenter)="activate(line.hour)"
+          (pointerdown)="activate(line.hour)"
+          (focus)="activate(line.hour)"
+          (blur)="deactivate()"
+        ></line>
+      }
+    </svg>
+
+    @if (activeLine; as active) {
+      <div class="rs-tooltip" [style.top.%]="tooltipTopPercent">
+        <div class="rs-tooltip-title">{{ active.hourLabel }}</div>
+        <div class="rs-tooltip-row"><span>Average</span><span class="rs-tooltip-value">#{{ active.averageRank }}</span></div>
+        <div class="rs-tooltip-row"><span>Marginal</span><span class="rs-tooltip-value">#{{ active.marginalRank }}</span></div>
+        <div class="rs-tooltip-note">{{ active.changeText }}</div>
+      </div>
+    }
+  </div>
+
+  <details class="rs-table-details">
+    <summary class="rs-table-summary">View as table</summary>
+    <div class="rs-table-scroll">
+      <table class="rs-table">
+        <caption class="rs-visually-hidden">Average and marginal CO2 rank by hour</caption>
+        <thead>
+          <tr>
+            <th scope="col" class="rs-th">Hour</th>
+            <th scope="col" class="rs-th">Average rank</th>
+            <th scope="col" class="rs-th">Marginal rank</th>
+            <th scope="col" class="rs-th">Change</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of lines; track line.hour) {
+            <tr>
+              <th scope="row" class="rs-th rs-th--row">{{ line.hourLabel }}</th>
+              <td class="rs-td">{{ line.averageRank }}</td>
+              <td class="rs-td">{{ line.marginalRank }}</td>
+              <td class="rs-td">{{ formatChange(line.change) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </details>
+</figure>
