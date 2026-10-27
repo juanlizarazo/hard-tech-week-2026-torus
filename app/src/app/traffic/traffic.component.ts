@@ -3,7 +3,7 @@ import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
-import { GridSignalsService, LoadForecastService, SnapshotService, emissionFactors } from '@app/core';
+import { GridSignalsService, LoadForecastService, SnapshotService, PlanningDayService, emissionFactors } from '@app/core';
 import { weatherWeightsProvenance } from '@app/core/forecast/load-forecast.constants';
 import {
   AlertBannerComponent,
@@ -50,8 +50,10 @@ export class TrafficComponent {
   private readonly _snapshotService = inject(SnapshotService);
   private readonly _gridSignalsService = inject(GridSignalsService);
   private readonly _loadForecastService = inject(LoadForecastService);
+  private readonly _planningDayService = inject(PlanningDayService);
   private readonly _options$ = new BehaviorSubject<ITrafficChartOptions>({ ...trafficChartDefaults });
 
+  public readonly day$ = this._planningDayService.day$;
   public readonly factors = [emissionFactors.COAL, emissionFactors.GAS];
   public readonly limitations = trafficLimitations;
   public readonly methodSteps = trafficMethodSteps;

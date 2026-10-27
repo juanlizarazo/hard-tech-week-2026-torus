@@ -3,7 +3,7 @@ import { IStartStep } from './start.interfaces';
 export const startSettings = {
   SITE_ID: 'airport',
   INTERVALS_PER_DAY: 96,
-  ERROR_MESSAGE: "We could not read tomorrow's grid data. Check your connection and refresh the page.",
+  ERROR_MESSAGE: "We could not read the PACE grid data. Check your connection and refresh the page.",
   EMPTY_MESSAGE: "Grid data isn't loaded yet. Refresh in a minute."
 };
 

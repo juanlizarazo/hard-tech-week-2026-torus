@@ -12,7 +12,8 @@
 | 03 | Grid signals (marginal CO2, PACE forecast score) + Traffic Report screen | No | 02, 04 | `phase-03-traffic.md` | Done |
 | 04 | Month backtest + Backtest screen | No | 02, 03 (rolling LP and oracle plug in once 02 merges) | `phase-04-backtest.md` | Done |
 | 05 | Stretch: our own PACE net-load forecast vs PACE's day-ahead forecast | No — stretch | — (01–04 merged) | `phase-05-forecast.md` | Done |
-| 06 | Last mile: daily auto-sync + demo pin, clarity redesign, audit, persona reviews, rehearsal | — | — | `phase-06a-sync-and-clarity.md` (first of several) | In progress |
+| 06a | Last mile: daily auto-sync + demo pin, clarity redesign | — | — | `phase-06a-sync-and-clarity.md` | Done |
+| 06b | Audit fixes: demo blockers, data and engine honesty, insight copy, plant map, launch | — | — | `phase-06b-winning-demo.md` | In progress |
 
 ### Phase scope
 
@@ -92,12 +93,17 @@ Self-imposed:
 - target under 5 minutes
 - The forecast, the emission factor, the tariff engine and the optimization are all deterministic code. Do not say "AI-powered."
 
+## Done instead of cut
+
+- **Scheduled data refresh** — was cut; 06a ships a daily 3 p.m. `refreshSnapshot` with validation, a last-good fallback and a demo pin, so the demo still serves a frozen snapshot
+
 ## Cut on purpose
 
 From the brief's out-of-scope list (§6), cut because the brief says so:
 
 - Feeder or substation heat maps — no public data
 - Literal routing maps — the metaphor lives in the copy only
+- Context map of PACE plants: **in**, because it explains marginal CO2 (solar fades, coal and gas carry the evening rush). It is not a routing or feeder map
 - LLM agents that "bid" or "negotiate" — Utah C&I customers pay tariffs, not LMPs
 - LSTM, transformer or Prophet forecasters — a transparent model judges can question beats a black box
 - Electricity Maps, WattTime or ERCOT integrations — free tiers too narrow or irrelevant to Utah
@@ -107,7 +113,6 @@ From the brief's out-of-scope list (§6), cut because the brief says so:
 Our own cuts:
 
 - **Cloud Functions on the demo path** — the snapshot is read straight from Firestore and the LP solves in the browser, so no function sits between the judge and a number
-- **Live or scheduled data refresh** — the demo serves a frozen snapshot by rule; the only refresh is the hand-run Wednesday re-freeze
 - **Wattsmart event-probability model** — the reserve slider already demos the constraint and the trade-off; a probability model we can't validate in 42 hours adds a number we can't defend
 - **Schedule 9** — same on-peak logic as Schedule 8 with different rates; adds no new insight to the 6-vs-8 toggle
 - **One-minute flywheel sub-simulation** — the Spin vs Pulse stack plus the battery ramp limit already shows the hybrid split at 15 minutes; sub-second control is Lattice's job, not ours

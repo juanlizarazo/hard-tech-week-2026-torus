@@ -204,14 +204,6 @@
   color: var(--dt-viz-muted);
 }
 
-.dt-hour-chart__visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
 
 @media (max-width: 959.98px) {
   .dt-hour-chart__tooltip {

@@ -21,7 +21,7 @@ import {
   subscribeOn,
   switchMap
 } from 'rxjs';
-import { GridSignalsService, SnapshotService } from '@app/core';
+import { GridSignalsService, SnapshotService, PlanningDayService } from '@app/core';
 import { IMarginalEmissionsSeries, ISiteArchetype, IStationAssets, TariffScheduleId } from '@app/core/models';
 import { PlanEngineHelper, PlanSolverService, placeholderMefSeries } from '@app/core/plan';
 import { SitesHelper } from '@app/core/sites';
@@ -76,6 +76,7 @@ export class PlanComponent {
   private readonly _planSolverService = inject(PlanSolverService);
   private readonly _controls$ = new BehaviorSubject<IPlanControls>(PlanHelper.defaultControls());
   private readonly _gridSignalsService = inject(GridSignalsService);
+  private readonly _planningDayService = inject(PlanningDayService);
   private readonly _mef$: Observable<IMarginalEmissionsSeries> = this._gridSignalsService.marginalEmissions$.pipe(
     subscribeOn(asapScheduler),
     map(([fossilGenerationSeries]) => PlanHelper.mefOrPlaceholder(fossilGenerationSeries)),
@@ -85,6 +86,7 @@ export class PlanComponent {
   private _lastState: IPlanSolveState | null = null;
 
   public dialsOpen = false;
+  public readonly day$ = this._planningDayService.day$;
   public readonly siteCards: IPlanSiteCard[] = PlanHelper.buildSiteCards();
   public readonly defaults = planDefaults;
   public controls = this._controls$.value;

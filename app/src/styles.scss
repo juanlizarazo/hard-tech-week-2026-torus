@@ -1,8 +1,11 @@
+@use '@angular/cdk' as cdk;
 @use '@angular/material' as mat;
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@include cdk.a11y-visually-hidden();
 
 :root {
   --dt-font: 'Overpass', 'Helvetica Neue', Arial, sans-serif;

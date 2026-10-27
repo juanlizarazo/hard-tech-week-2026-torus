@@ -1,12 +1,12 @@
 <div class="dt-page">
   <header class="dt-page__head">
     <p class="dt-page__step">Step 2 of 3</p>
-    <h1 class="dt-question">What should the Torus Station do tomorrow?</h1>
+    <h1 class="dt-question">What should the Torus Station do {{ (day$ | async)?.word }}?</h1>
     @if (solve$ | async; as solve) {
       @if (solve.viewModel; as viewModel) {
         <p class="dt-answer" aria-live="polite">{{ viewModel.answer }}</p>
       } @else {
-        <p class="dt-answer">Solving tomorrow's plan in your browser…</p>
+        <p class="dt-answer">Solving the plan in your browser…</p>
       }
     }
   </header>
@@ -16,7 +16,7 @@
       @case ('loading') {
         <div class="dt-state" role="status">
           <mat-spinner diameter="24"></mat-spinner>
-          <span>Reading tomorrow's grid data and loading the solver…</span>
+          <span>Reading PACE grid data and loading the solver…</span>
         </div>
       }
       @case ('error') {
@@ -120,7 +120,7 @@
                   aria-labelledby="dial-day"
                   hideSingleSelectionIndicator
                 >
-                  <mat-button-toggle value="target">Tomorrow</mat-button-toggle>
+                  <mat-button-toggle value="target">{{ (day$ | async)?.name }}</mat-button-toggle>
                   <mat-button-toggle value="july-peak">July's peak day</mat-button-toggle>
                 </mat-button-toggle-group>
               </div>
@@ -203,7 +203,7 @@
                       [mefIsPlaceholder]="viewModel.mefIsPlaceholder"
                     ></dt-three-clocks>
                     <div how-to-read>
-                      <p class="dt-hint">Three lanes share one time axis, 15 minutes per column, across tomorrow and the day after.</p>
+                      <p class="dt-hint">Three lanes share one time axis, 15 minutes per column, across the planning day and the day after.</p>
                       <ul class="dt-list">
                         <li><strong>Bill:</strong> dark blocks are the tariff's on-peak hours, labeled with the energy price. On Schedule 8 only these hours set the demand charge. On Schedule 6 every hour can, so the lane is hatched.</li>
                         <li><strong>Grid price:</strong> PACE's day-ahead wholesale price from EDAM. Light is cheap, dark blue is expensive. Hatched cells are hours not yet posted.</li>

@@ -3,7 +3,7 @@ import { IGlossaryEntry } from './glossary.interfaces';
 export const glossary = {
   RUSH_HOUR: {
     term: 'Rush hour',
-    short: "The four hours tomorrow when PACE's own forecast says the grid is busiest.",
+    short: "The four hours of the planning day when PACE's own forecast says the grid is busiest.",
     long: "DETOUR takes PACE's day-ahead load forecast and finds the busiest four-hour block. That block is drawn as orange stripes on every chart. When no forecast is posted yet, it falls back to a fixed late-afternoon block and says so.",
     whyItMatters: 'The Torus Station tries to keep the site off the grid in this window, and the Wattsmart reserve is held through it.'
   },

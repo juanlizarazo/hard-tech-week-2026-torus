@@ -1,6 +1,6 @@
 <figure class="dt-hour-chart__figure">
   @if (title) {
-    <figcaption class="dt-hour-chart__visually-hidden">{{ title }}</figcaption>
+    <figcaption class="cdk-visually-hidden">{{ title }}</figcaption>
   }
 
   @if (!hasData) {
@@ -116,7 +116,7 @@
       <summary class="dt-hour-chart__table-summary">View as table</summary>
       <div class="dt-hour-chart__table-scroll">
         <table class="dt-hour-chart__table">
-          <caption class="dt-hour-chart__visually-hidden">{{ title || 'Chart data' }} ({{ yLabel }})</caption>
+          <caption class="cdk-visually-hidden">{{ title || 'Chart data' }} ({{ yLabel }})</caption>
           <thead>
             <tr>
               <th scope="col" class="dt-hour-chart__th">Time</th>
