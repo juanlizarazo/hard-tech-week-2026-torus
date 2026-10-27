@@ -20,8 +20,8 @@
 .plan__dials-body {
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  padding: 20px;
+  gap: 18px;
+  padding: 18px 20px 20px;
   background: var(--dt-panel);
   border: 1px solid var(--dt-line);
   border-radius: 12px;
@@ -29,14 +29,14 @@
 
 .plan__dials-title {
   margin: 0;
-  font-size: var(--dt-text-21);
+  font-size: var(--dt-text-17);
   font-weight: 800;
 }
 
 .plan__dial {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -62,44 +62,49 @@
   color: var(--dt-muted);
 }
 
-.plan__sites {
+.plan__select-wrap {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
 }
 
-.plan__site {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 12px;
+.plan__select {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 36px 8px 12px;
   border: 1px solid var(--dt-line);
   border-radius: 8px;
   background: var(--dt-panel);
   color: var(--dt-ink);
   font: inherit;
-  text-align: left;
+  font-size: var(--dt-text-15);
+  font-weight: 600;
+  appearance: none;
   cursor: pointer;
 
   &:hover {
     border-color: var(--dt-ink);
   }
+
+  &:focus-visible {
+    outline: 2px solid var(--dt-focus);
+    outline-offset: 2px;
+  }
 }
 
-.plan__site--active {
-  border-color: var(--dt-ink);
-  box-shadow: inset 4px 0 0 var(--dt-ink);
-}
-
-.plan__site-name {
-  font-size: var(--dt-text-15);
-  font-weight: 800;
-}
-
-.plan__site-meta {
-  font-size: var(--dt-text-13);
+.plan__select-icon {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
   color: var(--dt-muted);
-  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.plan__dials-rule {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--dt-line-soft);
 }
 
 .plan__toggle {

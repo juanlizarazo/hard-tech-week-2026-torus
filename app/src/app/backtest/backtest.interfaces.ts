@@ -10,9 +10,20 @@ export interface IMonthCalendarCell {
   isOffPeakDay: boolean;
   offPeakReason: string;
   peakKw: number;
-  barFraction: number;
+  leadPeakKw: number;
+  peakFraction: number;
+  leadFraction: number;
   isPeakDay: boolean;
   isSelected: boolean;
+}
+
+export interface IMonthCalendarScale {
+  minKw: number;
+  maxKw: number;
+  monthPeakKw: number;
+  leadMonthPeakKw: number;
+  leadMonthPeakFraction: number;
+  leadName: string;
 }
 
 export interface IComponentBar {
@@ -26,7 +37,6 @@ export interface IComponentBarGroup {
   id: string;
   label: string;
   baselineAmount: number;
-  source: IProvenance;
   bars: IComponentBar[];
 }
 
@@ -47,7 +57,7 @@ export interface IBacktestTile {
   value: string;
   hint: string;
   tone: 'good' | 'bad' | 'neutral';
-  source: IProvenance;
+  source: IProvenance | null;
 }
 
 export interface IBacktestLegendItem {
@@ -96,7 +106,9 @@ export interface IBacktestViewModel {
   cyclesNotice: string;
   dayNotice: string;
   calendarCells: IMonthCalendarCell[];
+  calendarScale: IMonthCalendarScale;
   barGroups: IComponentBarGroup[];
+  billSource: IProvenance;
   legend: IBacktestLegendItem[];
   cycleRows: IBacktestCycleRow[];
   dayCharts: IBacktestDayCharts;

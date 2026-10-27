@@ -9,6 +9,7 @@ import {
   IBacktestViewModel,
   IComponentBarGroup,
   IMonthCalendarCell,
+  IMonthCalendarScale,
 } from './backtest.interfaces';
 
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -22,6 +23,7 @@ export class BacktestHelper {
     const activeDate = selectedDate ?? defaultDate;
     const tiles = BacktestHelper.tiles(result);
     const cycleRows = BacktestHelper.cycleRows(result);
+    const calendarScale = BacktestHelper.calendarScale(result);
 
     return {
       answer: BacktestHelper.answerSentence(result),
@@ -33,8 +35,10 @@ export class BacktestHelper {
       componentNotice: BacktestHelper.componentNotice(result),
       cyclesNotice: BacktestHelper.cyclesNotice(cycleRows),
       dayNotice: BacktestHelper.dayNotice(result, activeDate),
-      calendarCells: BacktestHelper.calendarCells(result, activeDate),
+      calendarCells: BacktestHelper.calendarCells(result, activeDate, calendarScale),
+      calendarScale,
       barGroups: BacktestHelper.barGroups(result),
+      billSource: result.sources.tariff,
       legend: result.strategies.map((entry: IBacktestStrategyResult) => ({
         id: entry.strategy.id,
         label: BacktestHelper.strategyName(entry),
@@ -68,7 +72,11 @@ export class BacktestHelper {
       return `Not this time: planning one day ahead, ${leadName} did not lower the July bill on ${site}.`;
     }
 
-    return `Yes. Planning one day ahead with only what was known the afternoon before, ${leadName} would have cut the July bill on ${site} by ${BacktestHelper.formatMoney(total)}, mostly by flattening the peaks that set the demand charge.`;
+    const capture = result.lead.captureRate;
+    const captureText =
+      capture === null ? '' : ` That is a ${BacktestHelper.formatNumber(capture * 100)}% capture rate against ${backtestStrategyNames.oracle}.`;
+
+    return `Yes. Planning one day ahead with only what was known the afternoon before, ${leadName} would have cut the July bill on ${site} by ${BacktestHelper.formatMoney(total)}, mostly by flattening the peaks that set the demand charge.${captureText}`;
   }
 
   public static tiles(result: IBacktestResult): IBacktestTile[] {
@@ -77,13 +85,15 @@ export class BacktestHelper {
     const demandShare = total > 0 ? (lead.savings.demand / total) * 100 : 0;
     const capture = lead.captureRate;
     const shaver = result.strategies.find((entry: IBacktestStrategyResult) => entry.strategy.role === 'heuristic');
+    const leadName = BacktestHelper.strategyName(lead);
+    const oracleName = backtestStrategyNames.oracle;
 
     return [
       {
         id: 'saved',
         label: 'Saved in July',
         value: BacktestHelper.formatMoney(total),
-        hint: `Bill ${BacktestHelper.formatMoney(result.baseline.bill.total)} with no storage, ${BacktestHelper.formatMoney(lead.bill.total)} with DETOUR. Base rates, riders excluded.`,
+        hint: `${backtestStrategyNames.baseline} ${BacktestHelper.formatMoney(result.baseline.bill.total)}, ${leadName} ${BacktestHelper.formatMoney(lead.bill.total)}. Base rates, riders excluded.`,
         tone: total > 0 ? 'good' : 'neutral',
         source: result.sources.tariff,
       },
@@ -91,9 +101,9 @@ export class BacktestHelper {
         id: 'demand-share',
         label: 'From the demand charge',
         value: `${BacktestHelper.formatNumber(demandShare)}%`,
-        hint: `Billed demand fell from ${BacktestHelper.formatNumber(result.baseline.bill.determinants.demandKw)} kW to ${BacktestHelper.formatNumber(lead.bill.determinants.demandKw)} kW.`,
+        hint: `${leadName} cut billed demand from ${BacktestHelper.formatNumber(result.baseline.bill.determinants.demandKw)} kW to ${BacktestHelper.formatNumber(lead.bill.determinants.demandKw)} kW.`,
         tone: 'neutral',
-        source: result.sources.site,
+        source: null,
       },
       {
         id: 'capture',
@@ -101,10 +111,10 @@ export class BacktestHelper {
         value: capture === null ? 'Not available' : `${BacktestHelper.formatNumber(capture * 100)}%`,
         hint:
           capture === null
-            ? 'Perfect hindsight could not be solved for this site.'
-            : `Of the ${result.oracle ? BacktestHelper.formatMoney(result.oracle.savings.total) : ''} perfect hindsight would have saved.`,
+            ? `${oracleName} could not be solved for this site.`
+            : `${leadName}'s share of the ${result.oracle ? BacktestHelper.formatMoney(result.oracle.savings.total) : ''} ${oracleName} saved.`,
         tone: 'neutral',
-        source: result.sources.tariff,
+        source: null,
       },
       {
         id: 'wattsmart',
@@ -153,7 +163,11 @@ export class BacktestHelper {
       .reduce((sum: number, line) => sum + line.amount, 0);
     const dollarText = dollars > 0 ? `, worth ${BacktestHelper.formatMoney(dollars)} with no storage` : '';
 
-    return `One 15-minute interval, ${BacktestHelper.formatTime(peak.localHour, peak.localMinute)} on ${BacktestHelper.formatDay(peak.localDate)}, set the whole month's demand charge${dollarText}.`;
+    const leadPeak = BacktestHelper.leadMonthPeakKw(result);
+    const leadText =
+      leadPeak > 0 ? ` ${BacktestHelper.strategyName(result.lead)} kept every billed hour at or under ${BacktestHelper.formatNumber(leadPeak)} kW.` : '';
+
+    return `One 15-minute interval, ${BacktestHelper.formatTime(peak.localHour, peak.localMinute)} on ${BacktestHelper.formatDay(peak.localDate)}, set the whole month's demand charge${dollarText}.${leadText}`;
   }
 
   public static componentNotice(result: IBacktestResult): string {
@@ -206,9 +220,36 @@ export class BacktestHelper {
     return `${BacktestHelper.formatNumber(peak.kw)} kW at ${BacktestHelper.formatTime(peak.localHour, peak.localMinute)} on ${BacktestHelper.formatDay(peak.localDate)}`;
   }
 
-  public static calendarCells(result: IBacktestResult, activeDate: string): IMonthCalendarCell[] {
-    const monthPeakKw = Math.max(1, ...result.days.map((day: IBacktestDay) => day.baselinePeakKw));
+  public static leadMonthPeakKw(result: IBacktestResult): number {
+    return Math.max(0, ...result.days.map((day: IBacktestDay) => day.leadPeakKw));
+  }
 
+  public static calendarScale(result: IBacktestResult): IMonthCalendarScale {
+    const billedDays = result.days.filter((day: IBacktestDay) => day.baselinePeakKw > 0);
+    const monthPeakKw = Math.max(1, ...billedDays.map((day: IBacktestDay) => day.baselinePeakKw));
+    const lowest = Math.min(monthPeakKw, ...billedDays.flatMap((day: IBacktestDay) => [day.baselinePeakKw, day.leadPeakKw]));
+    const step = backtestScreenSettings.CALENDAR_SCALE_STEP_KW;
+    const minKw = Math.max(0, Math.floor((lowest - (monthPeakKw - lowest) * 0.25) / step) * step);
+    const maxKw = monthPeakKw;
+    const leadMonthPeakKw = BacktestHelper.leadMonthPeakKw(result);
+
+    return {
+      minKw,
+      maxKw,
+      monthPeakKw,
+      leadMonthPeakKw,
+      leadMonthPeakFraction: BacktestHelper.scaleFraction(leadMonthPeakKw, minKw, maxKw),
+      leadName: BacktestHelper.strategyName(result.lead),
+    };
+  }
+
+  public static scaleFraction(kw: number, minKw: number, maxKw: number): number {
+    const span = maxKw - minKw || 1;
+
+    return Math.min(1, Math.max(0, (kw - minKw) / span));
+  }
+
+  public static calendarCells(result: IBacktestResult, activeDate: string, scale: IMonthCalendarScale): IMonthCalendarCell[] {
     return result.days.map((day: IBacktestDay) => {
       const weekday = new Date(`${day.localDate}T00:00:00Z`).getUTCDay();
       const isOffPeakDay = !day.isWeekday || day.isHoliday;
@@ -220,7 +261,9 @@ export class BacktestHelper {
         isOffPeakDay,
         offPeakReason: day.isHoliday ? 'Tariff holiday: no on-peak window' : isOffPeakDay ? 'Weekend: no on-peak window' : '',
         peakKw: day.baselinePeakKw,
-        barFraction: day.baselinePeakKw / monthPeakKw,
+        leadPeakKw: day.leadPeakKw,
+        peakFraction: BacktestHelper.scaleFraction(day.baselinePeakKw, scale.minKw, scale.maxKw),
+        leadFraction: BacktestHelper.scaleFraction(day.leadPeakKw, scale.minKw, scale.maxKw),
         isPeakDay: day.hasBaselinePeak,
         isSelected: day.localDate === activeDate,
       };
@@ -229,8 +272,6 @@ export class BacktestHelper {
 
   public static barGroups(result: IBacktestResult): IComponentBarGroup[] {
     const lines = result.baseline.bill.lines;
-    const sourceFor = (match: (id: string) => boolean): IComponentBarGroup['source'] =>
-      (lines.find((line) => match(line.id)) ?? lines[0]).provenance;
     const baselineFor = (match: (id: string) => boolean): number =>
       lines.filter((line) => match(line.id)).reduce((sum: number, line) => sum + line.amount, 0);
     const groups: { id: string; label: string; match: (id: string) => boolean; pick: (entry: IBacktestStrategyResult) => number }[] = [
@@ -244,7 +285,6 @@ export class BacktestHelper {
       id: group.id,
       label: group.label,
       baselineAmount: baselineFor(group.match),
-      source: sourceFor(group.match),
       bars: result.strategies.map((entry: IBacktestStrategyResult) => ({
         strategyId: entry.strategy.id,
         strategyLabel: BacktestHelper.strategyName(entry),

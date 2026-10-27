@@ -52,13 +52,9 @@
               [carbonCaption]="preview.carbonCaption"
               [mefIsPlaceholder]="preview.mefIsPlaceholder"
             ></dt-three-clocks>
-            <p class="dt-hint">
-              @if (preview.rushIsAssumption) {
-                PACE has not posted tomorrow's forecast yet, so the rush hour is an assumed late-afternoon block.
-              } @else {
-                Rush hour is the busiest four hours in PACE's own forecast for tomorrow. Orange stripes mark it on every chart.
-              }
-            </p>
+            @if (preview.rushIsAssumption) {
+              <p class="dt-hint">PACE has not posted tomorrow's forecast yet, so the rush hour is an assumed late-afternoon block.</p>
+            }
           </section>
         }
       }
@@ -78,7 +74,7 @@
             @if (step.step === '1' && (state$ | async)?.preview; as preview) {
               <p class="start__step-live">Rush hour tomorrow: <strong class="dt-num">{{ preview.rushLabel }}</strong></p>
             }
-            <a class="start__step-link" [routerLink]="step.path">
+            <a class="start__step-link" [class.start__step-link--primary]="step.isPrimary" [routerLink]="step.path">
               <span>{{ step.linkLabel }}</span>
               <mat-icon aria-hidden="true">east</mat-icon>
             </a>
@@ -90,7 +86,6 @@
 
   <section class="dt-section" aria-labelledby="start-words-title">
     <h2 class="dt-section__title" id="start-words-title">Six words to know</h2>
-    <p class="dt-hint">Dotted words are explained anywhere they appear. Hover or focus for a line, select for more.</p>
     <dl class="start__words">
       <div class="start__word">
         <dt class="start__word-term"><dt-term key="PACE">PACE</dt-term></dt>

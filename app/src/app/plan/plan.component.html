@@ -50,25 +50,74 @@
               <h2 class="plan__dials-title">Dials</h2>
 
               <div class="plan__dial">
-                <span class="plan__dial-label" id="dial-site">Site</span>
-                <div class="plan__sites" role="radiogroup" aria-labelledby="dial-site">
-                  @for (card of siteCards; track card.archetype.id) {
-                    <button
-                      type="button"
-                      role="radio"
-                      class="plan__site"
-                      [class.plan__site--active]="card.archetype.id === controls.siteId"
-                      [attr.aria-checked]="card.archetype.id === controls.siteId"
-                      (click)="onSiteSelect(card.archetype)"
-                    >
-                      <span class="plan__site-name">{{ siteShortName(card.archetype) }}</span>
-                      <span class="plan__site-meta">
-                        July peak {{ card.julyStats.peakKw | number: '1.0-0' }} kW, bill {{ card.julyBill.total | currency: 'USD' : 'symbol' : '1.0-0' }}
-                      </span>
-                    </button>
-                  }
+                <label class="plan__dial-label" for="dial-site">Site</label>
+                <div class="plan__select-wrap">
+                  <select
+                    id="dial-site"
+                    class="plan__select"
+                    [value]="controls.siteId"
+                    (change)="onSiteChange($any($event.target).value)"
+                  >
+                    @for (card of siteCards; track card.archetype.id) {
+                      <option [value]="card.archetype.id" [selected]="card.archetype.id === controls.siteId">
+                        {{ siteShortName(card.archetype) }}
+                      </option>
+                    }
+                  </select>
+                  <mat-icon class="plan__select-icon" aria-hidden="true">expand_more</mat-icon>
                 </div>
+                @if (selectedSiteCard; as card) {
+                  <span class="plan__dial-hint">
+                    July peak {{ card.julyStats.peakKw | number: '1.0-0' }} kW, bill {{ card.julyBill.total | currency: 'USD' : 'symbol' : '1.0-0' }}
+                  </span>
+                }
               </div>
+
+              <div class="plan__dial">
+                <label class="plan__dial-label plan__dial-label--value" for="co2-weight">
+                  <dt-term key="CO2_WEIGHT">CO2 weight</dt-term>
+                  <strong class="dt-num plan__dial-value">${{ controls.co2WeightPerKg | number: '1.2-2' }}/kg</strong>
+                </label>
+                <mat-slider
+                  class="plan__slider"
+                  [min]="0"
+                  [max]="defaults.CO2_WEIGHT_MAX_PER_KG"
+                  [step]="defaults.CO2_WEIGHT_STEP_PER_KG"
+                  discrete
+                >
+                  <input
+                    id="co2-weight"
+                    matSliderThumb
+                    [value]="controls.co2WeightPerKg"
+                    (valueChange)="onCo2WeightChange($event)"
+                  />
+                </mat-slider>
+                <span class="plan__dial-hint">$0 plans for the bill only. Higher pays to charge in cleaner hours.</span>
+              </div>
+
+              <div class="plan__dial">
+                <label class="plan__dial-label plan__dial-label--value" for="wattsmart-reserve">
+                  <dt-term key="WATTSMART">Wattsmart reserve</dt-term>
+                  <strong class="dt-num plan__dial-value">{{ controls.wattsmartReserveKwh | number: '1.0-0' }} kWh</strong>
+                </label>
+                <mat-slider
+                  class="plan__slider"
+                  [min]="0"
+                  [max]="maxReserveKwh"
+                  [step]="defaults.RESERVE_STEP_KWH"
+                  discrete
+                >
+                  <input
+                    id="wattsmart-reserve"
+                    matSliderThumb
+                    [value]="controls.wattsmartReserveKwh"
+                    (valueChange)="onReserveChange($event)"
+                  />
+                </mat-slider>
+                <span class="plan__dial-hint">Kept in the station through rush hour for a grid call. More reserve, less saving.</span>
+              </div>
+
+              <hr class="plan__dials-rule" />
 
               <div class="plan__dial">
                 <span class="plan__dial-label" id="dial-day">Day</span>
@@ -116,50 +165,6 @@
                 </mat-button-toggle-group>
                 <span class="plan__dial-hint">Shaving below a peak the month already set saves nothing.</span>
               </div>
-
-              <div class="plan__dial">
-                <label class="plan__dial-label plan__dial-label--value" for="co2-weight">
-                  <dt-term key="CO2_WEIGHT">CO2 weight</dt-term>
-                  <strong class="dt-num plan__dial-value">${{ controls.co2WeightPerKg | number: '1.2-2' }}/kg</strong>
-                </label>
-                <mat-slider
-                  class="plan__slider"
-                  [min]="0"
-                  [max]="defaults.CO2_WEIGHT_MAX_PER_KG"
-                  [step]="defaults.CO2_WEIGHT_STEP_PER_KG"
-                  discrete
-                >
-                  <input
-                    id="co2-weight"
-                    matSliderThumb
-                    [value]="controls.co2WeightPerKg"
-                    (valueChange)="onCo2WeightChange($event)"
-                  />
-                </mat-slider>
-                <span class="plan__dial-hint">$0 plans for the bill only. Higher pays more to charge in cleaner hours.</span>
-              </div>
-
-              <div class="plan__dial">
-                <label class="plan__dial-label plan__dial-label--value" for="wattsmart-reserve">
-                  <dt-term key="WATTSMART">Wattsmart reserve</dt-term>
-                  <strong class="dt-num plan__dial-value">{{ controls.wattsmartReserveKwh | number: '1.0-0' }} kWh</strong>
-                </label>
-                <mat-slider
-                  class="plan__slider"
-                  [min]="0"
-                  [max]="maxReserveKwh"
-                  [step]="defaults.RESERVE_STEP_KWH"
-                  discrete
-                >
-                  <input
-                    id="wattsmart-reserve"
-                    matSliderThumb
-                    [value]="controls.wattsmartReserveKwh"
-                    (valueChange)="onReserveChange($event)"
-                  />
-                </mat-slider>
-                <span class="plan__dial-hint">Energy kept in the station through rush hour for a grid call. More reserve, less bill saving.</span>
-              </div>
             </div>
           </aside>
 
@@ -188,7 +193,9 @@
                   <div class="dt-figures plan__figures">
                     @for (tile of viewModel.tiles; track tile.id) {
                       <dt-figure [value]="tile.value" [label]="tile.label" [detail]="tile.detail" [tone]="tile.tone">
-                        <dt-source-chip figure-source [label]="tile.source"></dt-source-chip>
+                        @if (tile.source) {
+                          <dt-source-chip figure-source [label]="tile.source"></dt-source-chip>
+                        }
                       </dt-figure>
                     }
                   </div>
@@ -257,7 +264,7 @@
                   <section class="dt-section" aria-labelledby="plan-bill-title">
                     <h2 class="dt-section__title" id="plan-bill-title">The bill, line by line</h2>
                     <p class="dt-hint">
-                      {{ viewModel.controls.peakSoFarMode === 'fresh' ? 'The 48-hour plan billed as if it were the whole month.' : viewModel.result.baselineBill.month + ' to date with no storage, plus the 48-hour plan.' }}
+                      {{ viewModel.billTableCaption }}
                       Base rates only, <dt-term key="RIDERS">riders</dt-term> excluded.
                     </p>
                     <div class="dt-table-wrap">

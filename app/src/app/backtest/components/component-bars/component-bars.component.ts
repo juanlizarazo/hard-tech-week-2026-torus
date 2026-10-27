@@ -1,12 +1,11 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CurrencyPipe, NgClass } from '@angular/common';
-import { SourceChipComponent } from '@app/shared/components';
 import { IBacktestLegendItem, IComponentBarGroup } from '../../backtest.interfaces';
 import { IComponentBarGroupView } from './component-bars.interfaces';
 
 @Component({
   selector: 'dt-component-bars',
-  imports: [CurrencyPipe, NgClass, SourceChipComponent],
+  imports: [CurrencyPipe, NgClass],
   templateUrl: './component-bars.component.html',
   styleUrl: './component-bars.component.scss'
 })

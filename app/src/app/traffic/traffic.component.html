@@ -187,7 +187,6 @@
                                   <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">MAPE</th>
                                   <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Bias</th>
                                   <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Low at peak</th>
-                                  <th class="dt-table__cell dt-table__cell--head" scope="col">Source</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -197,9 +196,6 @@
                                     <td class="dt-table__cell dt-table__cell--num">{{ row.score.mapePercent | number: '1.1-1' }}%</td>
                                     <td class="dt-table__cell dt-table__cell--num">{{ row.score.biasPercent | number: '1.1-1' }}%</td>
                                     <td class="dt-table__cell dt-table__cell--num">{{ row.score.peakUnderForecastRate | number: '1.0-0' }}%</td>
-                                    <td class="dt-table__cell">
-                                      <dt-source-chip [label]="row.provenance.label" [kind]="row.provenance.kind" [url]="row.provenance.url" [note]="row.provenance.note ?? ''"></dt-source-chip>
-                                    </td>
                                   </tr>
                                 }
                               </tbody>
@@ -212,8 +208,6 @@
                           </p>
                           <h3 class="dt-subheading">PACE's own forecast, every hour</h3>
                           <div class="dt-figures dt-figures--secondary">
-                            <dt-figure size="small" [value]="(report.score.mapePercent | number: '1.1-1') + '%'" label="Typical miss"></dt-figure>
-                            <dt-figure size="small" [value]="(report.score.biasPercent | number: '1.1-1') + '%'" label="Bias"></dt-figure>
                             <dt-figure size="small" [value]="report.peakMissLabel" label="Average miss at the daily peak"></dt-figure>
                             <dt-figure
                               size="small"
@@ -235,10 +229,7 @@
                             }
                           </ul>
                           <p class="dt-hint">{{ forecast.featureCount }} input features, ridge penalty &lambda; = {{ forecast.lambda }}.</p>
-                          <div class="traffic__source-line">
-                            <dt-source-chip [label]="weatherWeightsProvenance.label" [kind]="weatherWeightsProvenance.kind" [url]="weatherWeightsProvenance.url"></dt-source-chip>
-                            <span class="dt-hint">{{ weatherWeightsProvenance.note }}</span>
-                          </div>
+                          <p class="dt-hint">Weather points are weighted by 2020 Census county population: {{ weatherWeightsProvenance.note }}</p>
                         </dt-under-the-hood>
                       }
                     }
@@ -268,7 +259,7 @@
                 </dt-chart-frame>
               </section>
 
-              <dt-under-the-hood summary="Under the hood" [description]="'Method, sources and data audit for snapshot ' + manifest.id">
+              <dt-under-the-hood summary="Under the hood" [description]="'Snapshot ' + manifest.id">
                 <div class="traffic__hood-block">
                   <h3 class="dt-subheading">How the carbon number is made</h3>
                   <ol class="dt-list">
@@ -291,7 +282,7 @@
                             <td class="dt-table__cell">{{ factor.label }}</td>
                             <td class="dt-table__cell dt-table__cell--num">{{ factor.lbPerMwh | number: '1.0-0' }} lb/MWh</td>
                             <td class="dt-table__cell">
-                              <dt-source-chip [label]="factor.provenance.label" [kind]="factor.provenance.kind" [url]="factor.provenance.url"></dt-source-chip>
+                              <dt-source-chip [label]="factor.provenance.note ?? factor.provenance.label" [kind]="factor.provenance.kind" [url]="factor.provenance.url"></dt-source-chip>
                             </td>
                           </tr>
                         }

@@ -10,13 +10,6 @@
   min-width: 0;
 }
 
-.traffic__source-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
 .traffic__rows {
   max-height: 320px;
   overflow-y: auto;

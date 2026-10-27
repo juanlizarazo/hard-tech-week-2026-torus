@@ -4,26 +4,64 @@
 }
 
 .dt-month-calendar {
+  --dt-calendar-dot: 8px;
+
   color: var(--dt-ink);
   min-width: 0;
 }
 
-.dt-month-calendar__peak {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 12px;
-  font-size: var(--dt-text-15);
-  font-weight: 600;
+.dt-month-calendar__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--dt-text-13);
+  color: var(--dt-ink);
   font-variant-numeric: tabular-nums;
+
+  strong {
+    font-weight: 800;
+  }
 }
 
-.dt-month-calendar__peak-marker {
-  width: 12px;
-  height: 12px;
-  border: 2px solid var(--dt-ink);
-  border-radius: 3px;
+.dt-month-calendar__key {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 18px;
+}
+
+.dt-month-calendar__key-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 4px;
   flex: none;
+  border-radius: 50%;
+  background: var(--dt-ink);
+}
+
+.dt-month-calendar__key-dot--lead {
+  background: var(--dt-clear-mark);
+}
+
+.dt-month-calendar__key-dash {
+  width: 18px;
+  margin-top: 8px;
+  flex: none;
+  border-top: 2px dashed var(--dt-ink);
+}
+
+.dt-month-calendar__key-dash--lead {
+  border-top-color: var(--dt-clear-mark);
+}
+
+.dt-month-calendar__scale {
+  margin: 6px 0 12px;
+  font-size: var(--dt-text-13);
+  color: var(--dt-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .dt-month-calendar__empty {
@@ -49,7 +87,7 @@
   position: relative;
   display: block;
   min-width: 0;
-  height: 60px;
+  height: 72px;
   padding: 0;
   overflow: hidden;
   font: inherit;
@@ -62,10 +100,11 @@
   &:hover {
     border-color: var(--dt-muted);
   }
-}
 
-.dt-month-calendar__cell--off-peak .dt-month-calendar__track {
-  border-top-color: transparent;
+  &:focus-visible {
+    outline: 2px solid var(--dt-ink);
+    outline-offset: 1px;
+  }
 }
 
 .dt-month-calendar__cell--off-peak {
@@ -91,46 +130,81 @@
   font-weight: 800;
 }
 
-.dt-month-calendar__kw {
+.dt-month-calendar__values {
   position: absolute;
-  top: 4px;
-  right: 5px;
+  top: 6px;
+  right: 7px;
   display: none;
-  font-size: 11px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 12px;
   line-height: 1;
   color: var(--dt-muted);
   font-variant-numeric: tabular-nums;
 }
 
-.dt-month-calendar__track {
+.dt-month-calendar__value--lead {
+  color: var(--dt-ink);
+  font-weight: 800;
+}
+
+.dt-month-calendar__plot {
   position: absolute;
-  left: 22%;
-  right: 22%;
-  bottom: 0;
-  height: 68%;
-  display: flex;
-  align-items: flex-end;
-  border-top: 1px dashed var(--dt-muted);
+  left: 6px;
+  right: 6px;
+  top: 24px;
+  bottom: 10px;
 }
 
-.dt-month-calendar__bar {
-  display: block;
-  width: 100%;
+.dt-month-calendar__ref {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px dashed var(--dt-ink);
+  opacity: 0.55;
+}
+
+.dt-month-calendar__ref--lead {
+  border-top: 2px dashed var(--dt-clear-mark);
+  opacity: 0.8;
+}
+
+.dt-month-calendar__stem {
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
   background: var(--dt-muted);
-  border-radius: 4px 4px 0 0;
 }
 
-.dt-month-calendar__cell--peak .dt-month-calendar__bar {
+.dt-month-calendar__dot {
+  position: absolute;
+  left: 50%;
+  width: var(--dt-calendar-dot);
+  height: var(--dt-calendar-dot);
+  border-radius: 50%;
   background: var(--dt-ink);
+  box-shadow: 0 0 0 2px var(--dt-panel);
+  transform: translate(-50%, 50%);
+}
+
+.dt-month-calendar__dot--lead {
+  background: var(--dt-clear-mark);
 }
 
 @media (min-width: 640px) {
+  .dt-month-calendar {
+    --dt-calendar-dot: 10px;
+  }
+
   .dt-month-calendar__grid {
     gap: 4px;
   }
 
   .dt-month-calendar__cell {
-    height: 84px;
+    height: 96px;
   }
 
   .dt-month-calendar__day {
@@ -139,15 +213,16 @@
     left: 7px;
   }
 
-  .dt-month-calendar__kw {
-    display: block;
-    top: 7px;
-    right: 7px;
+  .dt-month-calendar__plot {
+    left: 10px;
+    right: 10px;
+    top: 34px;
+    bottom: 12px;
   }
+}
 
-  .dt-month-calendar__track {
-    height: 62%;
-    left: 32%;
-    right: 32%;
+@media (min-width: 960px) {
+  .dt-month-calendar__values {
+    display: flex;
   }
 }

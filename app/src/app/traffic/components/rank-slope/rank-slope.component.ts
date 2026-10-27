@@ -15,6 +15,7 @@ export class RankSlopeComponent implements OnChanges {
   public readonly rightX = rankSlopeLayout.RIGHT_X;
   public readonly topY = rankSlopeLayout.TOP_Y;
   public readonly rowHeight = rankSlopeLayout.ROW_HEIGHT;
+  public readonly labelOffset = rankSlopeLayout.LABEL_BASELINE_OFFSET;
 
   public lines: IRankSlopeLine[] = [];
   public height = rankSlopeLayout.DEFAULT_HEIGHT;
@@ -55,6 +56,8 @@ export class RankSlopeComponent implements OnChanges {
         marginalRank: row.marginalRank,
         averageY: this._rankY(row.averageRank),
         marginalY: this._rankY(row.marginalRank),
+        averageLabelY: this._rankY(row.averageRank),
+        marginalLabelY: this._rankY(row.marginalRank),
         change,
         isHighlighted: biggestChanges.includes(row.hour),
         changeText: this._changeText(change),
@@ -65,6 +68,8 @@ export class RankSlopeComponent implements OnChanges {
     });
 
     const highlighted = this.lines.filter((line) => line.isHighlighted);
+    this._spreadLabels(highlighted, 'averageY', 'averageLabelY');
+    this._spreadLabels(highlighted, 'marginalY', 'marginalLabelY');
     this.ariaSummary =
       'Slope chart of hourly CO2 rank, average versus marginal emissions, 1 is cleanest. Biggest changes: ' +
       highlighted.map((line) => `${line.hourLabel} ${line.averageRank} to ${line.marginalRank}`).join(', ');
@@ -88,6 +93,24 @@ export class RankSlopeComponent implements OnChanges {
     }
 
     return change < 0 ? `${Math.abs(change)} places cleaner on marginal` : `${change} places dirtier on marginal`;
+  }
+
+  private _spreadLabels(lines: IRankSlopeLine[], anchor: 'averageY' | 'marginalY', target: 'averageLabelY' | 'marginalLabelY'): void {
+    const ordered = [...lines].sort((first, second) => first[anchor] - second[anchor]);
+    let previous = -Infinity;
+
+    for (const line of ordered) {
+      line[target] = Math.max(line[anchor], previous + rankSlopeLayout.LABEL_GAP);
+      previous = line[target];
+    }
+
+    const overflow = previous - (this.height - rankSlopeLayout.BOTTOM_PADDING);
+
+    if (overflow > 0) {
+      for (const line of ordered) {
+        line[target] -= overflow;
+      }
+    }
   }
 
   private _rankY(rank: number): number {

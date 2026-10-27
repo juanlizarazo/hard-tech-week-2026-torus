@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { IMonthCalendarCell } from '../../backtest.interfaces';
-import { MIN_BAR_PERCENT, WEEKDAY_LABELS } from './month-calendar.constants';
+import { IMonthCalendarCell, IMonthCalendarScale } from '../../backtest.interfaces';
+import { WEEKDAY_LABELS } from './month-calendar.constants';
 
 @Component({
   selector: 'dt-month-calendar',
@@ -13,6 +13,7 @@ export class MonthCalendarComponent implements OnChanges {
   @Input() public cells: IMonthCalendarCell[] = [];
   @Input() public monthLabel = '';
   @Input() public peakLabel = '';
+  @Input({ required: true }) public scale!: IMonthCalendarScale;
   @Output() public readonly daySelected = new EventEmitter<string>();
 
   public readonly weekdays = WEEKDAY_LABELS;
@@ -27,16 +28,20 @@ export class MonthCalendarComponent implements OnChanges {
     this.daySelected.emit(cell.localDate);
   }
 
-  public barHeight(cell: IMonthCalendarCell): number {
-    if (cell.peakKw <= 0) {
-      return 0;
-    }
-
-    return Math.max(MIN_BAR_PERCENT, Math.min(1, Math.max(0, cell.barFraction)) * 100);
+  public lowFraction(cell: IMonthCalendarCell): number {
+    return Math.min(cell.peakFraction, cell.leadFraction);
   }
 
-  public kwLabel(cell: IMonthCalendarCell): string {
-    return `${Math.round(cell.peakKw).toLocaleString('en-US')} kW`;
+  public highFraction(cell: IMonthCalendarCell): number {
+    return Math.max(cell.peakFraction, cell.leadFraction);
+  }
+
+  public formatNumber(kw: number): string {
+    return Math.round(kw).toLocaleString('en-US');
+  }
+
+  public formatKw(kw: number): string {
+    return `${this.formatNumber(kw)} kW`;
   }
 
   public ariaLabel(cell: IMonthCalendarCell): string {
@@ -45,11 +50,11 @@ export class MonthCalendarComponent implements OnChanges {
     const parts = [day];
 
     if (cell.peakKw > 0) {
-      parts.push(`peak ${Math.round(cell.peakKw).toLocaleString('en-US')} kW`);
+      parts.push(`peak ${this.formatKw(cell.peakKw)} with no storage, ${this.formatKw(cell.leadPeakKw)} with ${this.scale.leadName}`);
     }
 
     if (cell.isPeakDay) {
-      parts.push('month peak day');
+      parts.push('set the month peak');
     }
 
     if (cell.isOffPeakDay && cell.offPeakReason) {

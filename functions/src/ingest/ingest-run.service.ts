@@ -91,7 +91,8 @@ export class IngestRunService {
     );
 
     const weatherStartDate = gridHours[0].utcHourEnding.slice(0, 10);
-    const weatherMonths = await this.fetchWeatherMonths(fetchService, weatherStartDate, targetDate);
+    const weatherEndDate = IngestSnapshotHelper.addDays(targetDate, 1);
+    const weatherMonths = await this.fetchWeatherMonths(fetchService, weatherStartDate, weatherEndDate);
 
     const manifest: Detour.Firestore.Snapshot.IManifest = {
       id: IngestSnapshotHelper.buildSnapshotId(now),
@@ -106,7 +107,7 @@ export class IngestRunService {
       filteredRows,
       weatherMonths: weatherMonths.map((month) => ({ month: month.month, rowCount: month.hours.length })),
       weatherPulledAt: Timestamp.now(),
-      weatherRange: { start: weatherStartDate, end: targetDate },
+      weatherRange: { start: weatherStartDate, end: weatherEndDate },
       weatherPoints,
       weatherModel: ingestConstants.OPEN_METEO_MODEL,
       sources: [

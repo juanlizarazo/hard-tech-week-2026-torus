@@ -55,15 +55,7 @@
       <div class="dt-component-bars__groups" role="img" [attr.aria-label]="ariaSummary">
         @for (view of views; track view.group.id) {
           <div class="dt-component-bars__group">
-            <div class="dt-component-bars__meta">
-              <span class="dt-component-bars__label">{{ view.group.label }}</span>
-              <dt-source-chip
-                [label]="view.group.source.label"
-                [kind]="view.group.source.kind"
-                [url]="view.group.source.url"
-                [note]="view.group.source.note ?? ''"
-              ></dt-source-chip>
-            </div>
+            <span class="dt-component-bars__label">{{ view.group.label }}</span>
             <div class="dt-component-bars__plot" [ngClass]="{ 'dt-component-bars__plot--signed': hasNegative }">
               <div class="dt-component-bars__axis">
                 @if (hasNegative) {

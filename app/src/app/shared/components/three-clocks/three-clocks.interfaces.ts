@@ -6,14 +6,10 @@ export interface IClockLane {
   titleX: number;
   titleY: number;
   stripY: number;
-  captionX: number;
-  captionY: number;
 }
 
 export interface IHeatLegend {
   visible: boolean;
-  x: number;
-  y: number;
   minLabel: string;
   maxLabel: string;
 }

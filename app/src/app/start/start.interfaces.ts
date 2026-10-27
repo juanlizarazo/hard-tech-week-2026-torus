@@ -26,4 +26,5 @@ export interface IStartStep {
   question: string;
   description: string;
   linkLabel: string;
+  isPrimary: boolean;
 }

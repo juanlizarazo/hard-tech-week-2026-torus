@@ -3,35 +3,37 @@
   align-items: center;
   gap: 6px;
   max-width: 100%;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: var(--dt-text-13, 0.8125rem);
+  font-weight: 400;
   line-height: 1.3;
-  color: var(--dt-ink, #1b2430);
+  color: var(--dt-muted, #5a6672);
+  font-variant-numeric: tabular-nums;
 }
 
 .dt-snapshot-badge__icon {
   flex: none;
-  width: 14px;
-  height: 14px;
-  font-size: 14px;
+  width: 15px;
+  height: 15px;
+  font-size: 15px;
   color: var(--dt-muted, #5a6672);
 }
 
-.dt-snapshot-badge__label {
+.dt-snapshot-badge__text {
+  display: inline-flex;
+  flex-wrap: wrap;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.dt-snapshot-badge__label,
+.dt-snapshot-badge__note {
   white-space: nowrap;
 }
 
-.dt-snapshot-badge--muted {
-  color: var(--dt-muted, #5a6672);
+.dt-snapshot-badge__note::before {
+  content: '·';
+  margin: 0 0.45em;
 }
 
-.dt-snapshot-badge--stale {
-  color: var(--dt-rush-ink, #9a4f00);
-}
-
-.dt-snapshot-badge--stale .dt-snapshot-badge__icon {
-  color: var(--dt-rush, #f28500);
+.dt-snapshot-badge--ready .dt-snapshot-badge__label {
+  color: var(--dt-ink, #1b2430);
 }

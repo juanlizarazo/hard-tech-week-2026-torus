@@ -1,6 +1,11 @@
 @if (view$ | async; as view) {
   <span class="dt-snapshot-badge" [class]="'dt-snapshot-badge--' + view.tone" [attr.title]="view.detail || null">
     <mat-icon class="dt-snapshot-badge__icon" aria-hidden="true">{{ view.icon }}</mat-icon>
-    <span class="dt-snapshot-badge__label">{{ view.label }}</span>
+    <span class="dt-snapshot-badge__text">
+      <span class="dt-snapshot-badge__label">{{ view.label }}</span>
+      @if (view.note) {
+        <span class="dt-snapshot-badge__note">{{ view.note }}</span>
+      }
+    </span>
   </span>
 }

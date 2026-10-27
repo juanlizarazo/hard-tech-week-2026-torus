@@ -8,7 +8,7 @@
       } @else {
         <p class="dt-answer dt-backtest__answer-pending">
           July 2026 replayed day by day on a simulated site, against a
-          <dt-term key="SIMPLE_SHAVER">simple shaver</dt-term> and <dt-term key="PERFECT_HINDSIGHT">perfect hindsight</dt-term>.
+          <dt-term key="SIMPLE_SHAVER">Simple shaver</dt-term> and <dt-term key="PERFECT_HINDSIGHT">Perfect hindsight</dt-term>.
         </p>
       }
     }
@@ -74,13 +74,15 @@
                     @if (tile.id === 'capture') {
                       <dt-term figure-term key="CAPTURE_RATE">Capture rate</dt-term>
                     }
-                    <dt-source-chip
-                      figure-source
-                      [label]="tile.source.label"
-                      [kind]="tile.source.kind"
-                      [url]="tile.source.url"
-                      [note]="tile.source.note ?? ''"
-                    ></dt-source-chip>
+                    @if (tile.source; as source) {
+                      <dt-source-chip
+                        figure-source
+                        [label]="source.label"
+                        [kind]="source.kind"
+                        [url]="source.url"
+                        [note]="source.note ?? ''"
+                      ></dt-source-chip>
+                    }
                   </dt-figure>
                 }
               </div>
@@ -103,10 +105,13 @@
                   [cells]="model.calendarCells"
                   [monthLabel]="model.monthLabel"
                   [peakLabel]="model.peakLabel"
+                  [scale]="model.calendarScale"
                   (daySelected)="onDaySelected($event)"
                 ></dt-month-calendar>
                 <div how-to-read>
-                  <p class="dt-backtest__how">Each square is a day in {{ model.monthLabel }}. The bar is that day's highest billed 15-minute draw with no storage, scaled from zero against the month's highest. The dashed line in every square is the month's peak, so the gap shows how close each day came. The number in the corner is the same value in kW.</p>
+                  <p class="dt-backtest__how">Each square is a day in {{ model.monthLabel }}. The dark dot is that day's highest billed 15-minute grid draw with no storage; the green dot is the same day with {{ model.leadName }} running the Torus Station. The line between them is what the station shaved off.</p>
+                  <p class="dt-backtest__how">Every square shares one scale, from {{ formatNumber(model.calendarScale.minKw) }} kW at the bottom to the month's peak, {{ formatNumber(model.calendarScale.maxKw) }} kW, at the top. The scale does not start at zero, so the drop reads clearly.</p>
+                  <p class="dt-backtest__how">The dark dashed line is the month's peak with no storage, which set the demand charge. The green dashed line is the highest billed draw with {{ model.leadName }}, which set its demand charge instead.</p>
                   <p class="dt-backtest__how">The dark outlined day set the month's peak. On a demand-charge tariff that single interval decides the charge for the whole month.</p>
                   <p class="dt-backtest__how">Grey days have no on-peak window (weekends and tariff holidays), so nothing on them is billed as demand on Schedule 8.</p>
                   <p class="dt-backtest__how">Select any day to see it up close below.</p>
@@ -117,11 +122,20 @@
             <section class="dt-section" aria-labelledby="backtest-dollars-title">
               <h2 class="dt-section__title" id="backtest-dollars-title">Where the dollars came from</h2>
               <dt-chart-frame title="Savings by bill line" [notice]="model.componentNotice" [simulated]="true">
+                <p frame-notice class="dt-backtest__frame-source">
+                  Rates from
+                  <dt-source-chip
+                    [label]="model.billSource.label"
+                    [kind]="model.billSource.kind"
+                    [url]="model.billSource.url"
+                    [note]="model.billSource.note ?? ''"
+                  ></dt-source-chip>
+                </p>
                 <dt-component-bars [groups]="model.barGroups" [strategyLegend]="model.legend"></dt-component-bars>
                 <div how-to-read>
                   <p class="dt-backtest__how">Each group is one line on the Rocky Mountain Power bill. Each bar is how much a strategy saved on that line in July, compared with no storage. Longer is better.</p>
                   <p class="dt-backtest__how"><strong>{{ model.shaverName }}</strong> (grey) discharges whenever load passes a fixed line. <strong>{{ model.leadName }}</strong> (green) plans each day ahead. <strong>{{ model.oracleName }}</strong> (dark) knew the whole month in advance, so it is the ceiling.</p>
-                  <p class="dt-backtest__how">The chip under each line names the tariff sheet the rate comes from.</p>
+                  <p class="dt-backtest__how">Every line is priced from the tariff sheet named under the title.</p>
                 </div>
               </dt-chart-frame>
             </section>

@@ -158,3 +158,13 @@
     align-self: flex-start;
   }
 }
+
+.dt-backtest__frame-source {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  font-size: var(--dt-text-13);
+  color: var(--dt-muted);
+}

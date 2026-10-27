@@ -84,7 +84,7 @@ export class TrafficComponent {
       hasOurForecast: !!forecastState.forecast,
       charts: state.report ? TrafficHelper.charts(state.report, forecastState.forecast, options) : null,
       answer: state.report ? TrafficHelper.answer(state.report) : [],
-      notices: state.report ? TrafficHelper.notices(state.report) : null
+      notices: state.report ? TrafficHelper.notices(state.report, forecastState.forecast) : null
     }))
   );
 

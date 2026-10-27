@@ -40,6 +40,7 @@
               [routerLink]="link.path"
               routerLinkActive="dt-shell__step--active"
               ariaCurrentWhenActive="page"
+              [attr.aria-label]="link.step ? 'Step ' + link.step + ': ' + link.label : link.label"
             >
               @if (link.step) {
                 <span class="dt-shell__step-number" aria-hidden="true">{{ link.step }}</span>
@@ -48,6 +49,7 @@
               }
               <span class="dt-shell__step-text">
                 <span class="dt-shell__step-label">{{ link.label }}</span>
+                <span class="dt-shell__step-short" aria-hidden="true">{{ link.shortLabel }}</span>
                 <span class="dt-shell__step-description">{{ link.description }}</span>
               </span>
             </a>

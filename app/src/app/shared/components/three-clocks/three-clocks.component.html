@@ -31,14 +31,6 @@
           <rect class="three-clocks__hatch-bg three-clocks__hatch-bg--rush" width="6" height="6"></rect>
           <line class="three-clocks__hatch-line three-clocks__hatch-line--rush" x1="0" y1="0" x2="0" y2="6" stroke-width="2"></line>
         </pattern>
-        <linearGradient [attr.id]="idPrefix + '-price-gradient'" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0" [attr.stop-color]="colors.PRICE_LOW"></stop>
-          <stop offset="1" [attr.stop-color]="colors.PRICE_HIGH"></stop>
-        </linearGradient>
-        <linearGradient [attr.id]="idPrefix + '-carbon-gradient'" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0" [attr.stop-color]="colors.CARBON_LOW"></stop>
-          <stop offset="1" [attr.stop-color]="colors.CARBON_HIGH"></stop>
-        </linearGradient>
       </defs>
 
       <!-- Day boundaries -->
@@ -102,9 +94,6 @@
           Demand counts all hours (Schedule 6)
         </text>
       }
-      <text class="three-clocks__caption" [attr.x]="billLane.captionX" [attr.y]="billLane.captionY">
-        {{ billLane.caption }}
-      </text>
 
       <!-- Price and carbon clocks -->
       @for (view of heatViews; track view.lane.title; let isPrice = $first) {
@@ -127,32 +116,6 @@
             </text>
           }
         }
-        <text class="three-clocks__caption" [attr.x]="view.lane.captionX" [attr.y]="view.lane.captionY">
-          {{ view.lane.caption }}
-        </text>
-        @if (view.legend.visible) {
-          <text class="chart__axis-text" [attr.x]="view.legend.x - 4" [attr.y]="view.legend.y + 8" text-anchor="end">
-            {{ view.legend.minLabel }}
-          </text>
-          <rect
-            class="three-clocks__legend-ramp"
-            [attr.x]="view.legend.x"
-            [attr.y]="view.legend.y"
-            [attr.width]="legendWidth"
-            height="8"
-            [attr.fill]="isPrice ? priceGradientFill : carbonGradientFill"
-          ></rect>
-          <text class="chart__axis-text" [attr.x]="view.legend.x + legendWidth + 4" [attr.y]="view.legend.y + 8">
-            {{ view.legend.maxLabel }}
-          </text>
-        }
-      }
-
-      @if (mefIsPlaceholder) {
-        <g class="three-clocks__placeholder" [attr.transform]="'translate(' + placeholderX + ',' + placeholderY + ')'">
-          <rect class="three-clocks__placeholder-pill" width="84" height="16" rx="8"></rect>
-          <text class="three-clocks__placeholder-text" x="42" y="11.5" text-anchor="middle">Placeholder</text>
-        </g>
       }
 
       <!-- Rush hour / Wattsmart window across all lanes -->
@@ -203,4 +166,41 @@
       </div>
     }
   </div>
+
+  <dl class="three-clocks__key">
+    <div class="three-clocks__key-item">
+      <dt class="three-clocks__key-title">
+        <span
+          class="three-clocks__swatch"
+          [class.three-clocks__swatch--on-peak]="!isAllHoursDemand"
+          [class.three-clocks__swatch--hatch]="isAllHoursDemand"
+          aria-hidden="true"
+        ></span>
+        {{ billLane.title }}
+      </dt>
+      <dd class="three-clocks__key-text">{{ billLane.caption }}</dd>
+    </div>
+    @for (view of heatViews; track view.lane.title; let isPrice = $first) {
+      <div class="three-clocks__key-item">
+        <dt class="three-clocks__key-title">
+          {{ view.lane.title }}
+          @if (!isPrice && mefIsPlaceholder) {
+            <span class="three-clocks__placeholder">Placeholder</span>
+          }
+        </dt>
+        @if (view.legend.visible) {
+          <dd class="three-clocks__ramp-row">
+            <span class="three-clocks__ramp-label">{{ view.legend.minLabel }}</span>
+            <span
+              class="three-clocks__ramp"
+              [class.three-clocks__ramp--carbon]="!isPrice"
+              aria-hidden="true"
+            ></span>
+            <span class="three-clocks__ramp-label">{{ view.legend.maxLabel }}</span>
+          </dd>
+        }
+        <dd class="three-clocks__key-text">{{ view.lane.caption }}</dd>
+      </div>
+    }
+  </dl>
 }

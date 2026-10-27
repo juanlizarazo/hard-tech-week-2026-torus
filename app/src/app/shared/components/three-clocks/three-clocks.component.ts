@@ -32,7 +32,6 @@ export class ThreeClocksComponent extends ResponsiveChartDirective implements On
   public readonly colors = chartColors;
   public readonly idPrefix = `dt-three-clocks-${ThreeClocksComponent._instanceCount++}`;
   public readonly stripHeight = 24;
-  public readonly legendWidth = 64;
   public viewHeight = 300;
   public plotLeft = 136;
   public plotRight = 0;
@@ -48,8 +47,6 @@ export class ThreeClocksComponent extends ResponsiveChartDirective implements On
   public priceView = this._emptyHeatView('Price clock');
   public carbonView = this._emptyHeatView('Carbon clock');
   public heatViews: IHeatLaneView[] = [];
-  public placeholderX = 0;
-  public placeholderY = 0;
   public hoverX = -1;
   public tooltip: IChartTooltip | null = null;
   public ariaLabel = '';
@@ -60,14 +57,6 @@ export class ThreeClocksComponent extends ResponsiveChartDirective implements On
 
   public get billHatchFill(): string {
     return `url(#${this.idPrefix}-bill-hatch)`;
-  }
-
-  public get priceGradientFill(): string {
-    return `url(#${this.idPrefix}-price-gradient)`;
-  }
-
-  public get carbonGradientFill(): string {
-    return `url(#${this.idPrefix}-carbon-gradient)`;
   }
 
   public ngOnChanges(): void {
@@ -130,27 +119,26 @@ export class ThreeClocksComponent extends ResponsiveChartDirective implements On
     const narrow = this.isNarrow;
     this.plotLeft = narrow ? 8 : 112;
     this.plotRight = this.viewWidth - 12;
-    this.stripsTop = 28 + (narrow ? 18 : 0);
+    this.stripsTop = 28 + (narrow ? 16 : 0);
     this.isAllHoursDemand = this.scheduleId === 'schedule-6';
-    this.rushLabelY = narrow ? 14 : this.stripsTop - 10;
+    this.rushLabelY = this.stripsTop - 10;
     this.onPointerLeave();
 
-    const laneHeight = narrow ? 92 : 64;
+    const laneHeight = narrow ? 50 : 38;
     const lanes = [0, 1, 2].map((laneIndex) => this._layoutLane(laneIndex, laneHeight));
     this.stripsBottom = lanes[2].stripY + this.stripHeight;
-    this.axisY = lanes[2].captionY + (narrow ? 34 : 18);
-    this.viewHeight = this.axisY + 34;
+    this.axisY = this.stripsBottom + 22;
+    this.viewHeight = this.axisY + 22;
 
-    const billNote = this.isAllHoursDemand ? '' : narrow ? 'Dark: on-peak hours' : 'Dark blocks: on-peak hours, when demand is billed';
     lanes[0].title = 'Bill';
-    lanes[0].caption = narrow ? billNote || this.billCaption : [billNote, this.billCaption].filter((part) => !!part).join('. ');
+    lanes[0].caption = this.isAllHoursDemand
+      ? `Hatched: demand counts every hour (Schedule 6). ${this.billCaption}`.trim()
+      : `Dark blocks: on-peak hours, when demand is billed. ${this.billCaption}`.trim();
     lanes[1].title = 'Grid price';
-    lanes[1].caption = narrow ? 'Darker is pricier' : 'Day-ahead wholesale price in PACE (EDAM), darker is pricier';
+    lanes[1].caption = 'Day-ahead wholesale price in PACE (EDAM). Hatched: not yet posted.';
     lanes[2].title = 'Carbon';
     lanes[2].caption = this.carbonCaption;
     this.billLane = lanes[0];
-    this.placeholderX = narrow ? lanes[2].titleX + 86 : lanes[2].titleX;
-    this.placeholderY = narrow ? lanes[2].titleY - 11 : lanes[2].titleY + 8;
 
     if (intervals.length === 0) {
       this.hourTicks = [];
@@ -210,10 +198,8 @@ export class ThreeClocksComponent extends ResponsiveChartDirective implements On
       title: '',
       caption: '',
       titleX: narrow ? this.plotLeft : 0,
-      titleY: narrow ? stripY - 6 : stripY + 16,
-      stripY,
-      captionX: this.plotLeft,
-      captionY: stripY + this.stripHeight + 15
+      titleY: narrow ? stripY - 7 : stripY + 17,
+      stripY
     };
   }
 
@@ -279,28 +265,19 @@ export class ThreeClocksComponent extends ResponsiveChartDirective implements On
         y: lane.stripY,
         width: ChartHelper.round(width),
         height: this.stripHeight,
-        label: width >= 96 ? 'not yet posted' : ''
+        label: width >= 96 ? 'Not yet posted' : ''
       };
     });
 
-    return { lane, cells, gaps, legend: this._buildLegend(lane, known.length > 0, formatter(minimum), `${formatter(maximum)}${unit}`) };
+    return { lane, cells, gaps, legend: this._buildLegend(known.length > 0, formatter(minimum), `${formatter(maximum)}${unit}`) };
   }
 
-  private _buildLegend(lane: IClockLane, visible: boolean, minLabel: string, maxLabel: string): IHeatLegend {
-    const narrow = this.isNarrow;
-    const reservedRight = 76;
-
-    return {
-      visible,
-      x: narrow ? this.plotLeft + 40 : Math.min(this.plotRight - reservedRight - this.legendWidth, lane.captionX + lane.caption.length * 6.2 + 56),
-      y: narrow ? lane.captionY + 10 : lane.captionY - 8,
-      minLabel,
-      maxLabel
-    };
+  private _buildLegend(visible: boolean, minLabel: string, maxLabel: string): IHeatLegend {
+    return { visible, minLabel, maxLabel };
   }
 
   private _emptyLane(title: string): IClockLane {
-    return { title, caption: '', titleX: 0, titleY: 0, stripY: 0, captionX: 0, captionY: 0 };
+    return { title, caption: '', titleX: 0, titleY: 0, stripY: 0 };
   }
 
   private _emptyHeatView(title: string): IHeatLaneView {
@@ -308,7 +285,7 @@ export class ThreeClocksComponent extends ResponsiveChartDirective implements On
       lane: this._emptyLane(title),
       cells: [],
       gaps: [],
-      legend: { visible: false, x: 0, y: 0, minLabel: '', maxLabel: '' }
+      legend: { visible: false, minLabel: '', maxLabel: '' }
     };
   }
 }

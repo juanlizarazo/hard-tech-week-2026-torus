@@ -29,22 +29,6 @@ export interface ITrafficHour {
   averageLbPerMwh: number | null;
 }
 
-export interface IRushHourHour {
-  hour: number;
-  clocks: string[];
-}
-
-export interface IRushHourBand {
-  startHour: number;
-  endHourExclusive: number;
-  hours: IRushHourHour[];
-}
-
-export interface ITrafficInsights {
-  headline: string;
-  sentences: string[];
-}
-
 export interface ITrafficRange {
   minLbPerMwh: number;
   maxLbPerMwh: number;
@@ -69,10 +53,8 @@ export interface ITrafficReport {
   hours: ITrafficHour[];
   hasPrices: boolean;
   hourLabels: string[];
-  rushHour: IRushHourBand | null;
   paceRush: IRushHourWindow | null;
   ranking: IRankSlopeRow[];
-  insights: ITrafficInsights;
   fossilRange: ITrafficRange | null;
   demandRange: ITrafficRange | null;
   score: IForecastScore;

@@ -1,4 +1,37 @@
-<span class="simulated-badge" role="note" title="Site loads and Torus Station figures are simulated (seed 42). Grid data is real.">
+<button
+  type="button"
+  class="simulated-badge"
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  [attr.aria-expanded]="isOpen"
+  [attr.aria-describedby]="popoverId"
+  (mouseenter)="show()"
+  (mouseleave)="hideSoon()"
+  (focus)="show()"
+  (blur)="hide()"
+  (click)="toggle()"
+  (keydown.escape)="hide()"
+>
   <mat-icon class="simulated-badge__icon" aria-hidden="true">science</mat-icon>
-  <span>Simulated site</span>
-</span>
+  <span class="simulated-badge__text">
+    <span class="simulated-badge__part">Simulated site</span>
+    <span class="simulated-badge__part simulated-badge__part--real">real grid data</span>
+  </span>
+</button>
+
+<span class="simulated-badge__sr" [id]="popoverId">{{ copy.SIMULATED }} {{ copy.REAL }}</span>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="isOpen"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayFlexibleDimensions]="false"
+  [cdkConnectedOverlayPush]="true"
+>
+  <div class="simulated-badge__popover" aria-hidden="true" (mouseenter)="cancelHide()" (mouseleave)="hideSoon()">
+    <span class="simulated-badge__popover-title">{{ copy.TITLE }}</span>
+    <span class="simulated-badge__popover-line">{{ copy.SIMULATED }}</span>
+    <span class="simulated-badge__popover-line">{{ copy.REAL }}</span>
+  </div>
+</ng-template>

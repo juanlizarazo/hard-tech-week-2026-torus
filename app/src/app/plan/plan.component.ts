@@ -155,8 +155,16 @@ export class PlanComponent {
     this.dialsOpen = !this.dialsOpen;
   }
 
-  public onSiteSelect(site: ISiteArchetype): void {
-    this._update({ siteId: site.id, scheduleId: site.scheduleId, wattsmartReserveKwh: 0 });
+  public get selectedSiteCard(): IPlanSiteCard | undefined {
+    return this.siteCards.find((card: IPlanSiteCard) => card.archetype.id === this.controls.siteId);
+  }
+
+  public onSiteChange(siteId: string): void {
+    const site = SitesHelper.getArchetype(siteId);
+
+    if (site) {
+      this._update({ siteId: site.id, scheduleId: site.scheduleId, wattsmartReserveKwh: 0 });
+    }
   }
 
   public onDateModeChange(dateMode: PlanDateMode): void {

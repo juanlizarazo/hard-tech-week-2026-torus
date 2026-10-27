@@ -14,7 +14,8 @@ export const startSteps: IStartStep[] = [
     title: "Tomorrow's grid",
     question: 'When is the grid jammed tomorrow?',
     description: "Load, price and carbon for PACE tomorrow, and how good PACE's own forecast is.",
-    linkLabel: "See tomorrow's grid"
+    linkLabel: "See tomorrow's grid",
+    isPrimary: true
   },
   {
     path: '/plan',
@@ -22,7 +23,8 @@ export const startSteps: IStartStep[] = [
     title: "Tomorrow's plan",
     question: 'What should the Torus Station do?',
     description: 'A plan solved live in your browser. Move the dials and watch it change.',
-    linkLabel: "See tomorrow's plan"
+    linkLabel: "See tomorrow's plan",
+    isPrimary: false
   },
   {
     path: '/backtest',
@@ -30,6 +32,7 @@ export const startSteps: IStartStep[] = [
     title: "July's proof",
     question: 'Would it have paid off last July?',
     description: 'A month replayed day by day against a simple shaver and perfect hindsight.',
-    linkLabel: "See July's proof"
+    linkLabel: "See July's proof",
+    isPrimary: false
   }
 ];

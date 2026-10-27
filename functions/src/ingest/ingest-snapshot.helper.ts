@@ -368,6 +368,10 @@ export class IngestSnapshotHelper {
     return report;
   }
 
+  public static addDays(date: string, days: number): string {
+    return new Date(Date.parse(`${date}T00:00:00Z`) + days * millisecondsPerDay).toISOString().slice(0, 10);
+  }
+
   public static buildDateChunks(startDate: string, endDate: string, chunkDays: number): { start: string; end: string }[] {
     const chunks: { start: string; end: string }[] = [];
     let chunkStartMs = Date.parse(`${startDate}T00:00:00Z`);

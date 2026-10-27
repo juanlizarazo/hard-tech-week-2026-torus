@@ -190,6 +190,13 @@
   white-space: nowrap;
 }
 
+.dt-shell__step-short {
+  display: none;
+  font-size: var(--dt-text-15);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .dt-shell__main {
   flex: 1;
   width: 100%;
@@ -223,6 +230,45 @@
   }
 }
 
+@media (max-width: 768px) {
+  .dt-shell__nav {
+    padding: 0 8px;
+  }
+
+  .dt-shell__steps {
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .dt-shell__step-item {
+    flex: 1 1 auto;
+  }
+
+  .dt-shell__step {
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 6px 11px;
+  }
+
+  .dt-shell__step-label,
+  .dt-shell__step-description {
+    display: none;
+  }
+
+  .dt-shell__step-short {
+    display: inline;
+  }
+
+  .dt-shell__step-number {
+    margin-top: 0;
+  }
+
+  .dt-shell__step-number--start {
+    margin: 0 4px;
+  }
+}
+
 @media (max-width: 599.98px) {
   .dt-shell__bar {
     padding: 12px 16px 4px;
@@ -232,29 +278,14 @@
     display: none;
   }
 
-  .dt-shell__nav {
-    padding: 0 8px;
-  }
-
-  .dt-shell__step {
-    padding: 8px 10px 10px 4px;
-    gap: 6px;
-  }
-
-  .dt-shell__step-label {
-    font-size: var(--dt-text-13);
-  }
-
   .dt-shell__step-number {
-    width: 20px;
-    height: 20px;
-    margin-top: 0;
+    width: 22px;
+    height: 22px;
   }
 
   .dt-shell__step-number--start {
     width: 10px;
     height: 10px;
-    margin: 5px 4px 0;
   }
 
   .dt-shell__main {

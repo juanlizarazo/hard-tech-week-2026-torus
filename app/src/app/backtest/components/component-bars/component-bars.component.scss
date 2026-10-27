@@ -69,13 +69,6 @@
   border-top: 1px solid var(--dt-viz-grid);
 }
 
-.dt-component-bars__meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 8px;
-}
-
 .dt-component-bars__label {
   font-size: 15px;
   font-weight: 800;
@@ -168,14 +161,9 @@
 
 @media (min-width: 640px) {
   .dt-component-bars__group {
-    grid-template-columns: 200px minmax(0, 1fr);
+    grid-template-columns: 160px minmax(0, 1fr);
     align-items: center;
     gap: 12px;
-  }
-
-  .dt-component-bars__meta {
-    flex-direction: column;
-    align-items: flex-start;
   }
 
   .dt-component-bars__row {

@@ -1,6 +1,4 @@
 export const trafficConfig = {
-  RUSH_HOUR_HOURS: 4,
-  TOP_THIRD: 2 / 3,
   TREND_DAYS: 7,
   WINDOW_DAYS: 3,
 };
@@ -9,12 +7,6 @@ export const trafficChartDefaults = {
   showAllDays: false,
   showOurForecast: false,
   showUncertainty: false,
-};
-
-export const trafficClocks = {
-  STRESS: 'grid stress',
-  PRICE: 'price',
-  CARBON: 'carbon',
 };
 
 export const trafficLimitations = [
