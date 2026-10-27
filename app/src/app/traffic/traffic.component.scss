@@ -38,7 +38,7 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #5b6573;
+  color: var(--dt-theme--muted);
 }
 
 .traffic__value {
@@ -51,7 +51,7 @@
 .traffic__hint {
   margin: 0 0 12px;
   font-size: 0.8125rem;
-  color: #5b6573;
+  color: var(--dt-theme--muted);
 }
 
 .traffic__heading {

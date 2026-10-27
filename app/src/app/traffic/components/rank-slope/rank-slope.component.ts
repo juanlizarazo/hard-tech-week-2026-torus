@@ -1,4 +1,5 @@
 import { Component, Input, OnChanges } from '@angular/core';
+import { rankSlopeLayout } from './rank-slope.constants';
 import { IRankSlopeLine, IRankSlopeRow } from './rank-slope.interfaces';
 
 @Component({
@@ -9,14 +10,14 @@ import { IRankSlopeLine, IRankSlopeRow } from './rank-slope.interfaces';
 export class RankSlopeComponent implements OnChanges {
   @Input() public rows: IRankSlopeRow[] = [];
 
-  public readonly width = 420;
-  public readonly leftX = 138;
-  public readonly rightX = 282;
-  public readonly topY = 52;
-  public readonly rowHeight = 17;
+  public readonly width = rankSlopeLayout.WIDTH;
+  public readonly leftX = rankSlopeLayout.LEFT_X;
+  public readonly rightX = rankSlopeLayout.RIGHT_X;
+  public readonly topY = rankSlopeLayout.TOP_Y;
+  public readonly rowHeight = rankSlopeLayout.ROW_HEIGHT;
 
   public lines: IRankSlopeLine[] = [];
-  public height = 480;
+  public height: number = rankSlopeLayout.DEFAULT_HEIGHT;
   public activeHour: number | null = null;
   public ariaSummary = '';
 
@@ -35,12 +36,13 @@ export class RankSlopeComponent implements OnChanges {
   }
 
   public ngOnChanges(): void {
-    this.height = this.topY + Math.max(this.rows.length, 1) * this.rowHeight + 8;
+    this.height = this.topY + Math.max(this.rows.length, 1) * this.rowHeight + rankSlopeLayout.BOTTOM_PADDING;
+
     const biggestChanges = [...this.rows]
       .sort((first: IRankSlopeRow, second: IRankSlopeRow): number =>
         Math.abs(second.marginalRank - second.averageRank) - Math.abs(first.marginalRank - first.averageRank)
       )
-      .slice(0, 3)
+      .slice(0, rankSlopeLayout.HIGHLIGHT_COUNT)
       .map((row: IRankSlopeRow): number => row.hour);
 
     this.lines = this.rows.map((row: IRankSlopeRow): IRankSlopeLine => {
@@ -61,6 +63,7 @@ export class RankSlopeComponent implements OnChanges {
           `marginal rank ${row.marginalRank} (${Math.round(row.marginalLbPerMwh)} lb/MWh)`
       };
     });
+
     const highlighted = this.lines.filter((line: IRankSlopeLine): boolean => line.isHighlighted);
     this.ariaSummary =
       'Slope chart of hourly CO2 rank, average versus marginal emissions, 1 is cleanest. Biggest changes: ' +

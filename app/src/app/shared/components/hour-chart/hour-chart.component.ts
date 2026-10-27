@@ -2,14 +2,18 @@ import { AfterViewInit, Component, ElementRef, Input, NgZone, OnChanges, OnDestr
 import {
   IHourChartBand,
   IHourChartBandPath,
+  IHourChartBandPoint,
   IHourChartHighlight,
+  IHourChartHighlightRect,
   IHourChartLegendItem,
+  IHourChartMarker,
   IHourChartPath,
   IHourChartSeries,
   IHourChartTableRow,
   IHourChartTick,
   IHourChartTooltipRow
 } from './hour-chart.interfaces';
+import { hourChartDashPatterns, hourChartEstimate, hourChartLayout, hourChartTicks } from './hour-chart.constants';
 import { HourChartLineStyle } from './hour-chart.types';
 
 @Component({
@@ -28,12 +32,12 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input() public dividerIndices: number[] = [];
   @Input() public estimateFromIndex: number | null = null;
 
-  public width = 640;
-  public height = 300;
-  public readonly plotLeft = 48;
-  public plotRight = 628;
-  public readonly plotTop = 26;
-  public plotBottom = 268;
+  public width = hourChartLayout.DEFAULT_WIDTH;
+  public height = hourChartLayout.DEFAULT_HEIGHT;
+  public readonly plotLeft = hourChartLayout.PLOT_LEFT;
+  public plotRight = hourChartLayout.DEFAULT_PLOT_RIGHT;
+  public readonly plotTop = hourChartLayout.PLOT_TOP;
+  public plotBottom = hourChartLayout.DEFAULT_PLOT_BOTTOM;
 
   public yTicks: IHourChartTick[] = [];
   public xTicks: IHourChartTick[] = [];
@@ -43,7 +47,8 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   public legendItems: IHourChartLegendItem[] = [];
   public tableHeaders: string[] = [];
   public tableRows: IHourChartTableRow[] = [];
-  public highlightRect: { x: number; width: number } | null = null;
+  public highlightRect: IHourChartHighlightRect | null = null;
+  public hasData = false;
   public ariaSummary = '';
   public hoverIndex: number | null = null;
   public tooltipRows: IHourChartTooltipRow[] = [];
@@ -61,23 +66,38 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     return this._xAt(this.hoverIndex ?? 0);
   }
 
-  public get hoverMarkers(): { y: number; color: string }[] {
-    if (this.hoverIndex === null) {
-      return [];
+  public get hoverMarkers(): IHourChartMarker[] {
+    const index = this.hoverIndex;
+    const markers: IHourChartMarker[] = [];
+
+    if (index === null) {
+      return markers;
     }
 
-    return this.series
-      .filter((line: IHourChartSeries): boolean => this._valueAt(line.values, this.hoverIndex as number) !== null)
-      .map((line: IHourChartSeries): { y: number; color: string } => ({
-        y: this._yAt(this._valueAt(line.values, this.hoverIndex as number) as number),
-        color: line.color
-      }));
+    for (const line of this.series) {
+      const value = this._valueAt(line.values, index);
+
+      if (value !== null) {
+        markers.push({ y: this._yAt(value), color: line.color });
+      }
+    }
+
+    return markers;
+  }
+
+  public xTickAnchor(index: number): string {
+    if (index === 0) {
+      return 'start';
+    }
+
+    return index === this.xTicks.length - 1 ? 'end' : 'middle';
   }
 
   public ngAfterViewInit(): void {
     if (typeof ResizeObserver === 'undefined') {
       return;
     }
+
     this._resizeObserver = new ResizeObserver((): void => {
       this._zone.run((): void => {
         this._applySize();
@@ -92,6 +112,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   }
 
   public ngOnChanges(): void {
+    this.hasData = this._allValues().length > 0;
     this._computeScale();
     this._buildTicks();
     this._buildPaths();
@@ -115,6 +136,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     const viewX = ((event.clientX - box.left) / box.width) * this.width;
     const ratio = (viewX - this.plotLeft) / (this.plotRight - this.plotLeft);
     const index = Math.min(count - 1, Math.max(0, Math.round(ratio * (count - 1))));
+
     this._setHover(index);
   }
 
@@ -123,21 +145,33 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   }
 
   private _applySize(): void {
-    const hostWidth = Math.round(this._host.nativeElement.clientWidth) - 2;
+    const hostWidth = Math.round(this._host.nativeElement.clientWidth) - hourChartLayout.HOST_BORDER;
 
-    if (hostWidth < 200) {
+    if (hostWidth < hourChartLayout.MIN_HOST_WIDTH) {
       return;
     }
-    this.width = Math.max(260, hostWidth - 32);
-    this.height = this.width < 420 ? 240 : this.width < 640 ? 270 : 300;
-    this.plotRight = this.width - 12;
-    this.plotBottom = this.height - 32;
+
+    this.width = Math.max(hourChartLayout.MIN_WIDTH, hostWidth - hourChartLayout.HOST_PADDING);
+    this.height = this._heightFor(this.width);
+    this.plotRight = this.width - hourChartLayout.PLOT_RIGHT_INSET;
+    this.plotBottom = this.height - hourChartLayout.PLOT_BOTTOM_INSET;
+  }
+
+  private _heightFor(width: number): number {
+    if (width < hourChartLayout.NARROW_WIDTH) {
+      return hourChartLayout.NARROW_HEIGHT;
+    }
+
+    if (width < hourChartLayout.MEDIUM_WIDTH) {
+      return hourChartLayout.MEDIUM_HEIGHT;
+    }
+
+    return hourChartLayout.DEFAULT_HEIGHT;
   }
 
   private _setHover(index: number): void {
     this.hoverIndex = index;
-    const isEstimate = this.estimateFromIndex !== null && index >= this.estimateFromIndex;
-    this.tooltipTitle = (this.xLabels[index] ?? `#${index + 1}`) + (isEstimate ? ' (estimate)' : '');
+    this.tooltipTitle = this._rowLabel(index);
     this.tooltipLeftPercent = (this._xAt(index) / this.width) * 100;
     this.tooltipFlip = index > (this._pointCount() - 1) / 2;
     const bandRows = this.bands.map((band: IHourChartBand): IHourChartTooltipRow => {
@@ -147,9 +181,9 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
       return {
         label: band.label,
         color: band.color,
-        dashArray: '',
+        dashArray: hourChartDashPatterns.NONE,
         isBand: true,
-        text: lower === null || upper === null ? 'no data' : `${this.valueFormat(lower)} to ${this.valueFormat(upper)}`
+        text: this._bandText(lower, upper, 'no data')
       };
     });
     const lineRows = this.series.map((line: IHourChartSeries): IHourChartTooltipRow => {
@@ -160,10 +194,28 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
         color: line.color,
         dashArray: this._dashArray(line.style),
         isBand: false,
-        text: value === null ? 'no data' : this.valueFormat(value)
+        text: this._lineText(value, 'no data')
       };
     });
     this.tooltipRows = [...lineRows, ...bandRows];
+  }
+
+  private _rowLabel(index: number): string {
+    const isEstimate = this.estimateFromIndex !== null && index >= this.estimateFromIndex;
+
+    return (this.xLabels[index] ?? `#${index + 1}`) + (isEstimate ? ' (estimate)' : '');
+  }
+
+  private _bandText(lower: number | null, upper: number | null, emptyText: string): string {
+    if (lower === null || upper === null) {
+      return emptyText;
+    }
+
+    return `${this.valueFormat(lower)} to ${this.valueFormat(upper)}`;
+  }
+
+  private _lineText(value: number | null, emptyText: string): string {
+    return value === null ? emptyText : this.valueFormat(value);
   }
 
   private _pointCount(): number {
@@ -195,19 +247,23 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   private _valueAt(values: (number | null)[], index: number): number | null {
     const value = values[index];
 
-    return value === undefined || value === null || Number.isNaN(value) ? null : value;
+    if (value === undefined || value === null || Number.isNaN(value)) {
+      return null;
+    }
+
+    return value;
   }
 
   private _dashArray(style: HourChartLineStyle): string {
     if (style === 'dashed') {
-      return '7 4';
+      return hourChartDashPatterns.DASHED;
     }
 
     if (style === 'dotted') {
-      return '1.5 4';
+      return hourChartDashPatterns.DOTTED;
     }
 
-    return '';
+    return hourChartDashPatterns.NONE;
   }
 
   private _allValues(): number[] {
@@ -246,18 +302,16 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     let low = Math.min(...values);
     let high = Math.max(...values);
 
-    if (low > 0 && low < high * 0.5) {
+    if (low > 0 && low < high * hourChartTicks.Y_ZERO_BASE_RATIO) {
       low = 0;
     }
 
     if (low === high) {
       high = low + 1;
     }
-    const rawStep = (high - low) / 4;
-    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
-    const residual = rawStep / magnitude;
-    const niceResidual = residual <= 1 ? 1 : residual <= 2 ? 2 : residual <= 2.5 ? 2.5 : residual <= 5 ? 5 : 10;
-    const step = niceResidual * magnitude;
+
+    const step = this._niceStep((high - low) / hourChartTicks.Y_TARGET_INTERVALS);
+
     this._yMin = Math.floor(low / step) * step;
     this._yMax = Math.ceil(high / step) * step;
     const ticks: IHourChartTick[] = [];
@@ -268,10 +322,19 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
     this.yTicks = ticks;
   }
 
+  private _niceStep(rawStep: number): number {
+    const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+    const residual = rawStep / magnitude;
+    const niceResidual = hourChartTicks.Y_NICE_RESIDUALS.find((candidate: number): boolean => residual <= candidate);
+
+    return (niceResidual ?? hourChartTicks.Y_NICE_FALLBACK) * magnitude;
+  }
+
   private _buildTicks(): void {
     const count = this._pointCount();
-    const candidates = [1, 2, 3, 4, 6, 8, 12, 24];
-    const step = candidates.find((candidate: number): boolean => count / candidate <= (this.width < 420 ? 5 : 7)) ?? 24;
+    const maxCount = this.width < hourChartLayout.NARROW_WIDTH ? hourChartTicks.X_MAX_COUNT_NARROW : hourChartTicks.X_MAX_COUNT_WIDE;
+    const step =
+      hourChartTicks.X_STEP_CANDIDATES.find((candidate: number): boolean => count / candidate <= maxCount) ?? hourChartTicks.X_FALLBACK_STEP;
     const ticks: IHourChartTick[] = [];
 
     for (let index = 0; index < count; index += step) {
@@ -291,6 +354,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
         drawing = false;
         continue;
       }
+
       path += `${drawing ? 'L' : 'M'}${this._xAt(index).toFixed(1)} ${this._yAt(value).toFixed(1)}`;
       drawing = true;
     }
@@ -311,57 +375,68 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
           label: line.label,
           color: line.color,
           dashArray,
-          opacity: 1,
+          opacity: hourChartEstimate.SOLID_OPACITY,
           path: this._segmentPath(line.values, 0, count - 1)
         });
         continue;
       }
+
       const split = Math.max(0, this.estimateFromIndex);
       paths.push({
         key: `${line.label}-actual`,
         label: line.label,
         color: line.color,
         dashArray,
-        opacity: 1,
+        opacity: hourChartEstimate.SOLID_OPACITY,
         path: this._segmentPath(line.values, 0, split - 1)
       });
       paths.push({
         key: `${line.label}-estimate`,
         label: line.label,
         color: line.color,
-        dashArray: '3 4',
-        opacity: 0.6,
+        dashArray: hourChartDashPatterns.ESTIMATE,
+        opacity: hourChartEstimate.OPACITY,
         path: this._segmentPath(line.values, Math.max(0, split - 1), count - 1)
       });
     }
     this.linePaths = paths.filter((entry: IHourChartPath): boolean => entry.path !== '');
+    this.bandPaths = this.bands.map(
+      (band: IHourChartBand): IHourChartBandPath => ({ label: band.label, color: band.color, path: this._bandPath(band, count) })
+    );
+  }
 
-    this.bandPaths = this.bands.map((band: IHourChartBand): IHourChartBandPath => {
-      const runs: string[] = [];
-      let run: number[] = [];
+  private _bandPath(band: IHourChartBand, count: number): string {
+    const runs: string[] = [];
+    let run: IHourChartBandPoint[] = [];
 
-      for (let index = 0; index <= count; index++) {
-        const inRun = index < count && this._valueAt(band.lower, index) !== null && this._valueAt(band.upper, index) !== null;
+    for (let index = 0; index <= count; index++) {
+      const lower = index < count ? this._valueAt(band.lower, index) : null;
+      const upper = index < count ? this._valueAt(band.upper, index) : null;
 
-        if (inRun) {
-          run.push(index);
-          continue;
-        }
-
-        if (run.length > 0) {
-          const top = run.map((point: number, position: number): string =>
-            `${position === 0 ? 'M' : 'L'}${this._xAt(point).toFixed(1)} ${this._yAt(this._valueAt(band.upper, point) as number).toFixed(1)}`
-          );
-          const bottom = [...run].reverse().map((point: number): string =>
-            `L${this._xAt(point).toFixed(1)} ${this._yAt(this._valueAt(band.lower, point) as number).toFixed(1)}`
-          );
-          runs.push(`${top.join('')}${bottom.join('')}Z`);
-          run = [];
-        }
+      if (lower !== null && upper !== null) {
+        run.push({ index, lower, upper });
+        continue;
       }
 
-      return { label: band.label, color: band.color, path: runs.join('') };
-    });
+      if (run.length > 0) {
+        runs.push(this._bandRunPath(run));
+        run = [];
+      }
+    }
+
+    return runs.join('');
+  }
+
+  private _bandRunPath(run: IHourChartBandPoint[]): string {
+    const top = run.map(
+      (point: IHourChartBandPoint, position: number): string =>
+        `${position === 0 ? 'M' : 'L'}${this._xAt(point.index).toFixed(1)} ${this._yAt(point.upper).toFixed(1)}`
+    );
+    const bottom = [...run]
+      .reverse()
+      .map((point: IHourChartBandPoint): string => `L${this._xAt(point.index).toFixed(1)} ${this._yAt(point.lower).toFixed(1)}`);
+
+    return `${top.join('')}${bottom.join('')}Z`;
   }
 
   private _buildLegend(): void {
@@ -375,7 +450,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
       ...this.bands.map((band: IHourChartBand): IHourChartLegendItem => ({
         label: band.label,
         color: band.color,
-        dashArray: '',
+        dashArray: hourChartDashPatterns.NONE,
         isBand: true
       }))
     ];
@@ -383,6 +458,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
 
   private _buildTable(): void {
     const count = this._pointCount();
+
     this.tableHeaders = [
       ...this.series.map((line: IHourChartSeries): string => line.label),
       ...this.bands.map((band: IHourChartBand): string => band.label)
@@ -393,17 +469,17 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
       const lineCells = this.series.map((line: IHourChartSeries): string => {
         const value = this._valueAt(line.values, index);
 
-        return value === null ? '-' : this.valueFormat(value);
+        return this._lineText(value, '-');
       });
       const bandCells = this.bands.map((band: IHourChartBand): string => {
         const lower = this._valueAt(band.lower, index);
         const upper = this._valueAt(band.upper, index);
 
-        return lower === null || upper === null ? '-' : `${this.valueFormat(lower)} to ${this.valueFormat(upper)}`;
+        return this._bandText(lower, upper, '-');
       });
-      const isEstimate = this.estimateFromIndex !== null && index >= this.estimateFromIndex;
+
       rows.push({
-        xLabel: (this.xLabels[index] ?? `#${index + 1}`) + (isEstimate ? ' (estimate)' : ''),
+        xLabel: this._rowLabel(index),
         cells: [...lineCells, ...bandCells]
       });
     }
@@ -421,10 +497,11 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
       return `${line.label} from ${this.valueFormat(Math.min(...values))} to ${this.valueFormat(Math.max(...values))}`;
     });
     const highlightText = this.highlight ? `. Highlighted: ${this.highlight.label}` : '';
+
     this.ariaSummary = `${this.title || 'Line chart'}, ${this._pointCount()} points, ${this.yLabel}. ${parts.join('; ')}${highlightText}`;
   }
 
-  private _buildHighlight(): { x: number; width: number } | null {
+  private _buildHighlight(): IHourChartHighlightRect | null {
     if (!this.highlight) {
       return null;
     }

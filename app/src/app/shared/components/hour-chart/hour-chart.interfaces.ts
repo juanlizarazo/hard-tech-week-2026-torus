@@ -59,3 +59,19 @@ export interface IHourChartTableRow {
   xLabel: string;
   cells: string[];
 }
+
+export interface IHourChartHighlightRect {
+  x: number;
+  width: number;
+}
+
+export interface IHourChartMarker {
+  y: number;
+  color: string;
+}
+
+export interface IHourChartBandPoint {
+  index: number;
+  lower: number;
+  upper: number;
+}
