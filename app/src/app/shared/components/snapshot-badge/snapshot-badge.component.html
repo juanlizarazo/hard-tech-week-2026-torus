@@ -2,18 +2,18 @@
   @switch (state.status) {
     @case ('ready') {
       @if (state.manifest; as manifest) {
-        <span class="snapshot-badge">
-          <mat-icon class="snapshot-badge__icon" aria-hidden="true">cloud_done</mat-icon>
+        <span class="dt-snapshot-badge">
+          <mat-icon class="dt-snapshot-badge__icon" aria-hidden="true">cloud_done</mat-icon>
           <span>Snapshot pulled {{ manifest.pulledAt.toDate() | date: 'MMM d, y' }} · target {{ manifest.targetDate }}</span>
         </span>
       }
     }
     @case ('loading') {
-      <span class="snapshot-badge snapshot-badge--muted">Loading snapshot…</span>
+      <span class="dt-snapshot-badge dt-snapshot-badge--muted">Loading snapshot…</span>
     }
     @default {
-      <span class="snapshot-badge snapshot-badge--muted">
-        <mat-icon class="snapshot-badge__icon" aria-hidden="true">cloud_off</mat-icon>
+      <span class="dt-snapshot-badge dt-snapshot-badge--muted">
+        <mat-icon class="dt-snapshot-badge__icon" aria-hidden="true">cloud_off</mat-icon>
         <span>snapshot unavailable</span>
       </span>
     }

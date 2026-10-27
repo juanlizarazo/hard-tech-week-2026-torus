@@ -10,7 +10,7 @@ export class GridSignalsService {
   private readonly _snapshotService = inject(SnapshotService);
   private readonly _loadingService = inject(LoadingService);
 
-  public readonly history$: Observable<Detour.Firestore.Snapshot.IGridHour[]> = defer(() => {
+  public readonly history$ = defer(() => {
     this._loadingService.show();
 
     return this._snapshotService.manifest$.pipe(
