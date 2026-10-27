@@ -27,6 +27,7 @@
 ### Sanity checks (HACK-10, one spec)
 - [x] Naive shaver stays inside power, SOC and ramp limits for 3 sites × 2 schedules
 - [x] Month demand and facilities peaks never above baseline
+- [x] Pulse SOC never below min + Wattsmart reserve; empty, error and loading states forced through the view-state helper
 - [x] Component savings sum to total savings; no storage bills like the raw load
 
 ## Handoff to phase 02 follow-up
