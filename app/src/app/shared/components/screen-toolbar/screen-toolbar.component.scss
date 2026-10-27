@@ -1,0 +1,37 @@
+.screen-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.screen-toolbar__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.screen-toolbar__text {
+  min-width: 0;
+}
+
+.screen-toolbar__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.screen-toolbar__subtitle {
+  margin: 4px 0 0;
+  color: #5b6573;
+}
+
+.screen-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

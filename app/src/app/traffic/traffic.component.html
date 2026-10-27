@@ -1,0 +1,138 @@
+<dt-screen-toolbar
+  title="Traffic Report"
+  subtitle="What the PACE grid looks like for the day we are planning, and where every number came from."
+></dt-screen-toolbar>
+
+@if (state$ | async; as state) {
+  @switch (state.status) {
+    @case ('loading') {
+      <mat-card class="dt-card traffic__state" appearance="outlined">
+        <mat-card-content class="traffic__state-content">
+          <mat-spinner diameter="28"></mat-spinner>
+          <span>Reading the frozen snapshot…</span>
+        </mat-card-content>
+      </mat-card>
+    }
+    @case ('error') {
+      <dt-alert-banner [message]="state.errorMessage"></dt-alert-banner>
+    }
+    @case ('empty') {
+      <mat-card class="dt-card traffic__state" appearance="outlined">
+        <mat-card-content class="traffic__state-content">
+          <mat-icon aria-hidden="true">inventory_2</mat-icon>
+          <span>No snapshot has been frozen yet. Run the ingest script.</span>
+        </mat-card-content>
+      </mat-card>
+    }
+    @case ('ready') {
+      @if (state.manifest; as manifest) {
+        <div class="traffic__grid">
+          <mat-card class="dt-card" appearance="outlined">
+            <mat-card-content>
+              <p class="traffic__label">Target date</p>
+              <p class="traffic__value">{{ manifest.targetDate }}</p>
+              <p class="traffic__hint">Timezone {{ manifest.timezone }}</p>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="dt-card" appearance="outlined">
+            <mat-card-content>
+              <p class="traffic__label">Grid history</p>
+              <p class="traffic__value">{{ manifest.gridRange.start }} to {{ manifest.gridRange.end }}</p>
+              <p class="traffic__hint">{{ manifest.gridMonths.length }} monthly files</p>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="dt-card" appearance="outlined">
+            <mat-card-content>
+              <p class="traffic__label">Price history</p>
+              <p class="traffic__value">{{ manifest.priceRange.start }} to {{ manifest.priceRange.end }}</p>
+              <p class="traffic__hint">{{ manifest.priceMonths.length }} monthly files</p>
+            </mat-card-content>
+          </mat-card>
+          <mat-card class="dt-card" appearance="outlined">
+            <mat-card-content>
+              <p class="traffic__label">Day-ahead forecast source</p>
+              <p class="traffic__value">{{ manifest.dayAheadForecastSource }}</p>
+              <p class="traffic__hint">{{ manifest.filteredRows }} rows filtered out</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <mat-card class="dt-card traffic__section" appearance="outlined">
+          <mat-card-content>
+            <h2 class="traffic__heading">Provenance</h2>
+            <div class="traffic__table-wrap">
+              <table class="traffic__table">
+                <thead>
+                  <tr>
+                    <th scope="col">Source</th>
+                    <th scope="col">Kind</th>
+                    <th scope="col">Series</th>
+                    <th scope="col">Link</th>
+                    <th scope="col">Note</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (source of manifest.sources; track source.id) {
+                    <tr>
+                      <td>{{ source.label }}</td>
+                      <td>{{ source.kind }}</td>
+                      <td>{{ source.seriesId || '—' }}</td>
+                      <td>
+                        @if (source.url) {
+                          <a [href]="source.url" target="_blank" rel="noopener noreferrer">Open</a>
+                        } @else {
+                          —
+                        }
+                      </td>
+                      <td>{{ source.note || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="dt-card traffic__section" appearance="outlined">
+          <mat-card-content>
+            <h2 class="traffic__heading">Row counts by month</h2>
+            <div class="traffic__table-wrap">
+              <table class="traffic__table">
+                <thead>
+                  <tr>
+                    <th scope="col">Series</th>
+                    <th scope="col">Month</th>
+                    <th scope="col">Rows</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (entry of manifest.gridMonths; track entry.month) {
+                    <tr>
+                      <td>Grid</td>
+                      <td>{{ entry.month }}</td>
+                      <td>{{ entry.rowCount }}</td>
+                    </tr>
+                  }
+                  @for (entry of manifest.priceMonths; track entry.month) {
+                    <tr>
+                      <td>Price</td>
+                      <td>{{ entry.month }}</td>
+                      <td>{{ entry.rowCount }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="dt-card traffic__section traffic__placeholder" appearance="outlined">
+          <mat-card-content class="traffic__state-content">
+            <mat-icon aria-hidden="true">traffic</mat-icon>
+            <span>Tomorrow's PACE rush hour arrives in phase 03.</span>
+          </mat-card-content>
+        </mat-card>
+      }
+    }
+  }
+}

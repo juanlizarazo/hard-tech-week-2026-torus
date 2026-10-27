@@ -5,7 +5,8 @@
     "noUnusedLocals": false
   },
   "include": [
-    "src"
+    "src",
+    "lib/firestore/index.d.ts"
   ],
   "exclude": []
 }

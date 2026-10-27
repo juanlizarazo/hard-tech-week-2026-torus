@@ -1,4 +1,86 @@
 :host {
   display: block;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.shell__progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 1000;
+}
+
+.shell__header {
+  background: #fff;
+  border-bottom: 1px solid var(--dt-theme--border);
+}
+
+.shell__header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 12px 16px 4px;
+}
+
+.shell__brand {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.shell__brand-name {
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.14em;
+  color: var(--dt-theme--primary);
+}
+
+.shell__tagline {
+  font-size: 0.8125rem;
+  color: #5b6573;
+}
+
+.shell__nav {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.shell__content {
+  flex: 1;
+}
+
+.shell__main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.shell__footer {
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #5b6573;
+  border-top: 1px solid var(--dt-theme--border);
+  background: #fff;
+}
+
+@media (max-width: 599.98px) {
+  .shell__main {
+    padding: 16px 12px;
+  }
 }

@@ -4,6 +4,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck:dev": "tsc -p tsconfig.dev.json",
+    "ingest": "tsx src/dev/ingest-snapshot.ts",
     "serve": "yarn build && firebase emulators:start --only functions",
     "shell": "yarn build && firebase functions:shell",
     "start": "yarn shell",
@@ -19,6 +20,7 @@
     "firebase-functions": "6.3.2"
   },
   "devDependencies": {
+    "fflate": "0.8.3",
     "tsx": "4.19.2",
     "typescript": "5.9.3"
   },
