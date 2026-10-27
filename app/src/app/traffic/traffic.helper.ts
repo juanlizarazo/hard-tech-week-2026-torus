@@ -1,5 +1,13 @@
-import { EmissionsHelper, signalsConfig } from '@app/core';
-import { IForecastComparisonRow, ILoadForecast, IMarginalEmissionsPoint, MefMethod, MefSeason } from '@app/core/models';
+import { EmissionsHelper, emissionFactors, signalsConfig } from '@app/core';
+import {
+  IForecastComparisonRow,
+  ILoadForecast,
+  IMarginalEmissionsPoint,
+  IProvenance,
+  MefMethod,
+  MefSeason,
+  ProvenanceKind,
+} from '@app/core/models';
 import { TimeHelper } from '@app/core/helpers';
 import { PlanEngineHelper } from '@app/core/plan';
 import { TimeLabelHelper } from '@app/shared/helpers/time-label.helper';
@@ -205,9 +213,14 @@ export class TrafficHelper {
         ? `One more MWh emits most at ${TrafficHelper.hourLabel(carbonHigh.hour)} (${pounds(carbonHigh.value)}) and least at ${TrafficHelper.hourLabel(carbonLow.hour)} (${pounds(carbonLow.value)}). The dirtiest hour is ${where(carbonHigh.hour)}.`
         : '';
     const cleanest = report.ranking.length > 0 ? [...report.ranking].sort((first, second) => first.averageRank - second.averageRank)[0] : null;
-    const ranking = cleanest
-      ? `The cleanest hour on average, ${cleanest.hourLabel}, ranks ${cleanest.marginalRank} of ${report.ranking.length} on the marginal scale.`
-      : '';
+    const ranking = [
+      TrafficHelper.marginalVsAverage(report.ranking),
+      cleanest
+        ? `The cleanest hour on average, ${cleanest.hourLabel}, ranks ${cleanest.marginalRank} of ${report.ranking.length} on the marginal scale.`
+        : ''
+    ]
+      .filter((sentence) => sentence.length > 0)
+      .join(' ');
 
     return { load: loadParts.join(' '), price, carbon, ranking };
   }
@@ -325,6 +338,42 @@ export class TrafficHelper {
     return prices;
   }
 
+  public static frameSource(sources: IProvenance[], kind: ProvenanceKind, label: string): IProvenance {
+    const source = sources.find((entry) => entry.kind === kind);
+
+    return { id: `${kind}-${label}`, label, kind, url: source?.url ?? '', note: source?.label ?? label };
+  }
+
+  public static marginalVsAverage(ranking: IRankSlopeRow[]): string {
+    if (ranking.length === 0) {
+      return '';
+    }
+
+    const dirtiestAverage = ranking.reduce((worst, row) => (row.averageRank > worst.averageRank ? row : worst));
+    const dirtiestMarginal = ranking.reduce((worst, row) => (row.marginalRank > worst.marginalRank ? row : worst));
+
+    if (dirtiestAverage.hour === dirtiestMarginal.hour) {
+      return `Average and marginal carbon both rank ${dirtiestAverage.hourLabel} dirtiest.`;
+    }
+
+    const opening = `Average carbon ranks ${dirtiestAverage.hourLabel} dirtiest; marginal ranks ${dirtiestMarginal.hourLabel}.`;
+    const marginalLb = dirtiestMarginal.marginalLbPerMwh;
+    const gasLb = emissionFactors.GAS.lbPerMwh;
+    const coalLb = emissionFactors.COAL.lbPerMwh;
+    const pounds = `${Math.round(marginalLb).toLocaleString('en-US')} lb/MWh`;
+    const isGasLike = Math.abs(marginalLb - gasLb) < Math.abs(marginalLb - coalLb) && marginalLb >= gasLb * trafficConfig.GAS_LIKE_MIN_SHARE;
+
+    if (isGasLike) {
+      return `${opening} At ${pounds}, the plant that answers one more kW at ${dirtiestMarginal.hourLabel} looks like gas, not the hour's average mix.`;
+    }
+
+    if (Math.abs(marginalLb - coalLb) < Math.abs(marginalLb - gasLb)) {
+      return `${opening} At ${pounds}, the plant that answers one more kW at ${dirtiestMarginal.hourLabel} looks like coal, not the hour's average mix.`;
+    }
+
+    return `${opening} The plant that answers one more kW at ${dirtiestMarginal.hourLabel} is not the hour's average mix.`;
+  }
+
   public static rankingRows(hours: ITrafficHour[]): IRankSlopeRow[] {
     const complete = hours.filter((hour) => hour.averageLbPerMwh !== null && hour.mefFossilLbPerMwh !== null);
     const averageOrder = [...complete].sort((first, second) => (first.averageLbPerMwh ?? 0) - (second.averageLbPerMwh ?? 0));
@@ -369,14 +418,14 @@ export class TrafficHelper {
     const paceLabel = `${pace.score.mapePercent.toFixed(1)}%`;
 
     if (diff > 0.05) {
-      return `We beat PACE's own forecast by ${diff.toFixed(1)} points of MAPE (${oursLabel} vs ${paceLabel}).`;
+      return `We beat PACE's own forecast: our typical miss is ${oursLabel} of load in an hour, PACE's is ${paceLabel}.`;
     }
 
     if (diff < -0.05) {
-      return `PACE's forecast beats ours by ${Math.abs(diff).toFixed(1)} points of MAPE (${paceLabel} vs ${oursLabel}).`;
+      return `PACE's forecast beats ours: its typical miss is ${paceLabel} of load in an hour, ours is ${oursLabel}.`;
     }
 
-    return `We're about even with PACE's own forecast (${oursLabel} vs ${paceLabel} MAPE).`;
+    return `We're about even with PACE's own forecast: a typical miss of ${oursLabel} of load in an hour for ours, ${paceLabel} for PACE's.`;
   }
 
   public static peakMissLabel(meanPeakMissMw: number): string {

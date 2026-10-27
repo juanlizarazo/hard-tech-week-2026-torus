@@ -14,6 +14,7 @@ import {
   ChartFrameComponent,
   FigureComponent,
   HourChartComponent,
+  NextStopComponent,
   SourceChipComponent,
   TermComponent,
   UnderTheHoodComponent
@@ -39,6 +40,7 @@ import { ComponentBarsComponent, MonthCalendarComponent } from './components';
     FigureComponent,
     HourChartComponent,
     MonthCalendarComponent,
+    NextStopComponent,
     SourceChipComponent,
     TermComponent,
     UnderTheHoodComponent

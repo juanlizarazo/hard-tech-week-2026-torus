@@ -13,9 +13,10 @@
         <p class="dt-chart-frame__notice"><span class="dt-chart-frame__notice-label">What to notice:</span> {{ notice }}</p>
       }
       <ng-content select="[frame-notice]"></ng-content>
+      <div class="dt-chart-frame__sources"><ng-content select="[frame-source]"></ng-content></div>
     </div>
     @if (simulated) {
-      <span class="dt-chart-frame__tag">Simulated</span>
+      <span class="dt-chart-frame__tag">Simulated · seed {{ seed }}</span>
     }
   </figcaption>
   <div class="dt-chart-frame__controls">

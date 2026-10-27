@@ -94,7 +94,7 @@
         ></rect>
         <line class="dispatch-chart__soc-limit" [attr.x1]="margins.left" [attr.x2]="plotRight" [attr.y1]="socBandBottom" [attr.y2]="socBandBottom"></line>
         <text class="chart__axis-text chart__halo-text" [attr.x]="plotRight - 4" [attr.y]="socBandBottom + 13" text-anchor="end">
-          Pulse min SOC
+          Pulse minimum charge
         </text>
       }
       @for (tick of socTicks; track tick.y) {
@@ -162,11 +162,11 @@
   <ul class="chart__legend dispatch-chart__soc-legend">
     <li class="chart__legend-item">
       <span class="chart__key chart__key--line" [style.background]="colors.PULSE"></span>
-      Pulse SOC
+      Pulse charge left
     </li>
     <li class="chart__legend-item">
       <span class="chart__key chart__key--line dispatch-chart__key-thin" [style.background]="colors.SPIN"></span>
-      Spin SOC
+      Spin charge left
     </li>
   </ul>
   <p class="chart__caption">Bars above zero discharge to the site; below zero charge from the grid.</p>

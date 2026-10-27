@@ -37,11 +37,15 @@
               <section class="dt-section" aria-labelledby="traffic-clocks-title">
                 <h2 class="dt-section__title" id="traffic-clocks-title">Three clocks for {{ report.targetDateLabel }}</h2>
                 <p class="dt-section__lede">
-                  Grid stress, price and carbon for <dt-term key="PACE">PACE</dt-term>, hour by hour. Orange stripes mark the
+                  Grid stress (load and <dt-term key="NET_LOAD">net load</dt-term>), price and carbon for <dt-term key="PACE">PACE</dt-term>, hour by hour. Orange stripes mark the
                   <dt-term key="RUSH_HOUR">rush hour</dt-term> on every chart.
                 </p>
 
+                @let gridSource = frameSource(manifest.sources, 'eia-930', 'PACE demand, day-ahead forecast, wind and solar');
+                @let priceSource = frameSource(manifest.sources, 'caiso-oasis', 'PACE day-ahead price, EDAM');
+                @let carbonSource = frameSource(manifest.sources, 'eia-930', 'Regression on PACE fuel mix');
                 <dt-chart-frame title="Grid stress" [notice]="viewModel.notices?.load ?? ''">
+                  <dt-source-chip frame-source [label]="gridSource.label" [kind]="gridSource.kind" [url]="gridSource.url" [note]="gridSource.note ?? ''"></dt-source-chip>
                   <div frame-controls class="dt-toggle-row">
                     <button type="button" class="dt-chip-toggle" [attr.aria-pressed]="options.showAllDays" (click)="onToggle('showAllDays')">
                       Show last 3 days
@@ -77,6 +81,7 @@
                 </dt-chart-frame>
 
                 <dt-chart-frame title="Grid price" [notice]="viewModel.notices?.price ?? ''">
+                  <dt-source-chip frame-source [label]="priceSource.label" [kind]="priceSource.kind" [url]="priceSource.url" [note]="priceSource.note ?? ''"></dt-source-chip>
                   @if (report.hasPrices) {
                     <dt-hour-chart
                       title="Day-ahead price"
@@ -101,6 +106,7 @@
                 </dt-chart-frame>
 
                 <dt-chart-frame title="Carbon" [notice]="viewModel.notices?.carbon ?? ''">
+                  <dt-source-chip frame-source [label]="carbonSource.label" [kind]="carbonSource.kind" [url]="carbonSource.url" [note]="carbonSource.note ?? ''"></dt-source-chip>
                   <div frame-controls class="dt-toggle-row">
                     <button type="button" class="dt-chip-toggle" [attr.aria-pressed]="options.showUncertainty" (click)="onToggle('showUncertainty')">
                       Show uncertainty
@@ -243,7 +249,9 @@
                   <dt-term key="AVERAGE_CO2">Average CO2</dt-term> divides all fossil emissions by all generation.
                   Marginal CO2 is what the next MWh adds. They rank the same 24 hours very differently.
                 </p>
+                @let rankSource = frameSource(manifest.sources, 'eia-930', 'PACE fuel mix, average and marginal');
                 <dt-chart-frame title="Hour rank: average vs marginal CO2" [notice]="viewModel.notices?.ranking ?? ''">
+                  <dt-source-chip frame-source [label]="rankSource.label" [kind]="rankSource.kind" [url]="rankSource.url" [note]="rankSource.note ?? ''"></dt-source-chip>
                   <div class="traffic__rank">
                     <dt-rank-slope [rows]="report.ranking"></dt-rank-slope>
                   </div>
@@ -370,4 +378,6 @@
       }
     }
   }
+
+  <dt-next-stop path="/plan" sign="2" [title]="(day$ | async)?.possessive + ' plan: what should the Torus Station do?'"></dt-next-stop>
 </div>

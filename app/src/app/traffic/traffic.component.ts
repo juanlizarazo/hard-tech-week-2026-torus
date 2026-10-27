@@ -10,6 +10,7 @@ import {
   ChartFrameComponent,
   FigureComponent,
   HourChartComponent,
+  NextStopComponent,
   SourceChipComponent,
   TermComponent,
   UnderTheHoodComponent
@@ -38,6 +39,7 @@ import { TrafficViewStateHelper } from './traffic-view-state.helper';
     ChartFrameComponent,
     FigureComponent,
     HourChartComponent,
+    NextStopComponent,
     RankSlopeComponent,
     SourceChipComponent,
     TermComponent,
@@ -64,6 +66,7 @@ export class TrafficComponent {
   public readonly priceFormat = (value: number): string => `$${value.toFixed(0)}/MWh`;
   public readonly carbonFormat = (value: number): string => `${Math.round(value).toLocaleString()} lb/MWh`;
   public readonly forecastVerdict = TrafficHelper.forecastVerdict;
+  public readonly frameSource = TrafficHelper.frameSource;
 
   public options = this._options$.value;
 

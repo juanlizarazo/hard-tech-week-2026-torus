@@ -88,7 +88,11 @@
               </div>
               <div class="dt-figures dt-figures--secondary">
                 @for (tile of model.secondaryTiles; track tile.id) {
-                  <dt-figure size="small" [value]="tile.value" [label]="tile.label" [detail]="tile.hint"></dt-figure>
+                  <dt-figure size="small" [value]="tile.value" [label]="tile.label" [detail]="tile.hint">
+                    @if (tile.source; as source) {
+                      <dt-source-chip figure-source [label]="source.label" [kind]="source.kind" [url]="source.url" [note]="source.note ?? ''"></dt-source-chip>
+                    }
+                  </dt-figure>
                 }
               </div>
               <p class="dt-hint">
@@ -265,4 +269,6 @@
       }
     }
   }
+
+  <dt-next-stop path="/start" label="Back to the start" title="See how DETOUR works, under the hood"></dt-next-stop>
 </div>

@@ -1,6 +1,7 @@
 export const trafficConfig = {
   TREND_DAYS: 7,
   WINDOW_DAYS: 3,
+  GAS_LIKE_MIN_SHARE: 0.5,
 };
 
 export const trafficChartDefaults = {

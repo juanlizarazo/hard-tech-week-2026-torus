@@ -88,6 +88,17 @@
   color: var(--dt-muted);
 }
 
+.dt-chart-frame__sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.dt-chart-frame__sources:empty {
+  display: none;
+}
+
 .dt-chart-frame__controls:empty {
   display: none;
 }
@@ -114,5 +125,14 @@
 
   .dt-chart-frame__title {
     font-size: var(--dt-text-17);
+  }
+
+  .dt-chart-frame__head {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dt-chart-frame__tag {
+    order: -1;
   }
 }

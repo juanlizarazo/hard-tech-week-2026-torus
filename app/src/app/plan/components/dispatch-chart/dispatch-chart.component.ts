@@ -85,12 +85,12 @@ export class DispatchChartComponent extends ResponsiveChartDirective implements 
         { label: 'Spin', value: this._netLabel(spinNet), swatch: chartColors.SPIN },
         { label: 'Pulse', value: this._netLabel(pulseNet), swatch: chartColors.PULSE },
         {
-          label: 'Pulse SOC',
+          label: 'Pulse charge left',
           value: `${ChartHelper.formatKwh(interval.pulseSocKwh)} (${Math.round(this._percent(interval.pulseSocKwh, this._pulseMaxKwh))}%)`,
           swatch: ''
         },
         {
-          label: 'Spin SOC',
+          label: 'Spin charge left',
           value: `${ChartHelper.formatKwh(interval.spinSocKwh)} (${Math.round(this._percent(interval.spinSocKwh, this._spinMaxKwh))}%)`,
           swatch: ''
         }
