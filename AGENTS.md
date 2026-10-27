@@ -4,7 +4,7 @@
 
 **DETOUR** is a day-ahead rush-hour planner for a labeled, simulated Torus Station (Nova Spin flywheel + Nova Pulse battery) at a Utah C&I site. It reads tomorrow's PACE grid conditions and solves an LP that co-optimizes the customer's Rocky Mountain Power bill, marginal CO2 and a Wattsmart reserve, then backtests against a naive shaver and a perfect-foresight oracle. Built solo for the **Torus bounty (Option 1: Rush Hour for Electrons), Hard Tech Week 2026 Hackathon**, judged on creativity, clarity of insight and execution.
 
-Angular 21+ (standalone components), Angular Material, SCSS, Firebase Cloud Functions (TypeScript), Firestore, highs-js for the LP.
+Angular 21+ (standalone components), Angular Material, SCSS + Tailwind, Firebase Cloud Functions (TypeScript), Firestore, highs-js for the LP.
 
 **Key files:**
 - `brief/brief.md` — challenge, judging rubric, required features, demo script. Read it before touching any feature.

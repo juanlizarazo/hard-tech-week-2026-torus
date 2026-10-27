@@ -30,7 +30,7 @@ Free and public: EIA-930 (PACE demand, forecast, fuel mix), CAISO OASIS (PACE da
 
 ## Stack
 
-Angular 21+ · Angular Material · SCSS · Firebase Cloud Functions · Firestore · highs-js (LP solver)
+Angular 21+ · Angular Material · SCSS + Tailwind · Firebase Cloud Functions · Firestore · highs-js (LP solver)
 
 ## Repo
 

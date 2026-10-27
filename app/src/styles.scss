@@ -1,0 +1,44 @@
+@use '@angular/material' as mat;
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --dt-theme--primary: #1f2a37;
+  --dt-theme--tertiary: #1f9d55;
+  --dt-theme--tertiary-bg: #e6f6ec;
+  --dt-theme--accent: #e3a008;
+  --dt-theme--error: #d63c3c;
+  --dt-theme--error-dark: #a82828;
+  --dt-theme--error-bg: #fdecec;
+  --dt-theme--surface: #f7f8fa;
+  --dt-theme--border: #e2e5ea;
+}
+
+html {
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$blue-palette,
+        tertiary: mat.$green-palette
+      ),
+      typography: Inter,
+      density: 0
+    )
+  );
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, 'Helvetica Neue', sans-serif;
+  background: var(--dt-theme--surface);
+  color: var(--dt-theme--primary);
+}
