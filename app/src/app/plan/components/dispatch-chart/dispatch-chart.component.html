@@ -1,0 +1,178 @@
+<div class="chart__header">
+  <h3 class="chart__title">Station dispatch</h3>
+  <dt-simulated-badge></dt-simulated-badge>
+</div>
+
+<ul class="chart__legend">
+  <li class="chart__legend-item">
+    <span class="chart__key" [style.background]="colors.SPIN"></span>
+    Spin (flywheel)
+  </li>
+  <li class="chart__legend-item">
+    <span class="chart__key" [style.background]="colors.PULSE"></span>
+    Pulse (battery)
+  </li>
+  <li class="chart__legend-item">
+    <span class="chart__key dispatch-chart__key-band"></span>
+    PACE rush hour
+  </li>
+  @if (showReserve) {
+    <li class="chart__legend-item">
+      <span class="chart__key chart__key--dash dispatch-chart__key-reserve"></span>
+      Wattsmart reserve floor
+    </li>
+  }
+</ul>
+
+@if (intervals.length === 0) {
+  <div class="chart__empty">No intervals to plot yet.</div>
+} @else {
+  <div class="chart__plot">
+    <svg
+      class="chart__svg"
+      [attr.viewBox]="'0 0 ' + viewWidth + ' ' + viewHeight"
+      role="img"
+      [attr.aria-label]="ariaLabel"
+      (pointermove)="onPointerMove($event)"
+      (pointerleave)="onPointerLeave()"
+    >
+      <!-- Rush-hour windows across both panels -->
+      @for (range of rushRanges; track range.x0) {
+        <rect
+          class="dispatch-chart__band"
+          [attr.x]="range.x0"
+          [attr.y]="powerTop"
+          [attr.width]="range.x1 - range.x0"
+          [attr.height]="powerBottom - powerTop"
+        ></rect>
+        <rect
+          class="dispatch-chart__band"
+          [attr.x]="range.x0"
+          [attr.y]="socTop"
+          [attr.width]="range.x1 - range.x0"
+          [attr.height]="socBottom - socTop"
+        ></rect>
+        <text class="chart__band-text" [attr.x]="range.labelX" [attr.text-anchor]="range.labelAnchor" [attr.y]="powerTop - 8">{{ range.label }}</text>
+      }
+
+      <!-- Power panel axis -->
+      @for (tick of powerTicks; track tick.y) {
+        <line
+          class="chart__grid-line"
+          [attr.x1]="margins.left"
+          [attr.x2]="plotRight"
+          [attr.y1]="tick.y"
+          [attr.y2]="tick.y"
+        ></line>
+        <text class="chart__axis-text" [attr.x]="margins.left - 6" [attr.y]="tick.y + 4" text-anchor="end">
+          {{ tick.label }}
+        </text>
+      }
+      <text class="chart__axis-text" [attr.x]="margins.left - 6" [attr.y]="powerTop - 8" text-anchor="end">kW</text>
+
+      <!-- Power bars -->
+      @for (bar of spinBars; track $index) {
+        <rect class="dispatch-chart__spin-bar" [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.width" [attr.height]="bar.height"></rect>
+      }
+      @for (bar of pulseBars; track $index) {
+        <rect class="dispatch-chart__pulse-bar" [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.width" [attr.height]="bar.height"></rect>
+      }
+      <line class="chart__baseline" [attr.x1]="margins.left" [attr.x2]="plotRight" [attr.y1]="zeroY" [attr.y2]="zeroY"></line>
+      <text class="dispatch-chart__side-text chart__halo-text" [attr.x]="plotRight - 4" [attr.y]="powerTop + 12" text-anchor="end">
+        Discharge to site
+      </text>
+      <text class="dispatch-chart__side-text chart__halo-text" [attr.x]="plotRight - 4" [attr.y]="powerBottom - 6" text-anchor="end">
+        Charge from grid
+      </text>
+
+      <!-- State of charge panel -->
+      <text class="dispatch-chart__panel-text" [attr.x]="margins.left" [attr.y]="socTop - 10">
+        State of charge (% of usable max)
+      </text>
+      @if (showSocBand) {
+        <rect
+          class="dispatch-chart__soc-band"
+          [attr.x]="margins.left"
+          [attr.y]="socBandTop"
+          [attr.width]="plotRight - margins.left"
+          [attr.height]="socBandBottom - socBandTop"
+        ></rect>
+        <line class="dispatch-chart__soc-limit" [attr.x1]="margins.left" [attr.x2]="plotRight" [attr.y1]="socBandBottom" [attr.y2]="socBandBottom"></line>
+        <text class="chart__axis-text chart__halo-text" [attr.x]="plotRight - 4" [attr.y]="socBandBottom + 13" text-anchor="end">
+          Pulse min SOC
+        </text>
+      }
+      @for (tick of socTicks; track tick.y) {
+        <line
+          [class]="tick.y === socBottom ? 'chart__baseline' : 'chart__grid-line'"
+          [attr.x1]="margins.left"
+          [attr.x2]="plotRight"
+          [attr.y1]="tick.y"
+          [attr.y2]="tick.y"
+        ></line>
+        <text class="chart__axis-text" [attr.x]="margins.left - 6" [attr.y]="tick.y + 4" text-anchor="end">
+          {{ tick.label }}
+        </text>
+      }
+      @if (showReserve) {
+        @for (range of rushRanges; track range.x0; let first = $first) {
+          <line class="dispatch-chart__reserve" [attr.x1]="range.x0" [attr.x2]="range.x1" [attr.y1]="reserveY" [attr.y2]="reserveY"></line>
+          @if (first) {
+            <text class="dispatch-chart__reserve-text chart__halo-text" [attr.x]="range.x0 - 4" [attr.y]="reserveY + 4" text-anchor="end">
+              Reserve floor
+            </text>
+          }
+        }
+      }
+      <path class="dispatch-chart__spin-soc" [attr.d]="spinSocPath"></path>
+      <path class="dispatch-chart__pulse-soc" [attr.d]="pulseSocPath"></path>
+
+      <!-- Hour axis -->
+      @for (tick of hourTicks; track tick.x) {
+        @if (tick.isMidnight) {
+          <line class="chart__midnight-line" [attr.x1]="tick.x" [attr.x2]="tick.x" [attr.y1]="powerTop" [attr.y2]="powerBottom"></line>
+          <line class="chart__midnight-line" [attr.x1]="tick.x" [attr.x2]="tick.x" [attr.y1]="socTop" [attr.y2]="socBottom + 4"></line>
+          <text class="chart__day-text" [attr.x]="tick.x + 2" [attr.y]="socBottom + 32">{{ tick.dayLabel }}</text>
+        }
+        <text class="chart__axis-text" [attr.x]="tick.x" [attr.y]="socBottom + 16" text-anchor="middle">{{ tick.label }}</text>
+      }
+
+      <!-- Hover -->
+      @if (hoverX >= 0) {
+        <line class="chart__crosshair" [attr.x1]="hoverX" [attr.x2]="hoverX" [attr.y1]="powerTop" [attr.y2]="socBottom"></line>
+      }
+      <rect
+        class="chart__hit"
+        [attr.x]="margins.left"
+        [attr.y]="powerTop"
+        [attr.width]="plotRight - margins.left"
+        [attr.height]="socBottom - powerTop"
+      ></rect>
+    </svg>
+
+    @if (tooltip) {
+      <div class="chart__tooltip" [class.chart__tooltip--right]="tooltip.alignRight" [style.left.%]="tooltip.leftPercent">
+        <div class="chart__tooltip-title">{{ tooltip.title }}</div>
+        @for (row of tooltip.rows; track row.label) {
+          <div class="chart__tooltip-row">
+            <span class="chart__tooltip-swatch" [style.background]="row.swatch || 'transparent'"></span>
+            <span class="chart__tooltip-label">{{ row.label }}</span>
+            <span class="chart__tooltip-value">{{ row.value }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <ul class="chart__legend dispatch-chart__soc-legend">
+    <li class="chart__legend-item">
+      <span class="chart__key chart__key--line" [style.background]="colors.PULSE"></span>
+      Pulse SOC
+    </li>
+    <li class="chart__legend-item">
+      <span class="chart__key chart__key--line dispatch-chart__key-thin" [style.background]="colors.SPIN"></span>
+      Spin SOC
+    </li>
+  </ul>
+  <p class="chart__caption">Bars above zero discharge to the site; below zero charge from the grid.</p>
+}

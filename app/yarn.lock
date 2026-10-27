@@ -3309,6 +3309,11 @@ hasown@^2.0.2, hasown@^2.0.4:
   dependencies:
     function-bind "^1.1.2"
 
+highs@1.15.4:
+  version "1.15.4"
+  resolved "https://registry.yarnpkg.com/highs/-/highs-1.15.4.tgz#2ce13b7a543a564ab5449cae215736fdbd484a57"
+  integrity sha512-vsC03XHDqWAVrEFUt22h8e4CDDMb+LAFa0bycjPUq2kadRigK5pNLVIlwspKvMxxVtrr4NAucZHP/CAgigxiDQ==
+
 hono@^4.11.4:
   version "4.13.2"
   resolved "https://registry.yarnpkg.com/hono/-/hono-4.13.2.tgz#692d400d2a0ea086e3eec5c73aa3207cb53f97b5"

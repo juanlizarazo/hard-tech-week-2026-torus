@@ -1,0 +1,63 @@
+@use '../chart-common';
+
+.clock-bands__lane-title {
+  fill: var(--dt-theme--primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.clock-bands__lane-bg {
+  fill: #f1f2f4;
+}
+
+.clock-bands__on-peak {
+  fill: var(--dt-theme--error);
+}
+
+.clock-bands__on-peak-text {
+  fill: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-bands__overlay-text {
+  fill: var(--dt-theme--error-dark);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.clock-bands__gap-text {
+  fill: #52514e;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.clock-bands__caption {
+  fill: #52514e;
+  font-size: 11px;
+}
+
+.clock-bands__legend-ramp {
+  rx: 2;
+}
+
+.clock-bands__placeholder-pill {
+  fill: #fff4d6;
+  stroke: #9a6b00;
+  stroke-width: 1;
+}
+
+.clock-bands__placeholder-text {
+  fill: #6b4900;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.clock-bands__window {
+  fill: none;
+  stroke: var(--dt-theme--error);
+  stroke-width: 2;
+  pointer-events: none;
+}

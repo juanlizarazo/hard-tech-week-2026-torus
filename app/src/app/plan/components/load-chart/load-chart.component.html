@@ -1,0 +1,139 @@
+<div class="chart__header">
+  <h3 class="chart__title">Site load vs grid draw</h3>
+  <dt-simulated-badge></dt-simulated-badge>
+</div>
+
+<ul class="chart__legend">
+  <li class="chart__legend-item">
+    <span class="chart__key chart__key--line" [style.background]="colors.LOAD"></span>
+    Site load (before)
+  </li>
+  <li class="chart__legend-item">
+    <span class="chart__key load-chart__key-area"></span>
+    Grid draw (after DETOUR)
+  </li>
+  <li class="chart__legend-item">
+    <span class="chart__key load-chart__key-band"></span>
+    PACE rush hour
+  </li>
+  @if (showDemand) {
+    <li class="chart__legend-item">
+      <span class="chart__key chart__key--dash load-chart__key-demand"></span>
+      Billed demand (D)
+    </li>
+  }
+</ul>
+
+@if (intervals.length === 0) {
+  <div class="chart__empty">No intervals to plot yet.</div>
+} @else {
+  <div class="chart__plot">
+    <svg
+      class="chart__svg"
+      [attr.viewBox]="'0 0 ' + viewWidth + ' ' + viewHeight"
+      role="img"
+      [attr.aria-label]="ariaLabel"
+      (pointermove)="onPointerMove($event)"
+      (pointerleave)="onPointerLeave()"
+    >
+      <!-- Rush-hour windows -->
+      @for (range of rushRanges; track range.x0) {
+        <rect
+          class="load-chart__band"
+          [attr.x]="range.x0"
+          [attr.y]="margins.top"
+          [attr.width]="range.x1 - range.x0"
+          [attr.height]="plotBottom - margins.top"
+        ></rect>
+        <text class="chart__band-text" [attr.x]="range.labelX" [attr.text-anchor]="range.labelAnchor" [attr.y]="margins.top - 8">{{ range.label }}</text>
+      }
+
+      <!-- Y grid -->
+      @for (tick of yTicks; track tick.y) {
+        <line
+          [class]="tick.y === plotBottom ? 'chart__baseline' : 'chart__grid-line'"
+          [attr.x1]="margins.left"
+          [attr.x2]="plotRight"
+          [attr.y1]="tick.y"
+          [attr.y2]="tick.y"
+        ></line>
+        <text class="chart__axis-text" [attr.x]="margins.left - 6" [attr.y]="tick.y + 4" text-anchor="end">
+          {{ tick.label }}
+        </text>
+      }
+      <text class="chart__axis-text" [attr.x]="margins.left - 6" [attr.y]="margins.top - 8" text-anchor="end">kW</text>
+
+      <!-- Midnights and hour ticks -->
+      @for (tick of hourTicks; track tick.x) {
+        @if (tick.isMidnight) {
+          <line
+            class="chart__midnight-line"
+            [attr.x1]="tick.x"
+            [attr.x2]="tick.x"
+            [attr.y1]="margins.top"
+            [attr.y2]="plotBottom + 4"
+          ></line>
+          <text class="chart__day-text" [attr.x]="tick.x + 2" [attr.y]="plotBottom + 32">{{ tick.dayLabel }}</text>
+        }
+        <text class="chart__axis-text" [attr.x]="tick.x" [attr.y]="plotBottom + 16" text-anchor="middle">
+          {{ tick.label }}
+        </text>
+      }
+
+      <!-- Series -->
+      <path class="load-chart__grid-area" [attr.d]="gridAreaPath"></path>
+      <path class="load-chart__grid-line" [attr.d]="gridLinePath"></path>
+      <path class="load-chart__load-line" [attr.d]="loadLinePath"></path>
+
+      <!-- Demand D -->
+      @if (showDemand) {
+        <line
+          class="load-chart__demand-line"
+          [attr.x1]="margins.left"
+          [attr.x2]="plotRight"
+          [attr.y1]="demandY"
+          [attr.y2]="demandY"
+        ></line>
+        <text
+          class="load-chart__demand-text chart__halo-text"
+          [attr.x]="plotRight - 4"
+          [attr.y]="demandY - 6"
+          text-anchor="end"
+        >
+          {{ demandLabel || 'Billed demand' }}
+        </text>
+      }
+
+      <!-- Hover -->
+      @if (hoverX >= 0) {
+        <line
+          class="chart__crosshair"
+          [attr.x1]="hoverX"
+          [attr.x2]="hoverX"
+          [attr.y1]="margins.top"
+          [attr.y2]="plotBottom"
+        ></line>
+      }
+      <rect
+        class="chart__hit"
+        [attr.x]="margins.left"
+        [attr.y]="margins.top"
+        [attr.width]="plotRight - margins.left"
+        [attr.height]="plotBottom - margins.top"
+      ></rect>
+    </svg>
+
+    @if (tooltip) {
+      <div class="chart__tooltip" [class.chart__tooltip--right]="tooltip.alignRight" [style.left.%]="tooltip.leftPercent">
+        <div class="chart__tooltip-title">{{ tooltip.title }}</div>
+        @for (row of tooltip.rows; track row.label) {
+          <div class="chart__tooltip-row">
+            <span class="chart__tooltip-swatch" [style.background]="row.swatch || 'transparent'"></span>
+            <span class="chart__tooltip-label">{{ row.label }}</span>
+            <span class="chart__tooltip-value">{{ row.value }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

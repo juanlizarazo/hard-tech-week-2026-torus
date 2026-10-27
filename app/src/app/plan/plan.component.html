@@ -1,4 +1,4 @@
-<dt-screen-toolbar title="Plan — Three Clocks" subtitle="Bill, carbon and reserve, planned together for tomorrow's rush hour.">
+<dt-screen-toolbar [title]="hook.title" [subtitle]="hook.subtitle">
   <dt-simulated-badge></dt-simulated-badge>
 </dt-screen-toolbar>
 
@@ -6,59 +6,273 @@
   @switch (state.status) {
     @case ('loading') {
       <mat-card class="dt-card" appearance="outlined">
-        <mat-card-content class="screen__state-content">
+        <mat-card-content class="plan__state">
           <mat-spinner diameter="28"></mat-spinner>
-          <span>Loading…</span>
+          <span>Reading the frozen snapshot…</span>
         </mat-card-content>
       </mat-card>
     }
     @case ('error') {
       <dt-alert-banner [message]="state.errorMessage"></dt-alert-banner>
     }
+    @case ('empty') {
+      <mat-card class="dt-card" appearance="outlined">
+        <mat-card-content class="plan__state">
+          <mat-icon aria-hidden="true">inventory_2</mat-icon>
+          <span>No snapshot has been frozen yet. Run the ingest script.</span>
+        </mat-card-content>
+      </mat-card>
+    }
     @default {
-      <!-- site cards -->
-      <p class="plan__intro">
-        Three simulated Utah sites, each with a Torus Station (Nova Spin flywheel + Nova Pulse battery).
-        Baseline = July 2026 bill with no storage, Rocky Mountain Power base rates, riders excluded.
-      </p>
-      <div class="plan__grid">
+      <!-- site picker -->
+      <div class="plan__sites" role="radiogroup" aria-label="Simulated site">
         @for (card of siteCards; track card.archetype.id) {
-          <mat-card class="dt-card plan__site" appearance="outlined">
-            <mat-card-header>
-              <mat-card-title>{{ card.archetype.name }}</mat-card-title>
-              <mat-card-subtitle>{{ card.scheduleName }}</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <dt-simulated-badge></dt-simulated-badge>
-              <p class="plan__desc">{{ card.archetype.description }}</p>
-              <dl class="plan__stats">
-                <div><dt>July peak</dt><dd>{{ card.julyStats.peakKw | number: '1.0-0' }} kW</dd></div>
-                <div><dt>July average</dt><dd>{{ card.julyStats.avgKw | number: '1.0-0' }} kW</dd></div>
-                <div><dt>Baseline July bill</dt><dd>{{ card.julyBill.total | currency: 'USD' : 'symbol' : '1.0-0' }}</dd></div>
-              </dl>
-              <h4>Nova Spin</h4>
-              <ul class="plan__assets">
-                @for (row of card.spinRows; track row.label) {
-                  <li>
-                    <span>{{ row.label }}</span><strong>{{ row.value }}</strong>
-                    <span class="plan__tag plan__tag--{{ row.kind }}" [title]="row.note">{{ row.kind === 'torus-spec' ? 'Torus spec' : 'Assumption' }}</span>
-                  </li>
-                }
-              </ul>
-              <h4>Nova Pulse</h4>
-              <ul class="plan__assets">
-                @for (row of card.pulseRows; track row.label) {
-                  <li>
-                    <span>{{ row.label }}</span><strong>{{ row.value }}</strong>
-                    <span class="plan__tag plan__tag--{{ row.kind }}" [title]="row.note">{{ row.kind === 'torus-spec' ? 'Torus spec' : 'Assumption' }}</span>
-                  </li>
-                }
-              </ul>
-            </mat-card-content>
-          </mat-card>
+          <button
+            type="button"
+            role="radio"
+            class="plan__site"
+            [class.plan__site--active]="card.archetype.id === controls.siteId"
+            [attr.aria-checked]="card.archetype.id === controls.siteId"
+            (click)="onSiteSelect(card.archetype)"
+          >
+            <span class="plan__site-name">{{ card.archetype.name }}</span>
+            <span class="plan__site-meta">
+              {{ card.scheduleName }} · July peak {{ card.julyStats.peakKw | number: '1.0-0' }} kW · baseline July bill
+              {{ card.julyBill.total | currency: 'USD' : 'symbol' : '1.0-0' }}
+            </span>
+          </button>
         }
       </div>
-      <p class="plan__footnote">Live LP re-solve arrives in phase 02.</p>
+
+      <!-- controls -->
+      <mat-card class="dt-card plan__controls" appearance="outlined">
+        <mat-card-content class="plan__controls-grid">
+          <div class="plan__control">
+            <span class="plan__control-label">Day to plan</span>
+            <mat-button-toggle-group
+              class="plan__toggle"
+              [value]="controls.dateMode"
+              (change)="onDateModeChange($event.value)"
+              aria-label="Day to plan"
+              hideSingleSelectionIndicator
+            >
+              <mat-button-toggle value="target">Tomorrow · {{ (dates$ | async)?.target }}</mat-button-toggle>
+              <mat-button-toggle value="july-peak">July 2026 peak day</mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+          <div class="plan__control">
+            <span class="plan__control-label">Tariff</span>
+            <mat-button-toggle-group
+              class="plan__toggle"
+              [value]="controls.scheduleId"
+              (change)="onScheduleChange($event.value)"
+              aria-label="Tariff schedule"
+              hideSingleSelectionIndicator
+            >
+              <mat-button-toggle value="schedule-8">Schedule 8 · on-peak demand</mat-button-toggle>
+              <mat-button-toggle value="schedule-6">Schedule 6 · all-hours demand</mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+          <div class="plan__control">
+            <span class="plan__control-label">Demand already set this month</span>
+            <mat-button-toggle-group
+              class="plan__toggle"
+              [value]="controls.peakSoFarMode"
+              (change)="onPeakSoFarModeChange($event.value)"
+              aria-label="Peak so far"
+              hideSingleSelectionIndicator
+            >
+              <mat-button-toggle value="fresh">None · these 48 h set the peak</mat-button-toggle>
+              <mat-button-toggle value="month-to-date">Month to date, no storage</mat-button-toggle>
+            </mat-button-toggle-group>
+            <span class="plan__control-hint">Once a month's peak is set, shaving below it saves nothing: the LP's demand variable is floored at the peak so far.</span>
+          </div>
+          <div class="plan__control">
+            <label class="plan__control-label" for="co2-weight">
+              CO2 weight <strong>${{ controls.co2WeightPerKg | number: '1.2-2' }}/kg</strong>
+            </label>
+            <mat-slider
+              class="plan__slider"
+              [min]="0"
+              [max]="defaults.CO2_WEIGHT_MAX_PER_KG"
+              [step]="defaults.CO2_WEIGHT_STEP_PER_KG"
+              discrete
+            >
+              <input
+                id="co2-weight"
+                matSliderThumb
+                [value]="controls.co2WeightPerKg"
+                (valueChange)="onCo2WeightChange($event)"
+              />
+            </mat-slider>
+            <span class="plan__control-hint">$0 = bill only. Higher = pay more to draw in low-carbon hours.</span>
+          </div>
+          <div class="plan__control">
+            <label class="plan__control-label" for="wattsmart-reserve">
+              Wattsmart reserve <strong>{{ controls.wattsmartReserveKwh | number: '1.0-0' }} kWh</strong>
+            </label>
+            <mat-slider
+              class="plan__slider"
+              [min]="0"
+              [max]="maxReserveKwh"
+              [step]="defaults.RESERVE_STEP_KWH"
+              discrete
+            >
+              <input
+                id="wattsmart-reserve"
+                matSliderThumb
+                [value]="controls.wattsmartReserveKwh"
+                (valueChange)="onReserveChange($event)"
+              />
+            </mat-slider>
+            <span class="plan__control-hint">Energy held above the Pulse floor through PACE's rush hour.</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      @if (solve$ | async; as solve) {
+        <p class="plan__status" aria-live="polite">
+          @if (solve.status === 'solving') {
+            <mat-spinner diameter="14"></mat-spinner>
+            <span>Solving…</span>
+          } @else if (solve.viewModel) {
+            <mat-icon class="plan__status-icon" aria-hidden="true">bolt</mat-icon>
+            <span>
+              {{ solve.viewModel.solveLabel }} in your browser (HiGHS) · {{ solve.viewModel.dateLabel }} + next day,
+              {{ solve.viewModel.result.intervals.length }} fifteen-minute intervals
+            </span>
+          }
+        </p>
+
+        @if (solve.status === 'error') {
+          <dt-alert-banner [message]="solve.errorMessage"></dt-alert-banner>
+        }
+
+        @if (solve.viewModel; as viewModel) {
+          <!-- summary tiles -->
+          <div class="plan__tiles">
+            @for (tile of viewModel.tiles; track tile.id) {
+              <mat-card class="dt-card plan__tile" appearance="outlined">
+                <mat-card-content>
+                  <p class="plan__tile-label">{{ tile.label }}</p>
+                  <p class="plan__tile-value" [ngClass]="'plan__tile-value--' + tile.tone">{{ tile.value }}</p>
+                  <p class="plan__tile-detail">{{ tile.detail }}</p>
+                  <p class="plan__tile-source">Source: {{ tile.source }}</p>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+
+          <!-- three clocks -->
+          <mat-card class="dt-card plan__panel" appearance="outlined">
+            <mat-card-content>
+              <p class="plan__panel-hint">The bill, the price and the carbon each say a different hour is expensive. The shaded block is PACE's rush hour, where the Wattsmart reserve applies.</p>
+              <dt-clock-bands
+                [intervals]="viewModel.result.intervals"
+                [rushHourWindows]="viewModel.result.metrics?.rushHourWindows ?? []"
+                [scheduleId]="viewModel.controls.scheduleId"
+                [billCaption]="viewModel.billCaption"
+                [edamPricePerMwh]="viewModel.edamPricePerMwh"
+                [carbonCaption]="viewModel.carbonCaption"
+                [mefIsPlaceholder]="viewModel.mefIsPlaceholder"
+              ></dt-clock-bands>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- load before / after -->
+          <mat-card class="dt-card plan__panel" appearance="outlined">
+            <mat-card-content>
+              <p class="plan__panel-hint">The line is what the site would pull from Rocky Mountain Power with no storage. The filled area is the planned grid draw with the Torus Station dispatching.</p>
+              <dt-load-chart
+                [intervals]="viewModel.result.intervals"
+                [rushHourWindows]="viewModel.result.metrics?.rushHourWindows ?? []"
+                [demandKw]="viewModel.result.demandKw"
+                [demandLabel]="viewModel.demandLabel"
+              ></dt-load-chart>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- spin vs pulse -->
+          <mat-card class="dt-card plan__panel" appearance="outlined">
+            <mat-card-content>
+              <p class="plan__panel-hint">Pulse is ramp-limited and wears ~3× faster per kWh, so the LP sends short, sharp moves to the Spin flywheel.</p>
+              <dt-dispatch-chart
+                [intervals]="viewModel.result.intervals"
+                [rushHourWindows]="viewModel.result.metrics?.rushHourWindows ?? []"
+                [pulseMinSocKwh]="viewModel.pulseMinSocKwh"
+                [pulseMaxSocKwh]="viewModel.pulseMaxSocKwh"
+                [reserveFloorKwh]="viewModel.reserveFloorKwh"
+                [spinMaxSocKwh]="viewModel.spinMaxSocKwh"
+              ></dt-dispatch-chart>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- bill lines and assets -->
+          <div class="plan__details">
+            <mat-card class="dt-card plan__panel" appearance="outlined">
+              <mat-card-content>
+                <h2 class="plan__panel-title">Bill, line by line</h2>
+                <p class="plan__panel-hint">
+                  {{ viewModel.controls.peakSoFarMode === 'fresh' ? 'The 48 h plan billed as if it were the whole month.' : viewModel.result.baselineBill.month + ' to date (no storage) plus the 48 h plan.' }}
+                  Base rates, riders excluded.
+                </p>
+                <table class="plan__bill">
+                  <thead>
+                    <tr>
+                      <th class="plan__bill-label">Line</th>
+                      <th class="plan__bill-num">No storage</th>
+                      <th class="plan__bill-num">Planned</th>
+                      <th class="plan__bill-num">Change</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (line of viewModel.billLines; track line.id) {
+                      <tr>
+                        <td class="plan__bill-label">{{ line.label }}</td>
+                        <td class="plan__bill-num">{{ line.baseline | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
+                        <td class="plan__bill-num">{{ line.planned | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
+                        <td class="plan__bill-num" [class.plan__bill-num--saving]="line.change < 0">{{ line.change | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
+                      </tr>
+                    }
+                    <tr class="plan__bill-total">
+                      <td class="plan__bill-label">Total</td>
+                      <td class="plan__bill-num">{{ viewModel.result.baselineBill.total | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
+                      <td class="plan__bill-num">{{ viewModel.result.plannedBill.total | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
+                      <td class="plan__bill-num">{{ viewModel.result.plannedBill.total - viewModel.result.baselineBill.total | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="dt-card plan__panel" appearance="outlined">
+              <mat-card-content>
+                <h2 class="plan__panel-title">Torus Station for this site</h2>
+                <h3 class="plan__assets-title">Nova Spin (flywheel)</h3>
+                <ul class="plan__assets">
+                  @for (row of spinRows; track row.label) {
+                    <li class="plan__asset">
+                      <span class="plan__asset-label">{{ row.label }}</span><strong>{{ row.value }}</strong>
+                      <span class="plan__tag plan__tag--{{ row.kind }}" [title]="row.note">{{ row.kind === 'torus-spec' ? 'Torus spec' : 'Assumption' }}</span>
+                    </li>
+                  }
+                </ul>
+                <h3 class="plan__assets-title">Nova Pulse (battery)</h3>
+                <ul class="plan__assets">
+                  @for (row of pulseRows; track row.label) {
+                    <li class="plan__asset">
+                      <span class="plan__asset-label">{{ row.label }}</span><strong>{{ row.value }}</strong>
+                      <span class="plan__tag plan__tag--{{ row.kind }}" [title]="row.note">{{ row.kind === 'torus-spec' ? 'Torus spec' : 'Assumption' }}</span>
+                    </li>
+                  }
+                </ul>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <dt-lp-text [lpText]="viewModel.result.lpText" [solveMs]="viewModel.result.solveMs"></dt-lp-text>
+        }
+      }
     }
   }
 }

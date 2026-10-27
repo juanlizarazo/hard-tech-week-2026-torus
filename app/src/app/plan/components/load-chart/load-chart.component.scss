@@ -1,0 +1,51 @@
+@use '../chart-common';
+
+.load-chart__band {
+  fill: var(--dt-theme--error-bg);
+}
+
+.load-chart__grid-area {
+  fill: var(--dt-theme--tertiary);
+  fill-opacity: 0.16;
+}
+
+.load-chart__grid-line {
+  fill: none;
+  stroke: var(--dt-theme--tertiary);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.load-chart__load-line {
+  fill: none;
+  stroke: var(--dt-theme--primary);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.load-chart__demand-line {
+  stroke: var(--dt-theme--primary);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+
+.load-chart__demand-text {
+  fill: var(--dt-theme--primary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.load-chart__key-area {
+  background: var(--dt-theme--tertiary-bg);
+  box-shadow: inset 0 2px 0 var(--dt-theme--tertiary);
+}
+
+.load-chart__key-band {
+  background: var(--dt-theme--error-bg);
+  box-shadow: inset 0 0 0 1px rgba(214, 60, 60, 0.35);
+}
+
+.load-chart__key-demand {
+  color: var(--dt-theme--primary);
+}

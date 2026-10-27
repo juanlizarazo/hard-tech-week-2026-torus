@@ -29,6 +29,27 @@ export interface IPlanInterval {
   marginalKgCo2PerKwh: number;
 }
 
+export interface IRushHourWindow {
+  startUtc: string;
+  endUtc: string;
+  startLocalHour: number;
+  endLocalHour: number;
+  isAssumption: boolean;
+}
+
+export interface IPlanMetrics {
+  baselineCo2Kg: number;
+  plannedCo2Kg: number;
+  baselineRushHourKwh: number;
+  plannedRushHourKwh: number;
+  trafficAvoidedKwh: number;
+  rushHourWindows: IRushHourWindow[];
+  wattsmartHeldKwh: number;
+  spinThroughputKwh: number;
+  pulseThroughputKwh: number;
+  objectiveValue: number;
+}
+
 export interface IPlanResult {
   request: IPlanRequest;
   status: 'optimal' | 'infeasible' | 'error';
@@ -38,4 +59,6 @@ export interface IPlanResult {
   plannedBill: IBillBreakdown;
   lpText: string;
   solveMs: number;
+  metrics?: IPlanMetrics;
+  errorMessage?: string;
 }
