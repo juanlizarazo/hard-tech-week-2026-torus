@@ -1,6 +1,6 @@
 # UI/UX Patterns
 
-Global classes use the `app-` prefix. Rename to a short project prefix at kickoff (e.g., `ss-`, `pl-`) and keep it consistent.
+Global classes and component selectors use the `dt-` prefix. Keep it consistent.
 
 ## Loading States
 
@@ -10,21 +10,21 @@ Global classes use the `app-` prefix. Rename to a short project prefix at kickof
 
 ## Global Card Styles (`styles.scss`)
 
-Use the global `app-card` classes for consistent clickable card lists:
+Use the global `dt-card` classes for consistent clickable card lists:
 
 ```html
-<div class="app-card-grid">
-  <mat-card class="app-card app-card--clickable" appearance="outlined" routerLink="/path">
+<div class="dt-card-grid">
+  <mat-card class="dt-card dt-card--clickable" appearance="outlined" routerLink="/path">
     <mat-card-content>
-      <div class="app-card-header">
-        <div class="app-card-icon">
+      <div class="dt-card-header">
+        <div class="dt-card-icon">
           <mat-icon>icon_name</mat-icon>
         </div>
-        <div class="app-card-content">
+        <div class="dt-card-content">
           <h4>Card Title</h4>
           <p>Card description text</p>
         </div>
-        <mat-icon class="app-card-arrow">chevron_right</mat-icon>
+        <mat-icon class="dt-card-arrow">chevron_right</mat-icon>
       </div>
     </mat-card-content>
   </mat-card>
@@ -34,25 +34,25 @@ Use the global `app-card` classes for consistent clickable card lists:
 Note: Always use `appearance="outlined"` on mat-card for flat white cards with borders.
 
 Classes:
-- `.app-card` - Base card with border, 12px radius, white background
-- `.app-card--clickable` - Adds hover effects (border color, shadow, translateY)
-- `.app-card-header` - Flexbox row layout with centered items
-- `.app-card-icon` - 48x48 circular icon container with primary background and white icon
-- `.app-card-content` - Flex content area with h4 title and p description
-- `.app-card-arrow` - Chevron arrow (gray, 24px)
-- `.app-card-grid` - Container with flex column, 12px gap, max-width 600px
+- `.dt-card` - Base card with border, 12px radius, white background
+- `.dt-card--clickable` - Adds hover effects (border color, shadow, translateY)
+- `.dt-card-header` - Flexbox row layout with centered items
+- `.dt-card-icon` - 48x48 circular icon container with primary background and white icon
+- `.dt-card-content` - Flex content area with h4 title and p description
+- `.dt-card-arrow` - Chevron arrow (gray, 24px)
+- `.dt-card-grid` - Container with flex column, 12px gap, max-width 600px
 
 ## Global Page Header Styles (`styles.scss`)
 
-Use the global `app-page-header` classes for page headers with actions:
+Use the global `dt-page-header` classes for page headers with actions:
 
 ```html
-<div class="app-page-header">
-  <div class="app-page-header-left">
-    <h1 class="app-page-title">Page Title</h1>
-    <p class="app-page-subtitle">Page description or subtitle</p>
+<div class="dt-page-header">
+  <div class="dt-page-header-left">
+    <h1 class="dt-page-title">Page Title</h1>
+    <p class="dt-page-subtitle">Page description or subtitle</p>
   </div>
-  <button mat-flat-button class="app-page-action">
+  <button mat-flat-button class="dt-page-action">
     <mat-icon>add</mat-icon>
     <span>Action</span>
   </button>
@@ -60,11 +60,11 @@ Use the global `app-page-header` classes for page headers with actions:
 ```
 
 Classes:
-- `.app-page-header` - Flexbox row with space-between, 24px bottom margin
-- `.app-page-header-left` - Flex container for title/subtitle
-- `.app-page-title` - Bold title (600 weight), no margins
-- `.app-page-subtitle` - Gray subtitle text
-- `.app-page-action` - Button container with icon styling
+- `.dt-page-header` - Flexbox row with space-between, 24px bottom margin
+- `.dt-page-header-left` - Flex container for title/subtitle
+- `.dt-page-title` - Bold title (600 weight), no margins
+- `.dt-page-subtitle` - Gray subtitle text
+- `.dt-page-action` - Button container with icon styling
 
 ## Forms
 
@@ -97,11 +97,11 @@ Classes:
   <button mat-button type="button" [disabled]="isSubmitting" (click)="onClose()">Cancel</button>
   ```
 
-- `[UI-14]` **Inline error on failure.** On submit error, set a `saveError` string and display it with `<app-alert-banner>` inside the panel (above the action buttons). Do not close the panel. Clear it on the next submit attempt or on close.
+- `[UI-14]` **Inline error on failure.** On submit error, set a `saveError` string and display it with `<dt-alert-banner>` inside the panel (above the action buttons). Do not close the panel. Clear it on the next submit attempt or on close.
 
   ```html
   @if (saveError) {
-    <app-alert-banner [message]="saveError" (dismissed)="saveError = ''"></app-alert-banner>
+    <dt-alert-banner [message]="saveError" (dismissed)="saveError = ''"></dt-alert-banner>
   }
   ```
 
