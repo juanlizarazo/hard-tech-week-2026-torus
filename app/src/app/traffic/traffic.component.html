@@ -100,7 +100,9 @@
                   </div>
                 </dt-chart-frame>
 
-                <dt-chart-frame title="Carbon" [notice]="viewModel.notices?.carbon ?? ''">
+                <dt-plant-map [rush]="report.paceRush" [weatherPoints]="manifest.weatherPoints"></dt-plant-map>
+
+                <dt-chart-frame title="Carbon"[notice]="viewModel.notices?.carbon ?? ''">
                   <div frame-controls class="dt-toggle-row">
                     <button type="button" class="dt-chip-toggle" [attr.aria-pressed]="options.showUncertainty" (click)="onToggle('showUncertainty')">
                       Show uncertainty
