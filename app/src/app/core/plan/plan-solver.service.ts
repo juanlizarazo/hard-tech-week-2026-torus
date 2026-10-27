@@ -29,13 +29,15 @@ export class PlanSolverService {
 
   private async _solveOnce(input: ILpInput): Promise<IPlanResult> {
     const highs = await this._loadHighs();
+    const startMs = performance.now();
     const result = PlanEngineHelper.solve(highs, input);
+    const solveMs = performance.now() - startMs;
 
     if (result.status === 'error') {
       throw new Error(result.errorMessage ?? 'Unknown solver error');
     }
 
-    return result;
+    return { ...result, solveMs, lpStats: { ...result.lpStats, solveMs } };
   }
 
   private _loadHighs(): Promise<Highs> {

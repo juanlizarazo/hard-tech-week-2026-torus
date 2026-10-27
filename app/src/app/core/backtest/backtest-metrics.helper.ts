@@ -5,6 +5,7 @@ import {
   IPlanInterval,
   IProvenance,
 } from '../models';
+import { planEngineSettings } from '../plan/plan-engine.constants';
 import { backtestProvenance, backtestSettings } from './backtest.constants';
 import {
   IBacktestCycles,
@@ -15,6 +16,7 @@ import {
   IBacktestStrategy,
   IBacktestStrategyResult,
   IBacktestTraffic,
+  IBacktestValue,
   IBacktestWattsmart,
   IComponentSavings,
 } from './backtest.interfaces';
@@ -27,18 +29,37 @@ export class BacktestMetricsHelper {
     bill: IBillBreakdown,
     baselineBill: IBillBreakdown,
   ): IBacktestStrategyResult {
+    const savings = BacktestMetricsHelper.savingsByComponent(baselineBill, bill);
+    const cycles = BacktestMetricsHelper.cycles(input, intervals);
+    const traffic = BacktestMetricsHelper.traffic(input, intervals);
+
     return {
       strategy: { id: strategy.id, label: strategy.label, description: strategy.description, role: strategy.role },
       intervals,
       bill,
-      savings: BacktestMetricsHelper.savingsByComponent(baselineBill, bill),
+      savings,
       peakInterval: BacktestMetricsHelper.peakInterval(input.intervals, bill),
       facilitiesKw: bill.determinants.facilitiesKw,
-      cycles: BacktestMetricsHelper.cycles(input, intervals),
+      cycles,
       wattsmart: BacktestMetricsHelper.wattsmart(input, intervals),
-      traffic: BacktestMetricsHelper.traffic(input, intervals),
+      traffic,
+      value: BacktestMetricsHelper.value(input, savings, cycles, traffic),
       captureRate: null,
     };
+  }
+
+  public static value(
+    input: IBacktestInput,
+    savings: IComponentSavings,
+    cycles: IBacktestCycles,
+    traffic: IBacktestTraffic,
+  ): IBacktestValue {
+    const carbonValue = -planEngineSettings.DEFAULT_CO2_WEIGHT_PER_KG * traffic.netKgCo2Change;
+    const wearCost =
+      cycles.pulseThroughputKwh * input.assets.pulse.degradationCostPerKwh +
+      cycles.spinThroughputKwh * input.assets.spin.degradationCostPerKwh;
+
+    return { billSavings: savings.total, carbonValue, wearCost, total: savings.total + carbonValue - wearCost };
   }
 
   public static savingsByComponent(baselineBill: IBillBreakdown, bill: IBillBreakdown): IComponentSavings {
@@ -103,7 +124,7 @@ export class BacktestMetricsHelper {
 
     intervals.forEach((entry: IPlanInterval, index: number) => {
       if (input.rushHourMask[index]) {
-        const held = Math.max(0, entry.pulseSocKwh - pulseFloorKwh) + entry.spinSocKwh;
+        const held = Math.max(0, entry.pulseSocKwh - pulseFloorKwh);
         minimumHeldKwh = Math.min(minimumHeldKwh, held);
       }
     });
@@ -148,6 +169,8 @@ export class BacktestMetricsHelper {
         captureRate: BacktestMetricsHelper.captureRate(entry, oracleRaw),
       }));
     const oracle = strategies.find((entry: IBacktestStrategyResult) => entry.strategy.role === 'oracle') ?? null;
+    const perfectLoad = strategies.find((entry: IBacktestStrategyResult) => entry.strategy.role === 'perfect-load') ?? null;
+    const shaver = strategies.find((entry: IBacktestStrategyResult) => entry.strategy.role === 'heuristic') ?? null;
     const lead =
       strategies.find((entry: IBacktestStrategyResult) => entry.strategy.role === 'realistic') ??
       strategies.find((entry: IBacktestStrategyResult) => entry.strategy.role === 'heuristic') ??
@@ -166,12 +189,15 @@ export class BacktestMetricsHelper {
         seed: input.site.seed,
         pulseCycleLife: input.assets.pulse.cycleLife,
         spinCycleLife: input.assets.spin.cycleLife,
+        co2WeightPerKg: planEngineSettings.DEFAULT_CO2_WEIGHT_PER_KG,
       },
       intervals: input.intervals,
       rushHourMask: input.rushHourMask,
       baseline,
       strategies,
       oracle,
+      perfectLoad,
+      shaver,
       lead,
       days: BacktestMetricsHelper.days(input, baseline, lead),
       provenance: BacktestMetricsHelper.provenance(input),
@@ -182,6 +208,8 @@ export class BacktestMetricsHelper {
         reserve: backtestProvenance.WATTSMART_RESERVE,
         rushHour: backtestProvenance.RUSH_HOUR_RULE,
         naiveTarget: backtestProvenance.NAIVE_TARGET,
+        loadForecast: backtestProvenance.LOAD_FORECAST,
+        oracle: backtestProvenance.ORACLE,
       },
     };
   }
@@ -250,6 +278,8 @@ export class BacktestMetricsHelper {
       backtestProvenance.NAIVE_TARGET,
       backtestProvenance.WATTSMART_RESERVE,
       backtestProvenance.RUSH_HOUR_RULE,
+      backtestProvenance.LOAD_FORECAST,
+      backtestProvenance.ORACLE,
       ...input.marginalEmissions.provenance,
       ...Object.values(input.assets.sources),
     ];

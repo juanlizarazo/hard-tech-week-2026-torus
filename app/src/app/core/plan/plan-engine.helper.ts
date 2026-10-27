@@ -3,12 +3,14 @@ import { TimeHelper } from '../helpers/time.helper';
 import {
   IBillBreakdown,
   IInterval,
+  ILpStats,
   IMarginalEmissionsPoint,
   IMarginalEmissionsSeries,
   IPlanInterval,
   IPlanMetrics,
   IPlanRequest,
   IPlanResult,
+  IPlanValue,
   IRushHourWindow,
   ISiteArchetype,
   ISiteLoadInterval,
@@ -104,7 +106,7 @@ export class PlanEngineHelper {
 
   public static solve(highs: Highs, input: ILpInput): IPlanResult {
     const startMs = performance.now();
-    let model: ILpModel = { lpText: '', columnNames: [] };
+    let model: ILpModel = { lpText: '', columnNames: [], stats: PlanEngineHelper.emptyStats(input) };
 
     try {
       model = LpBuilderHelper.build(input);
@@ -118,13 +120,20 @@ export class PlanEngineHelper {
           PlanEngineHelper.infeasibleMessage(input, solution.Status),
           model.lpText,
           solveMs,
+          { ...model.stats, solveMs },
         );
       }
 
       const columns = solution.Columns as Record<string, { Primal: number }>;
       const primal = (name: string): number => PlanEngineHelper.clean(columns[name]?.Primal ?? 0);
 
-      return PlanEngineHelper.optimalResult(input, model.lpText, solveMs, primal, solution.ObjectiveValue);
+      return PlanEngineHelper.optimalResult(
+        input,
+        model.lpText,
+        { ...model.stats, solveMs },
+        primal,
+        solution.ObjectiveValue,
+      );
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
 
@@ -134,8 +143,13 @@ export class PlanEngineHelper {
         `The solver failed before returning a plan: ${message}`,
         model.lpText,
         performance.now() - startMs,
+        model.stats,
       );
     }
+  }
+
+  public static emptyStats(input: ILpInput): ILpStats {
+    return { intervalCount: input.intervals.length, variableCount: 0, constraintCount: 0, solveMs: 0 };
   }
 
   public static failedResult(
@@ -144,6 +158,7 @@ export class PlanEngineHelper {
     errorMessage: string,
     lpText: string,
     solveMs: number,
+    lpStats: ILpStats = PlanEngineHelper.emptyStats(input),
   ): IPlanResult {
     const baselineBill = PlanEngineHelper.billFor(input, input.loadKw);
     const intervals = input.intervals.map((interval: IInterval, t: number) =>
@@ -159,6 +174,7 @@ export class PlanEngineHelper {
       plannedBill: baselineBill,
       lpText,
       solveMs,
+      lpStats: { ...lpStats, solveMs },
       errorMessage,
     };
   }
@@ -166,7 +182,7 @@ export class PlanEngineHelper {
   private static optimalResult(
     input: ILpInput,
     lpText: string,
-    solveMs: number,
+    lpStats: ILpStats,
     primal: (name: string) => number,
     objectiveValue: number,
   ): IPlanResult {
@@ -206,19 +222,12 @@ export class PlanEngineHelper {
       if (input.rushHourMask[t]) {
         baselineRushHourKwh += input.loadKw[t] * stepHours;
         plannedRushHourKwh += planInterval.gridKw * stepHours;
-        minimumHeldKwh = Math.min(
-          minimumHeldKwh,
-          planInterval.pulseSocKwh - pulseFloorKwh + planInterval.spinSocKwh,
-        );
+        minimumHeldKwh = Math.min(minimumHeldKwh, planInterval.pulseSocKwh - pulseFloorKwh);
       }
     }
 
-    const wattsmartHeldKwh =
-      input.request.wattsmartReserveKwh > 0
-        ? input.request.wattsmartReserveKwh
-        : Number.isFinite(minimumHeldKwh)
-          ? Math.max(0, minimumHeldKwh)
-          : 0;
+    const rushHourPulseMinKwh = Number.isFinite(minimumHeldKwh) ? Math.max(0, minimumHeldKwh) : 0;
+    const wattsmartHeldKwh = input.request.wattsmartReserveKwh > 0 ? rushHourPulseMinKwh : 0;
     const metrics: IPlanMetrics = {
       baselineCo2Kg,
       plannedCo2Kg,
@@ -227,9 +236,12 @@ export class PlanEngineHelper {
       trafficAvoidedKwh: baselineRushHourKwh - plannedRushHourKwh,
       rushHourWindows: input.rushHourWindows,
       wattsmartHeldKwh,
+      rushHourPulseMinKwh,
+      spinBurstCount: PlanEngineHelper.spinBurstCount(intervals),
       spinThroughputKwh,
       pulseThroughputKwh,
       objectiveValue,
+      value: PlanEngineHelper.planValue(input, gridKw, plannedCo2Kg - baselineCo2Kg),
     };
 
     return {
@@ -240,8 +252,74 @@ export class PlanEngineHelper {
       baselineBill: PlanEngineHelper.billFor(input, input.loadKw),
       plannedBill: PlanEngineHelper.billFor(input, gridKw),
       lpText,
-      solveMs,
+      solveMs: lpStats.solveMs,
+      lpStats,
       metrics,
+    };
+  }
+
+  public static spinBurstCount(intervals: IPlanInterval[]): number {
+    let count = 0;
+    let isBursting = false;
+
+    for (const planInterval of intervals) {
+      const isDischarging = planInterval.spinDischargeKw > planEngineSettings.SPIN_BURST_MIN_KW;
+
+      if (isDischarging && !isBursting) {
+        count++;
+      }
+
+      isBursting = isDischarging;
+    }
+
+    return count;
+  }
+
+  public static planValue(input: ILpInput, gridKw: number[], co2ChangeKg: number): IPlanValue {
+    const { schedule, request } = input;
+    const isOnPeakBasis = schedule.demandBasis === 'on-peak';
+    const demandFloorKw = isOnPeakBasis ? request.peakSoFarOnPeakKw : request.peakSoFarAllHoursKw;
+    const billedPeak = (series: number[]): number =>
+      series.reduce(
+        (peak: number, kw: number, t: number) => (isOnPeakBasis && !input.onPeakMask[t] ? peak : Math.max(peak, kw)),
+        demandFloorKw,
+      );
+    const facilitiesPeak = (series: number[]): number =>
+      series.reduce((peak: number, kw: number) => Math.max(peak, kw), request.peakSoFarAllHoursKw);
+    const energyCost = (series: number[]): number =>
+      series.reduce(
+        (sum: number, kw: number, t: number) => sum + kw * input.intervals[t].hours * input.energyPricePerKwh[t],
+        0,
+      );
+    const demandRatePerKw =
+      input.intervals.length > 0 ? TariffHelper.seasonRatesFor(schedule, input.intervals[0].localDate).demandRatePerKw : 0;
+    const baselinePeakKw = billedPeak(input.loadKw);
+    const plannedPeakKw = billedPeak(gridKw);
+    const baselineFacilitiesKw = facilitiesPeak(input.loadKw);
+    const plannedFacilitiesKw = facilitiesPeak(gridKw);
+    const peakCutKw = Math.max(0, baselinePeakKw - plannedPeakKw);
+    const facilitiesCutKw = Math.max(0, baselineFacilitiesKw - plannedFacilitiesKw);
+    const demandWorthPerMonth = peakCutKw * demandRatePerKw;
+    const facilitiesWorthPerMonth = facilitiesCutKw * schedule.facilitiesRatePerKw;
+    const baselineEnergyCost = energyCost(input.loadKw);
+    const plannedEnergyCost = energyCost(gridKw);
+
+    return {
+      baselinePeakKw,
+      plannedPeakKw,
+      peakCutKw,
+      baselineFacilitiesKw,
+      plannedFacilitiesKw,
+      facilitiesCutKw,
+      demandRatePerKw,
+      facilitiesRatePerKw: schedule.facilitiesRatePerKw,
+      demandWorthPerMonth,
+      facilitiesWorthPerMonth,
+      worthPerMonth: demandWorthPerMonth + facilitiesWorthPerMonth,
+      baselineEnergyCost,
+      plannedEnergyCost,
+      energyCostChange: plannedEnergyCost - baselineEnergyCost,
+      co2ChangeKg,
     };
   }
 

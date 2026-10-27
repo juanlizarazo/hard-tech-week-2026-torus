@@ -17,10 +17,10 @@ export const placeholderMefSeries: IMarginalEmissionsSeries = {
   provenance: [
     {
       id: 'placeholder-mef',
-      label: 'PLACEHOLDER marginal CO2 by hour and season',
+      label: 'Typical hourly carbon (used until grid data loads)',
       kind: 'assumption',
       url: '',
-      note: "PLACEHOLDER until phase 03's regression. Hand-shaped: coal on the margin overnight (~1,900 lb/MWh), gas at midday (~1,100), evening ramp (~1,500). Not a measurement.",
+      note: "Typical hourly carbon, used until grid data loads. Hand-shaped: coal on the margin overnight (~1,900 lb/MWh), gas at midday (~1,100), evening ramp (~1,500). Not a measurement.",
     },
   ],
 };

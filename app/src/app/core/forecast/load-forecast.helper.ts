@@ -327,7 +327,7 @@ export class LoadForecastHelper {
       },
       {
         id: forecastProvenance.NAIVE.id,
-        label: 'Seasonal naive (same hour, last week)',
+        label: 'Same hour last week',
         score: ForecastScoreHelper.scorePoints(naiveScored, [forecastProvenance.NAIVE]),
         provenance: forecastProvenance.NAIVE,
       },
