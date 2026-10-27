@@ -88,6 +88,7 @@ export interface IPlanSolveState {
   status: 'solving' | 'ready' | 'error';
   viewModel: IPlanViewModel | null;
   errorMessage: string;
+  isStale?: boolean;
 }
 
 export interface IPlanHook {

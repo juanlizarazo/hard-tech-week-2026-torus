@@ -107,6 +107,18 @@ describe('plan engine', () => {
     );
   });
 
+  it('applies the hourly marginal emissions value to every quarter-hour interval', () => {
+    const input = buildInput(airportAssets, '2026-07-15', 0.1, 0);
+    const summerValues = input.marginalKgCo2PerKwh.slice(0, 96);
+
+    for (let hour = 0; hour < 24; hour++) {
+      const quarterHourValues = summerValues.slice(hour * 4, hour * 4 + 4);
+
+      expect(new Set(quarterHourValues).size).toBe(1);
+      expect(quarterHourValues[0]).toBeGreaterThan(0);
+    }
+  });
+
   it('keeps Spin and Pulse state of charge within bounds with a Wattsmart reserve', () => {
     const result = PlanEngineHelper.solve(highs, buildInput(airportAssets, '2026-07-15', 0.1, 500));
     const pulseMinKwh = airportAssets.pulse.minSocFraction * airportAssets.pulse.energyKwh;

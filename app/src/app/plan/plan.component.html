@@ -88,6 +88,7 @@
                   />
                 </mat-slider>
                 <span class="plan__dial-hint">$0 plans for the bill only. Higher pays to charge in cleaner hours.</span>
+                <span class="plan__dial-hint">PACE's carbon signal barely varies by hour here, so this dial makes a small trade rather than the main decision.</span>
               </div>
 
               <div class="plan__dial">
@@ -109,7 +110,7 @@
                     (valueChange)="onReserveChange($event)"
                   />
                 </mat-slider>
-                <span class="plan__dial-hint">Kept in Pulse through rush hour for a grid call. More reserve, less saving.</span>
+                <span class="plan__dial-hint">Modeled reserve held in Pulse through the load-forecast rush; this is not a forecast or confirmation of a Wattsmart call.</span>
               </div>
 
               <hr class="plan__dials-rule" />
@@ -141,8 +142,8 @@
                   <mat-button-toggle value="schedule-6">Schedule 6</mat-button-toggle>
                 </mat-button-toggle-group>
                 <span class="plan__dial-hint">
-                  <dt-term key="SCHEDULE_8">Schedule 8</dt-term> bills demand on-peak only;
-                  <dt-term key="SCHEDULE_6">Schedule 6</dt-term> bills it any hour.
+                  <dt-term key="SCHEDULE_8">Schedule 8</dt-term>: big demand charge on-peak; smaller facilities charge still counts all hours.
+                  <dt-term key="SCHEDULE_6">Schedule 6</dt-term>: demand counts any hour.
                 </span>
               </div>
 
@@ -181,6 +182,10 @@
 
               @if (solve.status === 'error') {
                 <dt-alert-banner [message]="solve.errorMessage"></dt-alert-banner>
+              }
+
+              @if (solve.isStale) {
+                <p class="plan__stale" role="status">Showing the last successful plan; the current settings did not solve.</p>
               }
 
               <section class="plan__try" aria-labelledby="plan-try-title">
@@ -294,6 +299,7 @@
                       Base rates only, <dt-term key="RIDERS">riders</dt-term> excluded. The
                       <dt-term key="FACILITIES_CHARGE">facilities charge</dt-term> bills the highest draw in any hour.
                     </p>
+                    <p class="dt-hint plan__monthly-note">Why the monthly figure can be larger than July's: it assumes this two-day peak repeats for a full month; July's proof uses the peak that actually occurred across the month.</p>
                     <div class="dt-table-wrap">
                       <table class="dt-table plan__bill">
                         <thead>
@@ -326,7 +332,7 @@
 
                     <div class="plan__assets">
                       <h3 class="dt-subheading">The Torus Station for this site</h3>
-                      <p class="dt-hint">Torus spec values come from Torus. Assumptions are DETOUR's where Torus has not published a number.</p>
+                      <p class="dt-hint">Values marked Torus spec are from public Torus material; all other values are DETOUR assumptions.</p>
                       <div class="plan__assets-grid">
                         <div class="dt-table-wrap">
                           <table class="dt-table">

@@ -415,7 +415,8 @@ export class PlanEngineHelper {
 
     return intervals.map((interval: IInterval) => {
       const season = TariffHelper.seasonOf(schedule, Number(interval.localDate.slice(5, 7)));
-      const lbPerMwh = pointsByKey.get(`${season}|${interval.localHour}`) ?? 0;
+      const hour = Math.floor(interval.localHour);
+      const lbPerMwh = pointsByKey.get(`${season}|${hour}`) ?? 0;
 
       return lbPerMwh * mefConversions.KG_PER_KWH_PER_LB_PER_MWH;
     });
