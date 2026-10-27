@@ -1,0 +1,149 @@
+@use '../../charts/chart-common';
+
+.three-clocks__lane-title {
+  fill: var(--dt-ink);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.three-clocks__lane-bg {
+  fill: var(--dt-theme--chart-lane);
+}
+
+.three-clocks__on-peak {
+  fill: var(--dt-ink);
+}
+
+.three-clocks__on-peak-text {
+  fill: var(--dt-theme--card);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.three-clocks__overlay-text {
+  fill: var(--dt-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.three-clocks__gap-text {
+  fill: var(--dt-theme--chart-ink-secondary);
+  font-size: 12px;
+  font-style: italic;
+}
+
+.three-clocks__window-fill {
+  fill: url(#dt-rush-stripes-overlay);
+  pointer-events: none;
+}
+
+.three-clocks__window-edge {
+  stroke: var(--dt-rush);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.three-clocks__hatch-bg {
+  fill: var(--dt-theme--chart-lane);
+
+  &--rush {
+    fill: var(--dt-theme--chart-hatch);
+  }
+}
+
+.three-clocks__hatch-line {
+  stroke: var(--dt-theme--chart-baseline);
+
+  &--rush {
+    stroke: var(--dt-ink);
+    stroke-opacity: 0.25;
+  }
+}
+
+.three-clocks__key {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 24px;
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--dt-line-soft);
+}
+
+.three-clocks__key-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.three-clocks__key-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--dt-text-13);
+  font-weight: 800;
+  color: var(--dt-ink);
+}
+
+.three-clocks__key-text {
+  margin: 0;
+  font-size: var(--dt-text-13);
+  line-height: 1.4;
+  color: var(--dt-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.three-clocks__swatch {
+  flex: none;
+  width: 16px;
+  height: 10px;
+  border-radius: 2px;
+
+  &--on-peak {
+    background: var(--dt-ink);
+  }
+
+  &--hatch {
+    background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--dt-ink) 25%, transparent) 0 2px, var(--dt-theme--chart-hatch) 2px 5px);
+  }
+}
+
+.three-clocks__ramp-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: var(--dt-text-13);
+  color: var(--dt-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.three-clocks__ramp {
+  flex: none;
+  width: 64px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--dt-price-low), var(--dt-price-high));
+
+  &--carbon {
+    background: linear-gradient(90deg, var(--dt-carbon-low), var(--dt-carbon-high));
+  }
+}
+
+.three-clocks__placeholder {
+  padding: 1px 8px;
+  border: 1px solid var(--dt-theme--accent-border);
+  border-radius: 999px;
+  background: var(--dt-theme--accent-bg);
+  color: var(--dt-theme--accent-dark);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+@media (max-width: 599.98px) {
+  .three-clocks__key {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+}

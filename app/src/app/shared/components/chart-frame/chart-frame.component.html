@@ -1,0 +1,33 @@
+<figure class="dt-chart-frame">
+  <figcaption class="dt-chart-frame__head">
+    <div class="dt-chart-frame__titles">
+      <div class="dt-chart-frame__title-row">
+        <h3 class="dt-chart-frame__title">{{ title }}</h3>
+        @if (hasHowToRead) {
+          <button type="button" class="dt-chart-frame__info" [attr.aria-label]="'How to read ' + title" (click)="onOpenHowToRead()">
+            <mat-icon aria-hidden="true">info_outline</mat-icon>
+          </button>
+        }
+      </div>
+      @if (notice) {
+        <p class="dt-chart-frame__notice"><span class="dt-chart-frame__notice-label">What to notice:</span> {{ notice }}</p>
+      }
+      <ng-content select="[frame-notice]"></ng-content>
+    </div>
+    @if (simulated) {
+      <span class="dt-chart-frame__tag">Simulated</span>
+    }
+  </figcaption>
+  <div class="dt-chart-frame__controls">
+    <ng-content select="[frame-controls]"></ng-content>
+  </div>
+  <div class="dt-chart-frame__body">
+    <ng-content></ng-content>
+  </div>
+</figure>
+
+<ng-template #howToRead>
+  <div class="dt-chart-frame__how">
+    <ng-content select="[how-to-read]"></ng-content>
+  </div>
+</ng-template>

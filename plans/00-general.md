@@ -11,8 +11,8 @@
 | 02 | LP engine + Plan ("Three Clocks") screen | No | 03, 04 | `phase-02-plan.md` | Done |
 | 03 | Grid signals (marginal CO2, PACE forecast score) + Traffic Report screen | No | 02, 04 | `phase-03-traffic.md` | Done |
 | 04 | Month backtest + Backtest screen | No | 02, 03 (rolling LP and oracle plug in once 02 merges) | `phase-04-backtest.md` | Done |
-| 05 | Stretch: our own PACE net-load forecast vs PACE's day-ahead forecast | No — stretch | — (01–04 merged) | `phase-05-forecast.md` | In progress |
-| 06 | Last mile: re-freeze tomorrow, audit, persona reviews, UI polish, rehearsal | — | — | — | Not started |
+| 05 | Stretch: our own PACE net-load forecast vs PACE's day-ahead forecast | No — stretch | — (01–04 merged) | `phase-05-forecast.md` | Done |
+| 06 | Last mile: daily auto-sync + demo pin, clarity redesign, audit, persona reviews, rehearsal | — | — | `phase-06a-sync-and-clarity.md` (first of several) | In progress |
 
 ### Phase scope
 

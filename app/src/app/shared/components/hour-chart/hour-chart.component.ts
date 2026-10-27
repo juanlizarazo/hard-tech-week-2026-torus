@@ -22,6 +22,8 @@ import { HourChartLineStyle } from './hour-chart.types';
   styleUrl: './hour-chart.component.scss'
 })
 export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
+  private static _instanceCount = 0;
+
   @Input() public series: IHourChartSeries[] = [];
   @Input() public bands: IHourChartBand[] = [];
   @Input() public highlight: IHourChartHighlight | null = null;
@@ -32,6 +34,8 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input() public dividerIndices: number[] = [];
   @Input() public estimateFromIndex: number | null = null;
 
+  public readonly stripeId = `dt-hour-chart-stripes-${HourChartComponent._instanceCount++}`;
+  public readonly stripeFill = `url(#${this.stripeId})`;
   public width = hourChartLayout.DEFAULT_WIDTH;
   public height = hourChartLayout.DEFAULT_HEIGHT;
   public readonly plotLeft = hourChartLayout.PLOT_LEFT;

@@ -4,10 +4,6 @@
 
 .dt-hour-chart__figure {
   margin: 0;
-  padding: 16px;
-  background: var(--dt-viz-surface);
-  border: 1px solid var(--dt-viz-border);
-  border-radius: 12px;
   color: var(--dt-viz-ink);
   font-family: inherit;
   min-width: 0;
@@ -70,8 +66,18 @@
   stroke-dasharray: 2 3;
 }
 
-.dt-hour-chart__highlight {
-  fill: var(--dt-viz-highlight);
+.dt-hour-chart__stripe-bg {
+  fill: color-mix(in srgb, var(--dt-rush) 9%, white);
+}
+
+.dt-hour-chart__stripe {
+  fill: color-mix(in srgb, var(--dt-rush) 34%, white);
+}
+
+.dt-hour-chart__band-text {
+  fill: var(--dt-rush-ink);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .dt-hour-chart__tick-text {
@@ -214,10 +220,6 @@
 }
 
 @media (max-width: 599.98px) {
-  .dt-hour-chart__figure {
-    padding: 12px;
-  }
-
   .dt-hour-chart__tooltip {
     min-width: 140px;
   }

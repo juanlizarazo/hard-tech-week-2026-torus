@@ -1,0 +1,206 @@
+@if (intervals.length === 0) {
+  <div class="chart__empty">No intervals to plot yet.</div>
+} @else {
+  <div class="chart__plot">
+    <svg
+      class="chart__svg"
+      [attr.viewBox]="'0 0 ' + viewWidth + ' ' + viewHeight"
+      role="img"
+      [attr.aria-label]="ariaLabel"
+      (pointermove)="onPointerMove($event)"
+      (pointerleave)="onPointerLeave()"
+    >
+      <defs>
+        <pattern
+          [attr.id]="idPrefix + '-hatch'"
+          width="6"
+          height="6"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(45)"
+        >
+          <rect class="three-clocks__hatch-bg" width="6" height="6"></rect>
+          <line class="three-clocks__hatch-line" x1="0" y1="0" x2="0" y2="6" stroke-width="2"></line>
+        </pattern>
+        <pattern
+          [attr.id]="idPrefix + '-bill-hatch'"
+          width="6"
+          height="6"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(45)"
+        >
+          <rect class="three-clocks__hatch-bg three-clocks__hatch-bg--rush" width="6" height="6"></rect>
+          <line class="three-clocks__hatch-line three-clocks__hatch-line--rush" x1="0" y1="0" x2="0" y2="6" stroke-width="2"></line>
+        </pattern>
+      </defs>
+
+      <!-- Day boundaries -->
+      @for (tick of hourTicks; track tick.x) {
+        @if (tick.isMidnight) {
+          <line
+            class="chart__midnight-line"
+            [attr.x1]="tick.x"
+            [attr.x2]="tick.x"
+            [attr.y1]="stripsTop"
+            [attr.y2]="axisY - 12"
+          ></line>
+        }
+      }
+
+      <!-- Bill clock -->
+      <text class="three-clocks__lane-title" [attr.x]="billLane.titleX" [attr.y]="billLane.titleY">
+        {{ billLane.title }}
+      </text>
+      <rect
+        class="three-clocks__lane-bg"
+        [attr.x]="plotLeft"
+        [attr.y]="billLane.stripY"
+        [attr.width]="plotRight - plotLeft"
+        [attr.height]="stripHeight"
+      ></rect>
+      @if (isAllHoursDemand) {
+        <rect
+          [attr.x]="plotLeft"
+          [attr.y]="billLane.stripY"
+          [attr.width]="plotRight - plotLeft"
+          [attr.height]="stripHeight"
+          [attr.fill]="billHatchFill"
+        ></rect>
+      }
+      @for (segment of billSegments; track segment.x) {
+        <rect
+          class="three-clocks__on-peak"
+          [attr.x]="segment.x"
+          [attr.y]="segment.y"
+          [attr.width]="segment.width"
+          [attr.height]="segment.height"
+        ></rect>
+        @if (segment.label) {
+          <text
+            class="three-clocks__on-peak-text"
+            [attr.x]="segment.x + segment.width / 2"
+            [attr.y]="segment.y + 16"
+            text-anchor="middle"
+          >
+            {{ segment.label }}
+          </text>
+        }
+      }
+      @if (isAllHoursDemand) {
+        <text
+          class="three-clocks__overlay-text chart__halo-text"
+          [attr.x]="plotLeft + 8"
+          [attr.y]="billLane.stripY + 16"
+        >
+          Demand counts all hours (Schedule 6)
+        </text>
+      }
+
+      <!-- Price and carbon clocks -->
+      @for (view of heatViews; track view.lane.title; let isPrice = $first) {
+        <text class="three-clocks__lane-title" [attr.x]="view.lane.titleX" [attr.y]="view.lane.titleY">
+          {{ view.lane.title }}
+        </text>
+        @for (cell of view.cells; track cell.x) {
+          <rect [attr.x]="cell.x" [attr.y]="cell.y" [attr.width]="cell.width" [attr.height]="cell.height" [attr.fill]="cell.fill"></rect>
+        }
+        @for (gap of view.gaps; track gap.x) {
+          <rect [attr.x]="gap.x" [attr.y]="gap.y" [attr.width]="gap.width" [attr.height]="gap.height" [attr.fill]="hatchFill"></rect>
+          @if (gap.label) {
+            <text
+              class="three-clocks__gap-text chart__halo-text"
+              [attr.x]="gap.x + gap.width / 2"
+              [attr.y]="gap.y + 16"
+              text-anchor="middle"
+            >
+              {{ gap.label }}
+            </text>
+          }
+        }
+      }
+
+      <!-- Rush hour / Wattsmart window across all lanes -->
+      @for (range of rushRanges; track range.x0) {
+        <rect
+          class="three-clocks__window-fill"
+          [attr.x]="range.x0"
+          [attr.y]="stripsTop - 6"
+          [attr.width]="range.x1 - range.x0"
+          [attr.height]="stripsBottom - stripsTop + 12"
+        ></rect>
+        <line class="three-clocks__window-edge" [attr.x1]="range.x0" [attr.x2]="range.x0" [attr.y1]="stripsTop - 6" [attr.y2]="stripsBottom + 6"></line>
+        <line class="three-clocks__window-edge" [attr.x1]="range.x1" [attr.x2]="range.x1" [attr.y1]="stripsTop - 6" [attr.y2]="stripsBottom + 6"></line>
+        <text class="chart__band-text" [attr.x]="range.labelX" [attr.text-anchor]="range.labelAnchor" [attr.y]="rushLabelY">{{ range.label }}</text>
+      }
+
+      <!-- Hour axis -->
+      @for (tick of hourTicks; track tick.x) {
+        <text class="chart__axis-text" [attr.x]="tick.x" [attr.y]="axisY" text-anchor="middle">{{ tick.label }}</text>
+        @if (tick.isMidnight) {
+          <text class="chart__day-text" [attr.x]="tick.x + 2" [attr.y]="axisY + 16">{{ tick.dayLabel }}</text>
+        }
+      }
+
+      <!-- Hover -->
+      @if (hoverX >= 0) {
+        <line class="chart__crosshair" [attr.x1]="hoverX" [attr.x2]="hoverX" [attr.y1]="stripsTop - 4" [attr.y2]="stripsBottom + 4"></line>
+      }
+      <rect
+        class="chart__hit"
+        [attr.x]="plotLeft"
+        [attr.y]="stripsTop - 4"
+        [attr.width]="plotRight - plotLeft"
+        [attr.height]="stripsBottom - stripsTop + 8"
+      ></rect>
+    </svg>
+
+    @if (tooltip) {
+      <div class="chart__tooltip" [class.chart__tooltip--right]="tooltip.alignRight" [style.left.%]="tooltip.leftPercent">
+        <div class="chart__tooltip-title">{{ tooltip.title }}</div>
+        @for (row of tooltip.rows; track row.label) {
+          <div class="chart__tooltip-row">
+            <span class="chart__tooltip-swatch" [style.background]="row.swatch || 'transparent'"></span>
+            <span class="chart__tooltip-label">{{ row.label }}</span>
+            <span class="chart__tooltip-value">{{ row.value }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <dl class="three-clocks__key">
+    <div class="three-clocks__key-item">
+      <dt class="three-clocks__key-title">
+        <span
+          class="three-clocks__swatch"
+          [class.three-clocks__swatch--on-peak]="!isAllHoursDemand"
+          [class.three-clocks__swatch--hatch]="isAllHoursDemand"
+          aria-hidden="true"
+        ></span>
+        {{ billLane.title }}
+      </dt>
+      <dd class="three-clocks__key-text">{{ billLane.caption }}</dd>
+    </div>
+    @for (view of heatViews; track view.lane.title; let isPrice = $first) {
+      <div class="three-clocks__key-item">
+        <dt class="three-clocks__key-title">
+          {{ view.lane.title }}
+          @if (!isPrice && mefIsPlaceholder) {
+            <span class="three-clocks__placeholder">Placeholder</span>
+          }
+        </dt>
+        @if (view.legend.visible) {
+          <dd class="three-clocks__ramp-row">
+            <span class="three-clocks__ramp-label">{{ view.legend.minLabel }}</span>
+            <span
+              class="three-clocks__ramp"
+              [class.three-clocks__ramp--carbon]="!isPrice"
+              aria-hidden="true"
+            ></span>
+            <span class="three-clocks__ramp-label">{{ view.legend.maxLabel }}</span>
+          </dd>
+        }
+        <dd class="three-clocks__key-text">{{ view.lane.caption }}</dd>
+      </div>
+    }
+  </dl>
+}

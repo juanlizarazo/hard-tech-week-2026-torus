@@ -1,26 +1,23 @@
-<figure class="dt-component-bars__figure">
-  <figcaption class="dt-component-bars__top">
-    <span class="dt-component-bars__title">Savings by bill component</span>
-    @if (groups.length > 0) {
-      <button type="button" class="dt-component-bars__toggle" [attr.aria-pressed]="showTable" (click)="toggleTable()">
-        {{ showTable ? 'Show as chart' : 'Show as table' }}
-      </button>
-    }
-  </figcaption>
+<div class="dt-component-bars__figure">
 
   @if (groups.length === 0) {
     <p class="dt-component-bars__empty">No bill components to compare yet.</p>
   } @else {
-    @if (strategyLegend.length > 0) {
-      <ul class="dt-component-bars__legend">
-        @for (item of strategyLegend; track item.id) {
-          <li class="dt-component-bars__legend-item">
-            <span class="dt-component-bars__swatch" [style.background]="'var(--dt-viz-' + item.colorIndex + ')'"></span>
-            <span>{{ item.label }}</span>
-          </li>
-        }
-      </ul>
-    }
+    <div class="dt-component-bars__top">
+      @if (strategyLegend.length > 0) {
+        <ul class="dt-component-bars__legend">
+          @for (item of strategyLegend; track item.id) {
+            <li class="dt-component-bars__legend-item">
+              <span class="dt-component-bars__swatch" [style.background]="item.color"></span>
+              <span>{{ item.label }}</span>
+            </li>
+          }
+        </ul>
+      }
+      <button type="button" class="dt-component-bars__toggle" [attr.aria-pressed]="showTable" (click)="toggleTable()">
+        {{ showTable ? 'Show as chart' : 'Show as table' }}
+      </button>
+    </div>
 
     @if (showTable) {
       <div class="dt-component-bars__table-wrap">
@@ -28,20 +25,20 @@
           <caption class="dt-component-bars__visually-hidden">Baseline bill and savings by component</caption>
           <thead>
             <tr>
-              <th scope="col">Component</th>
-              <th scope="col" class="dt-component-bars__num">Baseline</th>
+              <th scope="col" class="dt-component-bars__cell dt-component-bars__head">Component</th>
+              <th scope="col" class="dt-component-bars__cell dt-component-bars__head dt-component-bars__num">Bill with no storage</th>
               @for (item of strategyLegend; track item.id) {
-                <th scope="col" class="dt-component-bars__num">{{ item.label }}</th>
+                <th scope="col" class="dt-component-bars__cell dt-component-bars__head dt-component-bars__num">{{ item.label }}</th>
               }
             </tr>
           </thead>
           <tbody>
             @for (group of groups; track group.id) {
               <tr>
-                <th scope="row">{{ group.label }}</th>
-                <td class="dt-component-bars__num">{{ group.baselineAmount | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
+                <th scope="row" class="dt-component-bars__cell dt-component-bars__head">{{ group.label }}</th>
+                <td class="dt-component-bars__cell dt-component-bars__num">{{ group.baselineAmount | currency: 'USD' : 'symbol' : '1.0-0' }}</td>
                 @for (item of strategyLegend; track item.id) {
-                  <td class="dt-component-bars__num">
+                  <td class="dt-component-bars__cell dt-component-bars__num">
                     @if (savingsFor(group, item.id) !== null) {
                       {{ savingsFor(group, item.id) | currency: 'USD' : 'symbol' : '1.0-0' }}
                     } @else {
@@ -58,23 +55,7 @@
       <div class="dt-component-bars__groups" role="img" [attr.aria-label]="ariaSummary">
         @for (view of views; track view.group.id) {
           <div class="dt-component-bars__group">
-            <div class="dt-component-bars__meta">
-              <span class="dt-component-bars__label">{{ view.group.label }}</span>
-              @if (view.group.source.url) {
-                <a
-                  class="dt-component-bars__chip"
-                  [href]="view.group.source.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  [attr.title]="view.group.source.note ?? null"
-                  >{{ view.group.source.kind }} · {{ view.group.source.label }}</a
-                >
-              } @else {
-                <span class="dt-component-bars__chip" [attr.title]="view.group.source.note ?? null"
-                  >{{ view.group.source.kind }} · {{ view.group.source.label }}</span
-                >
-              }
-            </div>
+            <span class="dt-component-bars__label">{{ view.group.label }}</span>
             <div class="dt-component-bars__plot" [ngClass]="{ 'dt-component-bars__plot--signed': hasNegative }">
               <div class="dt-component-bars__axis">
                 @if (hasNegative) {
@@ -86,7 +67,7 @@
                       class="dt-component-bars__bar"
                       [style.left.%]="row.startPercent"
                       [style.width.%]="row.lengthPercent"
-                      [style.background]="'var(--dt-viz-' + row.bar.colorIndex + ')'"
+                      [style.background]="row.bar.color"
                     ></span>
                     <span
                       class="dt-component-bars__value"
@@ -104,4 +85,4 @@
       </div>
     }
   }
-</figure>
+</div>

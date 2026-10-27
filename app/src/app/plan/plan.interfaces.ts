@@ -77,6 +77,9 @@ export interface IPlanViewModel {
   reserveFloorKwh: number;
   maxReserveKwh: number;
   solveLabel: string;
+  answer: string;
+  billTableCaption: string;
+  notices: IPlanNotices;
 }
 
 export interface IPlanSolveState {
@@ -88,4 +91,16 @@ export interface IPlanSolveState {
 export interface IPlanHook {
   title: string;
   subtitle: string;
+}
+
+export interface IPlanHookNumbers {
+  demandRateLabel: string;
+  spreadLabel: string;
+  equivalentKwh: number;
+}
+
+export interface IPlanNotices {
+  clocks: string;
+  load: string;
+  dispatch: string;
 }

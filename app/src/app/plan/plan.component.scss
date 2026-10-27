@@ -1,85 +1,85 @@
-:host {
-  display: block;
-}
-
-.plan__state {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.plan__sites {
+.plan__layout {
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  margin-bottom: 16px;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
 }
 
-.plan__site {
+.plan__dials {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  min-width: 0;
+}
+
+.plan__dials-toggle {
+  display: none;
+}
+
+.plan__dials-body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 12px 16px;
-  color: var(--dt-theme--primary);
-  font: inherit;
-  text-align: left;
-
-  &--active {
-    border-color: var(--dt-theme--primary);
-    box-shadow: inset 0 0 0 1px var(--dt-theme--primary);
-  }
+  gap: 18px;
+  padding: 18px 20px 20px;
+  background: var(--dt-panel);
+  border: 1px solid var(--dt-line);
+  border-radius: 12px;
 }
 
-.plan__site-name {
-  font-weight: 600;
+.plan__dials-title {
+  margin: 0;
+  font-size: var(--dt-text-17);
+  font-weight: 800;
 }
 
-.plan__site-meta {
-  font-size: 0.8125rem;
-  color: var(--dt-theme--text-secondary);
-}
-
-.plan__controls {
-  margin-bottom: 8px;
-}
-
-.plan__controls-grid {
-  display: grid;
-  gap: 16px 24px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-
-  @media (max-width: 959.98px) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.plan__control {
+.plan__dial {
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
 }
 
+.plan__dial-label {
+  font-size: var(--dt-text-15);
+  font-weight: 800;
+  color: var(--dt-ink);
+}
+
+.plan__dial-label--value {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.plan__dial-value {
+  font-weight: 800;
+}
+
+.plan__dial-hint {
+  font-size: var(--dt-text-13);
+  color: var(--dt-muted);
+}
+
+.plan__select {
+  width: 100%;
+}
+
+.plan__dials-rule {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--dt-line-soft);
+}
+
 .plan__toggle {
-  width: fit-content;
-  max-width: 100%;
+  align-self: stretch;
+  font-size: var(--dt-text-13);
 
-  @media (max-width: 599.98px) {
-    flex-direction: column;
-    width: 100%;
-    border-radius: 8px;
+  .mat-button-toggle {
+    flex: 1;
   }
-}
-
-.plan__control-label {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--dt-theme--text-secondary);
-}
-
-.plan__control-hint {
-  font-size: 0.75rem;
-  color: var(--dt-theme--text-tertiary);
 }
 
 .plan__slider {
@@ -87,154 +87,169 @@
   margin: 0;
 }
 
+.plan__results {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.plan__body {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  min-width: 0;
+  transition: opacity 200ms ease;
+}
+
+.plan__body--solving {
+  opacity: 0.72;
+}
+
 .plan__status {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 24px;
-  margin: 8px 0 12px;
-  font-size: 0.8125rem;
-  color: var(--dt-theme--text-secondary);
+  margin: 0;
+  font-size: var(--dt-text-13);
+  color: var(--dt-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .plan__status-icon {
   width: 18px;
   height: 18px;
   font-size: 18px;
-  color: var(--dt-theme--tertiary);
-
-  &--pending {
-    color: var(--dt-theme--text-tertiary);
-  }
+  flex: none;
+  color: var(--dt-clear);
 }
 
-.plan__tiles {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
-  margin-bottom: 16px;
+.plan__status-icon--pending {
+  color: var(--dt-muted);
+  animation: plan-spin 900ms linear infinite;
 }
 
-.plan__tile-label {
-  margin: 0;
-  font-size: 0.8125rem;
-  color: var(--dt-theme--text-secondary);
+.plan__figures {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.plan__tile-value {
-  margin: 4px 0;
-  font-size: 1.75rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-
-  &--good {
-    color: var(--dt-theme--tertiary);
-  }
-
-  &--bad {
-    color: var(--dt-theme--error-dark);
-  }
-}
-
-.plan__tile-detail {
-  margin: 0;
-  font-size: 0.8125rem;
-}
-
-.plan__tile-source {
-  margin: 8px 0 0;
-  font-size: 0.6875rem;
-  color: var(--dt-theme--text-tertiary);
-}
-
-.plan__panel {
-  margin-bottom: 16px;
-}
-
-.plan__panel-title {
-  margin: 0 0 4px;
-  font-size: 1.0625rem;
+.plan__saving {
+  color: var(--dt-clear);
   font-weight: 600;
 }
 
-.plan__panel-hint {
-  margin: 0 0 12px;
-  font-size: 0.8125rem;
-  color: var(--dt-theme--text-secondary);
-}
-
-.plan__details {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
-}
-
-.plan__bill {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.plan__bill-label,
-.plan__bill-num {
-  padding: 6px 4px;
-  border-bottom: 1px solid var(--dt-theme--border);
-}
-
-.plan__bill-label {
-  text-align: left;
-}
-
-.plan__bill-num {
-  text-align: right;
-  white-space: nowrap;
-
-  &--saving {
-    color: var(--dt-theme--tertiary);
-    font-weight: 600;
-  }
-}
-
-.plan__bill-total {
-  font-weight: 700;
-}
-
-.plan__assets-title {
-  margin: 12px 0 4px;
-  font-size: 0.875rem;
-  font-weight: 600;
+.plan__bill-total .dt-table__cell {
+  font-weight: 800;
+  border-top: 2px solid var(--dt-ink);
+  border-bottom: 0;
 }
 
 .plan__assets {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.plan__asset {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
-  padding: 4px 0;
-  border-bottom: 1px solid var(--dt-theme--border);
-  font-size: 0.8125rem;
 }
 
-.plan__asset-label {
-  flex: 1;
+.plan__assets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
 }
 
-.plan__tag {
-  font-size: 11px;
-  border-radius: 999px;
-  padding: 2px 8px;
-  background: var(--dt-theme--surface);
-  border: 1px solid var(--dt-theme--border);
+.plan__assets-caption {
+  padding: 0 10px 6px;
+  text-align: left;
+  font-weight: 800;
+  font-size: var(--dt-text-15);
+}
 
-  &--torus-spec {
-    background: var(--dt-theme--tertiary-bg);
-    color: var(--dt-theme--tertiary);
+@keyframes plan-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .plan__figures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 959.98px) {
+  .plan__layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .plan__dials {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .plan__dials-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--dt-line);
+    border-radius: 12px;
+    background: var(--dt-panel);
+    color: var(--dt-ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .plan__dials-toggle[aria-expanded='true'] {
+    border-radius: 12px 12px 0 0;
+    border-bottom-color: var(--dt-line-soft);
+  }
+
+  .plan__dials-toggle-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .plan__dials-toggle-title {
+    font-weight: 800;
+  }
+
+  .plan__dials-toggle-summary {
+    font-size: var(--dt-text-13);
+    color: var(--dt-muted);
+  }
+
+  .plan__dials-body {
+    display: none;
+    border-top: 0;
+    border-radius: 0 0 12px 12px;
+  }
+
+  .plan__dials-body--open {
+    display: flex;
+  }
+
+  .plan__dials-title {
+    display: none;
+  }
+
+  .plan__assets-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 599.98px) {
+  .plan__figures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan__status-icon--pending {
+    animation: none;
   }
 }

@@ -1,5 +1,5 @@
 <figure class="dt-rank-slope__figure">
-  <figcaption class="dt-rank-slope__title">Hour rank: average vs marginal CO2</figcaption>
+  <figcaption class="dt-rank-slope__visually-hidden">Hour rank: average vs marginal CO2</figcaption>
   @if (lines.length === 0) {
     <p class="dt-rank-slope__empty">No hourly rank data to compare yet.</p>
   } @else {
@@ -8,7 +8,7 @@
         <svg class="dt-rank-slope__legend-swatch" viewBox="0 0 24 12" aria-hidden="true">
           <line x1="1" y1="6" x2="23" y2="6" class="dt-rank-slope__swatch-accent"></line>
         </svg>
-        <span>Biggest rank change (labelled)</span>
+        <span>Biggest rank changes (labeled)</span>
       </li>
       <li class="dt-rank-slope__legend-item">
         <svg class="dt-rank-slope__legend-swatch" viewBox="0 0 24 12" aria-hidden="true">
@@ -27,9 +27,10 @@
         [attr.aria-label]="ariaSummary"
         (pointerleave)="deactivate()"
       >
-        <text class="dt-rank-slope__head" [attr.x]="leftX" y="16" text-anchor="middle">Average</text>
-        <text class="dt-rank-slope__head" [attr.x]="rightX" y="16" text-anchor="middle">Marginal</text>
-        <text class="dt-rank-slope__head-sub" [attr.x]="width / 2" y="34" text-anchor="middle">rank 1 = cleanest hour</text>
+        <text class="dt-rank-slope__head" [attr.x]="leftX" y="14" text-anchor="middle">Average</text>
+        <text class="dt-rank-slope__head" [attr.x]="rightX" y="14" text-anchor="middle">Marginal</text>
+        <text class="dt-rank-slope__head-sub" [attr.x]="width / 2" [attr.y]="topY - 4" text-anchor="middle">cleanest &#8593;</text>
+        <text class="dt-rank-slope__head-sub" [attr.x]="width / 2" [attr.y]="height - 1" text-anchor="middle">dirtiest &#8595;</text>
 
         @for (line of lines; track line.hour) {
           @if (!line.isHighlighted) {
@@ -41,8 +42,6 @@
               [attr.x2]="rightX"
               [attr.y2]="line.marginalY"
             ></line>
-            <text class="dt-rank-slope__rank" [attr.x]="leftX - 10" [attr.y]="line.averageY + 4" text-anchor="end">{{ line.averageRank }}</text>
-            <text class="dt-rank-slope__rank" [attr.x]="rightX + 10" [attr.y]="line.marginalY + 4" text-anchor="start">{{ line.marginalRank }}</text>
           }
         }
 
@@ -57,8 +56,8 @@
             ></line>
             <circle class="dt-rank-slope__dot" [attr.cx]="leftX" [attr.cy]="line.averageY" r="4"></circle>
             <circle class="dt-rank-slope__dot" [attr.cx]="rightX" [attr.cy]="line.marginalY" r="4"></circle>
-            <text class="dt-rank-slope__label" [attr.x]="leftX - 10" [attr.y]="line.averageY + 4" text-anchor="end">{{ line.hourLabel }} #{{ line.averageRank }}</text>
-            <text class="dt-rank-slope__label" [attr.x]="rightX + 10" [attr.y]="line.marginalY + 4" text-anchor="start">#{{ line.marginalRank }} {{ line.hourLabel }}</text>
+            <text class="dt-rank-slope__label" [attr.x]="leftX - 10" [attr.y]="line.averageLabelY + labelOffset" text-anchor="end">{{ line.hourLabel }} #{{ line.averageRank }}</text>
+            <text class="dt-rank-slope__label" [attr.x]="rightX + 10" [attr.y]="line.marginalLabelY + labelOffset" text-anchor="start">#{{ line.marginalRank }} {{ line.hourLabel }}</text>
           }
         }
 

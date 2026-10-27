@@ -1,0 +1,11 @@
+<details class="dt-under-the-hood" [open]="open">
+  <summary class="dt-under-the-hood__summary">
+    <span class="dt-under-the-hood__title">{{ summary }}</span>
+    @if (description) {
+      <span class="dt-under-the-hood__description">{{ description }}</span>
+    }
+  </summary>
+  <div class="dt-under-the-hood__body">
+    <ng-content></ng-content>
+  </div>
+</details>

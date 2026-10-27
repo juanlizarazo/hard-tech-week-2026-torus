@@ -1,0 +1,116 @@
+<div class="dt-page">
+  <section class="start__hero">
+    <h1 class="start__headline">The grid has a rush hour. DETOUR plans a Torus Station around it.</h1>
+    <p class="start__hook">
+      One kW of summer <dt-term key="ON_PEAK_DEMAND">on-peak demand</dt-term> costs <span class="dt-num">{{ hook.demandRateLabel }}</span> a month,
+      as much as shifting about <span class="dt-num">{{ hook.equivalentKwh }}</span> kWh. The bill, the grid price and the carbon all
+      disagree on when that is.
+    </p>
+  </section>
+
+  @if (state$ | async; as state) {
+    @switch (state.status) {
+      @case ('loading') {
+        <div class="dt-state" role="status">
+          <mat-spinner diameter="24"></mat-spinner>
+          <span>Reading tomorrow's PACE grid data…</span>
+        </div>
+      }
+      @case ('error') {
+        <dt-alert-banner [message]="state.errorMessage"></dt-alert-banner>
+      }
+      @case ('empty') {
+        <div class="dt-state">
+          <mat-icon aria-hidden="true">schedule</mat-icon>
+          <span>{{ state.errorMessage }}</span>
+        </div>
+      }
+      @case ('ready') {
+        @if (state.preview; as preview) {
+          <section class="start__clocks" aria-labelledby="start-clocks-title">
+            <div class="start__clocks-head">
+              <div class="start__clocks-titles">
+                <h2 class="start__clocks-title" id="start-clocks-title">{{ preview.dateLabel }}, on <dt-term key="THREE_CLOCKS">three clocks</dt-term></h2>
+                <p class="dt-hint">
+                  A simulated airport on Schedule 8. Each lane darkens where that clock says power is costly.
+                </p>
+              </div>
+              <p class="start__rush">
+                <span class="start__rush-swatch" aria-hidden="true"></span>
+                <span class="start__rush-text">
+                  <span class="start__rush-label"><dt-term key="RUSH_HOUR">Rush hour</dt-term> tomorrow</span>
+                  <span class="start__rush-value">{{ preview.rushLabel }}</span>
+                </span>
+              </p>
+            </div>
+            <dt-three-clocks
+              [intervals]="preview.intervals"
+              [rushHourWindows]="preview.rushHourWindows"
+              scheduleId="schedule-8"
+              [billCaption]="preview.billCaption"
+              [edamPricePerMwh]="preview.edamPricePerMwh"
+              [carbonCaption]="preview.carbonCaption"
+              [mefIsPlaceholder]="preview.mefIsPlaceholder"
+            ></dt-three-clocks>
+            @if (preview.rushIsAssumption) {
+              <p class="dt-hint">PACE has not posted tomorrow's forecast yet, so the rush hour is an assumed late-afternoon block.</p>
+            }
+          </section>
+        }
+      }
+    }
+  }
+
+  <section class="start__route" aria-labelledby="start-route-title">
+    <h2 class="dt-section__title" id="start-route-title">Three stops: forecast, decision, proof</h2>
+    <ol class="start__steps">
+      @for (step of steps; track step.path) {
+        <li class="start__step">
+          <span class="start__step-sign" aria-hidden="true">{{ step.step }}</span>
+          <div class="start__step-body">
+            <h3 class="start__step-title">{{ step.title }}</h3>
+            <p class="start__step-question">{{ step.question }}</p>
+            <p class="start__step-description">{{ step.description }}</p>
+            @if (step.step === '1' && (state$ | async)?.preview; as preview) {
+              <p class="start__step-live">Rush hour tomorrow: <strong class="dt-num">{{ preview.rushLabel }}</strong></p>
+            }
+            <a class="start__step-link" [class.start__step-link--primary]="step.isPrimary" [routerLink]="step.path">
+              <span>{{ step.linkLabel }}</span>
+              <mat-icon aria-hidden="true">east</mat-icon>
+            </a>
+          </div>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <section class="dt-section" aria-labelledby="start-words-title">
+    <h2 class="dt-section__title" id="start-words-title">Six words to know</h2>
+    <dl class="start__words">
+      <div class="start__word">
+        <dt class="start__word-term"><dt-term key="PACE">PACE</dt-term></dt>
+        <dd class="start__word-text">The grid operator for Utah, Wyoming and Idaho. All grid data here is its own.</dd>
+      </div>
+      <div class="start__word">
+        <dt class="start__word-term"><dt-term key="RUSH_HOUR">Rush hour</dt-term></dt>
+        <dd class="start__word-text">The busiest four hours in PACE's forecast. Orange stripes, every chart.</dd>
+      </div>
+      <div class="start__word">
+        <dt class="start__word-term"><dt-term key="DEMAND_CHARGE">Demand charge</dt-term></dt>
+        <dd class="start__word-text">One busy 15 minutes sets a charge for the whole month.</dd>
+      </div>
+      <div class="start__word">
+        <dt class="start__word-term"><dt-term key="MARGINAL_CO2">Marginal CO2</dt-term></dt>
+        <dd class="start__word-text">The CO2 from one more MWh in that hour, not the hour's average.</dd>
+      </div>
+      <div class="start__word">
+        <dt class="start__word-term"><dt-term key="NOVA_SPIN">Spin</dt-term> vs <dt-term key="NOVA_PULSE">Pulse</dt-term></dt>
+        <dd class="start__word-text">The flywheel takes short spikes; the battery holds energy for hours.</dd>
+      </div>
+      <div class="start__word">
+        <dt class="start__word-term"><dt-term key="CAPTURE_RATE">Capture rate</dt-term></dt>
+        <dd class="start__word-text">How close a plan got to the best result possible with hindsight.</dd>
+      </div>
+    </dl>
+  </section>
+</div>

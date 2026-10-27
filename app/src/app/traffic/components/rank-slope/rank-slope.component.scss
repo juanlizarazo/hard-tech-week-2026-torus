@@ -4,10 +4,6 @@
 
 .dt-rank-slope__figure {
   margin: 0;
-  padding: 16px;
-  background: var(--dt-viz-surface);
-  border: 1px solid var(--dt-viz-border);
-  border-radius: 12px;
   color: var(--dt-viz-ink);
   font-family: inherit;
   min-width: 0;
@@ -43,7 +39,7 @@
 }
 
 .dt-rank-slope__swatch-accent {
-  stroke: var(--dt-viz-2);
+  stroke: var(--dt-carbon-high);
   stroke-width: 3;
   stroke-linecap: round;
 }
@@ -56,7 +52,7 @@
 
 .dt-rank-slope__plot {
   position: relative;
-  max-width: 520px;
+  max-width: 440px;
   margin: 0 auto;
 }
 
@@ -80,13 +76,13 @@
 
 .dt-rank-slope__line {
   stroke: var(--dt-viz-muted-line);
-  stroke-width: 1.5;
+  stroke-width: 1.25;
   stroke-linecap: round;
   opacity: 0.8;
 }
 
 .dt-rank-slope__line--accent {
-  stroke: var(--dt-viz-2);
+  stroke: var(--dt-carbon-high);
   stroke-width: 3;
   opacity: 1;
 }
@@ -99,20 +95,14 @@
 }
 
 .dt-rank-slope__dot {
-  fill: var(--dt-viz-2);
+  fill: var(--dt-carbon-high);
   stroke: var(--dt-viz-surface);
   stroke-width: 2;
 }
 
-.dt-rank-slope__rank {
-  fill: var(--dt-viz-muted);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-}
-
 .dt-rank-slope__label {
   fill: var(--dt-viz-ink);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -225,14 +215,3 @@
   white-space: nowrap;
 }
 
-@media (max-width: 959.98px) {
-  .dt-rank-slope__plot {
-    max-width: 440px;
-  }
-}
-
-@media (max-width: 599.98px) {
-  .dt-rank-slope__figure {
-    padding: 12px;
-  }
-}

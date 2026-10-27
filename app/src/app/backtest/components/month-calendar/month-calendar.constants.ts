@@ -1,3 +1,1 @@
-export const WEEKDAY_LABELS: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-export const MIN_BAR_PERCENT = 4;
+export const weekdayLabels: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

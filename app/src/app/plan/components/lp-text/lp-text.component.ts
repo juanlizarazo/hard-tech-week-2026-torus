@@ -1,12 +1,10 @@
 import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, inject } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'dt-lp-text',
-  imports: [DecimalPipe, MatButtonModule, MatExpansionModule, MatIconModule],
+  imports: [MatButtonModule, MatIconModule],
   templateUrl: './lp-text.component.html',
   styleUrl: './lp-text.component.scss'
 })
@@ -23,6 +21,24 @@ export class LpTextComponent implements OnChanges, OnDestroy {
   public copyFailed = false;
 
   private _copiedTimer: ReturnType<typeof setTimeout> | null = null;
+
+  public get metaLabel(): string {
+    const parts = [`${this.lineCount.toLocaleString('en-US')} lines`];
+
+    if (this.variableCount) {
+      parts.push(`${this.variableCount.toLocaleString('en-US')} variables`);
+    }
+
+    if (this.constraintCount) {
+      parts.push(`${this.constraintCount.toLocaleString('en-US')} constraints`);
+    }
+
+    if (this.solveMs !== null && this.solveMs !== undefined) {
+      parts.push(`solved in ${Math.round(this.solveMs)} ms`);
+    }
+
+    return `${parts.join(', ')}. CPLEX LP format: paste it into any LP solver to check the plan.`;
+  }
 
   public ngOnChanges(): void {
     this._computeCounts(this.lpText ?? '');

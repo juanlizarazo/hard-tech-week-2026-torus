@@ -14,6 +14,8 @@ export interface IRankSlopeLine {
   marginalRank: number;
   averageY: number;
   marginalY: number;
+  averageLabelY: number;
+  marginalLabelY: number;
   change: number;
   isHighlighted: boolean;
   description: string;

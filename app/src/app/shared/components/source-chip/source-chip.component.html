@@ -1,0 +1,15 @@
+@if (url) {
+  <a class="dt-source-chip dt-source-chip--link" [href]="url" target="_blank" rel="noopener noreferrer" [title]="note || label">
+    @if (kindLabel) {
+      <span class="dt-source-chip__kind">{{ kindLabel }}</span>
+    }
+    <span class="dt-source-chip__label">{{ label }}</span>
+  </a>
+} @else {
+  <span class="dt-source-chip" [title]="note || label">
+    @if (kindLabel) {
+      <span class="dt-source-chip__kind">{{ kindLabel }}</span>
+    }
+    <span class="dt-source-chip__label">{{ label }}</span>
+  </span>
+}

@@ -1,14 +1,11 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { IPlanInterval, IRushHourWindow } from '@app/core/models/plan.interfaces';
-import { SimulatedBadgeComponent } from '@app/shared/components';
-import { ChartHelper } from '../chart.helper';
-import { chartColors } from '../chart.constants';
-import { IChartTooltip, IHourTick, IValueTick, IWindowRange } from '../chart.interfaces';
-import { ResponsiveChartDirective } from '../responsive-chart.directive';
+import { ChartHelper, chartColors } from '@app/shared/charts';
+import { IChartTooltip, IHourTick, IValueTick, IWindowRange } from '@app/shared/charts';
+import { ResponsiveChartDirective } from '@app/shared/charts';
 
 @Component({
   selector: 'dt-load-chart',
-  imports: [SimulatedBadgeComponent],
   templateUrl: './load-chart.component.html',
   styleUrl: './load-chart.component.scss'
 })
@@ -34,6 +31,10 @@ export class LoadChartComponent extends ResponsiveChartDirective implements OnCh
   public hoverX = -1;
   public tooltip: IChartTooltip | null = null;
   public ariaLabel = '';
+
+  public cssPath(path: string): string | null {
+    return path ? `path('${path}')` : null;
+  }
 
   public ngOnChanges(): void {
     this.render();
@@ -108,7 +109,7 @@ export class LoadChartComponent extends ResponsiveChartDirective implements OnCh
       startUtcs,
       this.rushHourWindows ?? [],
       xScale,
-      this.isNarrow ? 'Rush hour' : 'PACE rush hour'
+      'Rush hour'
     );
     this.gridAreaPath = ChartHelper.stepAreaPath(xScale, yScale, grids, 0);
     this.gridLinePath = ChartHelper.stepLinePath(xScale, yScale, grids);

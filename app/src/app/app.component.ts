@@ -1,11 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
+import { asapScheduler, observeOn } from 'rxjs';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { LoadingService } from '@app/core';
-import { SnapshotBadgeComponent } from '@app/shared/components';
+import { SidePanelComponent, SimulatedBadgeComponent, SnapshotBadgeComponent } from '@app/shared/components';
 import { navLinks } from './app.constants';
 
 @Component({
@@ -15,9 +14,9 @@ import { navLinks } from './app.constants';
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    MatToolbarModule,
-    MatTabsModule,
     MatProgressBarModule,
+    SidePanelComponent,
+    SimulatedBadgeComponent,
     SnapshotBadgeComponent
   ],
   templateUrl: './app.component.html',
@@ -26,6 +25,6 @@ import { navLinks } from './app.constants';
 export class AppComponent {
   private readonly _loadingService = inject(LoadingService);
 
-  public readonly isLoading$ = this._loadingService.isLoading$;
+  public readonly isLoading$ = this._loadingService.isLoading$.pipe(observeOn(asapScheduler));
   public readonly links = navLinks;
 }

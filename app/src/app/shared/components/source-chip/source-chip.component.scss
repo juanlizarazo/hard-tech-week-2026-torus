@@ -1,0 +1,37 @@
+:host {
+  display: inline-flex;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.dt-source-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 2px 8px;
+  border: 1px solid var(--dt-line);
+  border-radius: 8px;
+  background: var(--dt-paper);
+  font-size: var(--dt-text-13);
+  line-height: 1.5;
+  color: var(--dt-muted);
+  text-decoration: none;
+}
+
+.dt-source-chip--link:hover {
+  border-color: var(--dt-ink);
+  color: var(--dt-ink);
+}
+
+.dt-source-chip__kind {
+  flex: none;
+  font-weight: 600;
+  color: var(--dt-ink);
+}
+
+.dt-source-chip__label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

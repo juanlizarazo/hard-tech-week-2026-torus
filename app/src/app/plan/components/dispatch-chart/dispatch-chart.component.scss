@@ -1,7 +1,7 @@
-@use '../chart-common';
+@use '../../../shared/charts/chart-common';
 
 .dispatch-chart__band {
-  fill: var(--dt-theme--error-bg);
+  fill: url(#dt-rush-stripes);
 }
 
 .dispatch-chart__spin-bar {
@@ -67,8 +67,8 @@
 }
 
 .dispatch-chart__key-band {
-  background: var(--dt-theme--error-bg);
-  box-shadow: inset 0 0 0 1px rgba(214, 60, 60, 0.35);
+  background: var(--dt-rush-stripes);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dt-rush) 45%, transparent);
 }
 
 .dispatch-chart__key-reserve {

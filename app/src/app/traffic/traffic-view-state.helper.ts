@@ -19,7 +19,7 @@ export class TrafficViewStateHelper {
         return of<IForecastViewState>({
           status: 'error',
           forecast: null,
-          errorMessage: 'We could not build our forecast from the snapshot weather. The rest of the Traffic Report is unaffected.',
+          errorMessage: 'We could not build our forecast from the snapshot weather. The rest of this page is unaffected.',
         });
       }),
       startWith<IForecastViewState>({ status: 'loading', forecast: null, errorMessage: '' }),
@@ -54,7 +54,7 @@ export class TrafficViewStateHelper {
           status: 'error',
           manifest: null,
           report: null,
-          errorMessage: 'We could not build the traffic report from the grid snapshot. Check your connection and refresh the page.',
+          errorMessage: 'We could not read the grid data. Check your connection and refresh the page.',
         });
       }),
       startWith<ITrafficViewState>({ status: 'loading', manifest: null, report: null, errorMessage: '' }),

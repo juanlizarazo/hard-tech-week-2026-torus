@@ -1,9 +1,9 @@
 import { Component, inject } from '@angular/core';
-import { AsyncPipe, CurrencyPipe, DecimalPipe, NgClass } from '@angular/common';
+import { AsyncPipe, CurrencyPipe, DecimalPipe } from '@angular/common';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import {
   BehaviorSubject,
@@ -27,13 +27,16 @@ import { PlanEngineHelper, PlanSolverService, placeholderMefSeries } from '@app/
 import { SitesHelper } from '@app/core/sites';
 import {
   AlertBannerComponent,
-  ScreenToolbarComponent,
-  SimulatedBadgeComponent
+  ChartFrameComponent,
+  FigureComponent,
+  SourceChipComponent,
+  TermComponent,
+  ThreeClocksComponent,
+  UnderTheHoodComponent
 } from '@app/shared/components';
 import { ISnapshotViewState } from '@app/shared/interfaces/snapshot-view-state.interfaces';
 import { SnapshotViewStateHelper } from '@app/shared/helpers/snapshot-view-state.helper';
 import {
-  ClockBandsComponent,
   DispatchChartComponent,
   LoadChartComponent,
   LpTextComponent
@@ -49,16 +52,18 @@ import { planBaseline, planDefaults } from './plan.constants';
     AsyncPipe,
     CurrencyPipe,
     DecimalPipe,
-    NgClass,
     MatButtonToggleModule,
-    MatCardModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
     MatSliderModule,
     AlertBannerComponent,
-    ScreenToolbarComponent,
-    SimulatedBadgeComponent,
-    ClockBandsComponent,
+    ChartFrameComponent,
+    FigureComponent,
+    SourceChipComponent,
+    TermComponent,
+    ThreeClocksComponent,
+    UnderTheHoodComponent,
     DispatchChartComponent,
     LoadChartComponent,
     LpTextComponent
@@ -79,7 +84,7 @@ export class PlanComponent {
   );
   private _lastState: IPlanSolveState | null = null;
 
-  public readonly hook = PlanHelper.buildHook();
+  public dialsOpen = false;
   public readonly siteCards: IPlanSiteCard[] = PlanHelper.buildSiteCards();
   public readonly defaults = planDefaults;
   public controls = this._controls$.value;
@@ -140,8 +145,28 @@ export class PlanComponent {
     this._refreshAssetRows();
   }
 
-  public onSiteSelect(site: ISiteArchetype): void {
-    this._update({ siteId: site.id, scheduleId: site.scheduleId, wattsmartReserveKwh: 0 });
+  public get dialsSummary(): string {
+    return PlanHelper.dialsSummary(this.controls);
+  }
+
+  public siteShortName(site: ISiteArchetype): string {
+    return PlanHelper.siteShortName(site);
+  }
+
+  public onToggleDials(): void {
+    this.dialsOpen = !this.dialsOpen;
+  }
+
+  public get selectedSiteCard(): IPlanSiteCard | undefined {
+    return this.siteCards.find((card: IPlanSiteCard) => card.archetype.id === this.controls.siteId);
+  }
+
+  public onSiteChange(siteId: string): void {
+    const site = SitesHelper.getArchetype(siteId);
+
+    if (site) {
+      this._update({ siteId: site.id, scheduleId: site.scheduleId, wattsmartReserveKwh: 0 });
+    }
   }
 
   public onDateModeChange(dateMode: PlanDateMode): void {
