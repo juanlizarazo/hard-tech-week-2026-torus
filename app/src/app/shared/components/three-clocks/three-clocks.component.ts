@@ -11,7 +11,7 @@ import {
   IWindowRange
 } from '../../charts/chart.interfaces';
 import { ResponsiveChartDirective } from '../../charts/responsive-chart.directive';
-import { IClockLane, IHeatLaneView, IHeatLegend, ILabeledRect } from './three-clocks.interfaces';
+import { IBillSegment, IClockLane, IHeatLaneView, IHeatLegend } from './three-clocks.interfaces';
 
 @Component({
   selector: 'dt-three-clocks',
@@ -42,7 +42,7 @@ export class ThreeClocksComponent extends ResponsiveChartDirective implements On
   public hourTicks: IHourTick[] = [];
   public rushRanges: IWindowRange[] = [];
   public billLane = this._emptyLane('Bill clock');
-  public billSegments: ILabeledRect[] = [];
+  public billSegments: IBillSegment[] = [];
   public isAllHoursDemand = false;
   public priceView = this._emptyHeatView('Price clock');
   public carbonView = this._emptyHeatView('Carbon clock');
@@ -203,24 +203,56 @@ export class ThreeClocksComponent extends ResponsiveChartDirective implements On
     };
   }
 
-  private _buildBillSegments(intervals: IPlanInterval[], xScale: ILinearScale, lane: IClockLane): ILabeledRect[] {
+  private _buildBillSegments(intervals: IPlanInterval[], xScale: ILinearScale, lane: IClockLane): IBillSegment[] {
     const runs = ChartHelper.runs(intervals.map((interval) => interval.isOnPeak));
-
-    return runs.map((run) => {
+    const segments: IBillSegment[] = runs.map((run) => {
       const x0 = ChartHelper.scale(xScale, run.startIndex);
       const x1 = ChartHelper.scale(xScale, run.endIndex + 1);
       const slice = intervals.slice(run.startIndex, run.endIndex + 1);
       const averagePrice = slice.reduce((sum, interval) => sum + interval.energyPricePerKwh, 0) / slice.length;
-      const width = x1 - x0;
 
       return {
         x: ChartHelper.round(x0),
         y: lane.stripY,
-        width: ChartHelper.round(width),
+        width: ChartHelper.round(x1 - x0),
         height: this.stripHeight,
-        label: width >= 72 ? `$${averagePrice.toFixed(4)}/kWh` : ''
+        label: `${(averagePrice * 100).toFixed(1)}¢/kWh`,
+        labelX: ChartHelper.round((x0 + x1) / 2)
       };
     });
+    const labeled = segments
+      .map((segment) => ({ segment, clear: this._clearSpan(segment.x, segment.x + segment.width) }))
+      .reduce<{ segment: IBillSegment; clear: [number, number] } | null>(
+        (best, entry) => (!best || entry.clear[1] - entry.clear[0] > best.clear[1] - best.clear[0] ? entry : best),
+        null
+      );
+
+    return segments.map((segment) => {
+      if (!labeled || segment !== labeled.segment || labeled.clear[1] - labeled.clear[0] < 56) {
+        return { ...segment, label: '' };
+      }
+
+      return { ...segment, labelX: ChartHelper.round((labeled.clear[0] + labeled.clear[1]) / 2) };
+    });
+  }
+
+  private _clearSpan(start: number, end: number): [number, number] {
+    let spans: [number, number][] = [[start, end]];
+
+    for (const range of this.rushRanges) {
+      spans = spans.flatMap(([spanStart, spanEnd]): [number, number][] => {
+        if (range.x1 <= spanStart || range.x0 >= spanEnd) {
+          return [[spanStart, spanEnd]];
+        }
+
+        return [
+          [spanStart, Math.max(spanStart, range.x0)],
+          [Math.min(spanEnd, range.x1), spanEnd]
+        ].filter(([pieceStart, pieceEnd]) => pieceEnd - pieceStart > 0) as [number, number][];
+      });
+    }
+
+    return spans.reduce<[number, number]>((best, span) => (span[1] - span[0] > best[1] - best[0] ? span : best), [start, start]);
   }
 
   private _buildHeatLane(

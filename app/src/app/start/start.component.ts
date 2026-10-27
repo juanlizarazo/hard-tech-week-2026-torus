@@ -1,12 +1,19 @@
 import { Component, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Observable, catchError, combineLatest, map, of, startWith } from 'rxjs';
 import { GridSignalsService, PlanningDayService, SnapshotService } from '@app/core';
 import { DayRelationHelper } from '@app/shared/helpers';
-import { AlertBannerComponent, TermComponent, ThreeClocksComponent } from '@app/shared/components';
+import {
+  AlertBannerComponent,
+  ArchitectureComponent,
+  NextStopComponent,
+  TermComponent,
+  ThreeClocksComponent,
+  UnderTheHoodComponent
+} from '@app/shared/components';
 import { PlanHelper } from '../plan/plan.helper';
 import { startSettings, startSteps } from './start.constants';
 import { StartHelper } from './start.helper';
@@ -14,7 +21,7 @@ import { IStartStep, IStartViewState } from './start.interfaces';
 
 @Component({
   selector: 'dt-start',
-  imports: [AsyncPipe, RouterLink, MatIconModule, MatProgressSpinnerModule, AlertBannerComponent, TermComponent, ThreeClocksComponent],
+  imports: [AsyncPipe, DecimalPipe, RouterLink, MatIconModule, MatProgressSpinnerModule, AlertBannerComponent, ArchitectureComponent, NextStopComponent, TermComponent, ThreeClocksComponent, UnderTheHoodComponent],
   templateUrl: './start.component.html',
   styleUrl: './start.component.scss'
 })
@@ -25,6 +32,7 @@ export class StartComponent {
 
   public readonly hook = PlanHelper.hookNumbers();
   public readonly day$ = this._planningDayService.day$;
+  public readonly seasonBridge$: Observable<string> = this.day$.pipe(map((day) => StartHelper.seasonBridge(day)));
   public readonly steps$: Observable<IStartStep[]> = this.day$.pipe(
     map((day) =>
       startSteps.map((step) => ({

@@ -1,0 +1,55 @@
+<figure class="dt-architecture">
+  @for (view of views; track view.id) {
+    <svg
+      class="dt-architecture__svg"
+      [class.dt-architecture__svg--wide]="view.id === 'wide'"
+      [class.dt-architecture__svg--narrow]="view.id === 'narrow'"
+      [attr.viewBox]="'-2 -2 ' + (view.layout.width + 4) + ' ' + (view.layout.height + 4)"
+      role="img"
+      [attr.aria-label]="summary"
+    >
+      <defs>
+        <marker
+          [attr.id]="idPrefix + '-' + view.id + '-arrow'"
+          viewBox="0 0 8 8"
+          refX="1"
+          refY="4"
+          markerWidth="7"
+          markerHeight="7"
+          orient="auto"
+        >
+          <path class="dt-architecture__arrow" d="M 0 0 L 8 4 L 0 8 z"></path>
+        </marker>
+      </defs>
+
+      @for (label of view.layout.labels; track label.text) {
+        <text class="dt-architecture__stage" [attr.x]="label.x" [attr.y]="label.y">{{ label.text }}</text>
+      }
+
+      @for (edge of view.layout.edges; track $index) {
+        <path
+          class="dt-architecture__edge"
+          [attr.d]="edge.d"
+          [attr.marker-end]="edge.hasArrow ? 'url(#' + idPrefix + '-' + view.id + '-arrow)' : null"
+        ></path>
+      }
+
+      @for (node of view.layout.nodes; track node.id) {
+        <g [class]="'dt-architecture__node dt-architecture__node--' + node.tone">
+          <rect class="dt-architecture__box" [attr.x]="node.x" [attr.y]="node.y" [attr.width]="node.width" [attr.height]="node.height" rx="8"></rect>
+          <text class="dt-architecture__title" [attr.x]="node.x + 12" [attr.y]="node.y + node.height / 2 - (node.details.length * 8) + 4">
+            {{ node.title }}
+          </text>
+          @for (detail of node.details; track detail; let index = $index) {
+            <text class="dt-architecture__detail" [attr.x]="node.x + 12" [attr.y]="node.y + node.height / 2 - (node.details.length * 8) + 21 + index * 15">
+              {{ detail }}
+            </text>
+          }
+        </g>
+      }
+    </svg>
+  }
+  <figcaption class="dt-architecture__caption">
+    No upstream API is called while you use the app: every screen reads the pinned snapshot and does its maths on your device.
+  </figcaption>
+</figure>

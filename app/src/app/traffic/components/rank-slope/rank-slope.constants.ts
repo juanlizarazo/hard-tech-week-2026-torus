@@ -8,5 +8,6 @@ export const rankSlopeLayout = {
   DEFAULT_HEIGHT: 240,
   HIGHLIGHT_COUNT: 3,
   LABEL_GAP: 15,
+  LABEL_EDGE_PADDING: 4,
   LABEL_BASELINE_OFFSET: 4
 };

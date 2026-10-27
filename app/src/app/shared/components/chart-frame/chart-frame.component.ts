@@ -1,5 +1,6 @@
 import { Component, Input, TemplateRef, ViewChild, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { siteArchetypes } from '@app/core/sites/sites.constants';
 import { SidePanelService } from '../side-panel/side-panel.service';
 
 @Component({
@@ -15,6 +16,8 @@ export class ChartFrameComponent {
   @Input() public notice = '';
   @Input() public simulated = false;
   @Input() public hasHowToRead = true;
+
+  public readonly seed = siteArchetypes.AIRPORT.seed;
 
   @ViewChild('howToRead', { static: true }) private readonly _howToRead!: TemplateRef<unknown>;
 

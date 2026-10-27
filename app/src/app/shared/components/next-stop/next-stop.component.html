@@ -1,0 +1,12 @@
+<nav class="dt-next-stop" [attr.aria-label]="label">
+  <a class="dt-next-stop__link" [routerLink]="path">
+    @if (sign) {
+      <span class="dt-next-stop__sign" aria-hidden="true">{{ sign }}</span>
+    }
+    <span class="dt-next-stop__text">
+      <span class="dt-next-stop__label">{{ label }}</span>
+      <span class="dt-next-stop__title">{{ title }}</span>
+    </span>
+    <mat-icon class="dt-next-stop__arrow" aria-hidden="true">east</mat-icon>
+  </a>
+</nav>

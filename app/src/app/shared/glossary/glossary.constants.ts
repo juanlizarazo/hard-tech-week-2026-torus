@@ -3,8 +3,8 @@ import { IGlossaryEntry } from './glossary.interfaces';
 export const glossary = {
   RUSH_HOUR: {
     term: 'Rush hour',
-    short: "The four hours of the planning day when PACE's own forecast says the grid is busiest.",
-    long: "DETOUR takes PACE's day-ahead load forecast and finds the busiest four-hour block. That block is drawn as orange stripes on every chart. When no forecast is posted yet, it falls back to a fixed late-afternoon block and says so.",
+    short: "The four hours in a row with the most load in PACE's day-ahead forecast for the planning day.",
+    long: "DETOUR adds up PACE's day-ahead load forecast over every run of four straight hours in the day and picks the run with the highest total. Any hour the forecast skips uses PACE's measured demand instead. When no forecast is posted yet, it falls back to a fixed late-afternoon block and says so. The next day's window is assumed to repeat at the same hours.",
     whyItMatters: 'The Torus Station tries to keep the site off the grid in this window, and the Wattsmart reserve is held through it.'
   },
   PACE: {
@@ -192,6 +192,18 @@ export const glossary = {
     short: 'Savings achieved divided by the savings perfect hindsight would have made.',
     long: 'A capture rate of 80% means DETOUR, planning one day ahead with forecasts, got 80% of the way to the best possible result.',
     whyItMatters: 'It is an honest score: it cannot be inflated by picking an easy baseline.'
+  },
+  KW: {
+    term: 'kW',
+    short: 'Kilowatts: how fast power is being drawn at one moment. Think speed.',
+    long: 'A site drawing 2,000 kW right now is moving fast. The demand charge bills the fastest 15 minutes of the month, in dollars per kW.',
+    whyItMatters: 'Cutting the peak kW, even for 15 minutes, is where most of the bill saving comes from.'
+  },
+  KWH: {
+    term: 'kWh',
+    short: 'Kilowatt-hours: how much energy was used over time. Think distance.',
+    long: 'Drawing 1 kW for one hour uses 1 kWh. Energy charges bill every kWh, at a higher price in on-peak hours.',
+    whyItMatters: 'Moving a kWh to a cheaper hour saves cents; trimming a kW of peak saves dollars.'
   },
   THREE_CLOCKS: {
     term: 'Three clocks',

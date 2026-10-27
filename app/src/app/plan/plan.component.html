@@ -1,13 +1,16 @@
 <div class="dt-page">
   <header class="dt-page__head">
     <p class="dt-page__step">Step 2 of 3</p>
-    <h1 class="dt-question">What should the Torus Station do {{ (day$ | async)?.word }}?</h1>
+    <h1 class="dt-question">What should the <dt-term key="TORUS_STATION">Torus Station</dt-term> do {{ (day$ | async)?.word }}?</h1>
     @if (solve$ | async; as solve) {
       @if (solve.viewModel; as viewModel) {
         <p class="dt-answer" aria-live="polite">{{ viewModel.answer }}</p>
       } @else {
         <p class="dt-answer">Solving the plan in your browser…</p>
       }
+    }
+    @if (hook$ | async; as hook) {
+      <p class="plan__hook"><strong class="plan__hook-title dt-num">{{ hook.title }}</strong> {{ hook.subtitle }}</p>
     }
   </header>
 
@@ -180,11 +183,39 @@
                 <dt-alert-banner [message]="solve.errorMessage"></dt-alert-banner>
               }
 
+              <section class="plan__try" aria-labelledby="plan-try-title">
+                <h2 class="plan__try-title" id="plan-try-title">Try this</h2>
+                <ul class="plan__try-list">
+                  @for (chip of tryChips; track chip.id) {
+                    <li class="plan__try-item">
+                      <button
+                        type="button"
+                        class="plan__try-chip"
+                        [attr.aria-pressed]="isChipActive(chip)"
+                        [attr.aria-describedby]="'plan-try-' + chip.id"
+                        (click)="onTryChip(chip)"
+                      >
+                        {{ chip.label }}
+                      </button>
+                      <span class="plan__try-effect" [id]="'plan-try-' + chip.id">{{ chip.effect }}</span>
+                    </li>
+                  }
+                </ul>
+              </section>
+
               @if (solve.viewModel; as viewModel) {
+                @let deltaState = deltas$ | async;
+                @let deltas = deltaState?.deltas ?? {};
+                @if (deltaState?.isUnchanged) {
+                  <p class="plan__unchanged" role="status">Same plan as the last solve: at these settings nothing in the figures moved.</p>
+                }
                 <div class="plan__body" [class.plan__body--solving]="solve.status === 'solving'">
                   <div class="dt-figures plan__figures">
                     @for (tile of viewModel.tiles; track tile.id) {
                       <dt-figure [value]="tile.value" [label]="tile.label" [detail]="tile.detail" [tone]="tile.tone">
+                        @if (deltas[tile.id]; as delta) {
+                          <span figure-delta class="plan__delta" role="status">{{ delta.text }}</span>
+                        }
                         @if (tile.source) {
                           <dt-source-chip figure-source [label]="tile.source"></dt-source-chip>
                         }
@@ -260,7 +291,8 @@
                     <h2 class="dt-section__title" id="plan-bill-title">What the plan changes on the bill</h2>
                     <p class="dt-hint">
                       {{ viewModel.billTableCaption }}
-                      Base rates only, <dt-term key="RIDERS">riders</dt-term> excluded.
+                      Base rates only, <dt-term key="RIDERS">riders</dt-term> excluded. The
+                      <dt-term key="FACILITIES_CHARGE">facilities charge</dt-term> bills the highest draw in any hour.
                     </p>
                     <div class="dt-table-wrap">
                       <table class="dt-table plan__bill">
@@ -330,6 +362,7 @@
                 </div>
               }
             }
+            <dt-next-stop path="/backtest" sign="3" title="July's proof: would it have paid off?"></dt-next-stop>
           </div>
         </div>
       }
