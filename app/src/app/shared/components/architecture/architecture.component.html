@@ -1,5 +1,5 @@
 <figure class="dt-architecture">
-  @for (view of views; track view.id) {
+  @for (view of views$ | async; track view.id) {
     <svg
       class="dt-architecture__svg"
       [class.dt-architecture__svg--wide]="view.id === 'wide'"

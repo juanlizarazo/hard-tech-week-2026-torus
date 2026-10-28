@@ -46,7 +46,14 @@ export class DispatchOrdersHelper {
       }),
       dateLabel: viewModel.dateLabel,
       isTargetDay: viewModel.controls.dateMode === 'target',
-      revision
+      revision,
+      arrive: viewModel.result.metrics
+        ? {
+            rushPeakCutKw: viewModel.result.metrics.rushPeakCutKw,
+            worthPerMonth: viewModel.result.metrics.value.worthPerMonth,
+            wattsmartHeldKwh: viewModel.result.metrics.wattsmartHeldKwh
+          }
+        : null
     };
   }
 
@@ -58,6 +65,7 @@ export class DispatchOrdersHelper {
       revision: 1,
       dayIntervals: DispatchOrdersHelper.dayIntervals(input.intervals, input.date),
       orders: DispatchOrdersHelper.orders(input),
+      arrive: null,
       fileName: `${dispatchCsvSettings.FILE_PREFIX}-${input.date}.csv`
     };
   }
@@ -81,12 +89,13 @@ export class DispatchOrdersHelper {
       ...DispatchOrdersHelper.catchOrder(input, day)
     ];
 
-    return drafts
-      .sort(
-        (first: DispatchOrderDraft, second: DispatchOrderDraft) =>
-          Date.parse(first.startUtc) - Date.parse(second.startUtc) ||
-          DispatchOrdersHelper._actionOrder.indexOf(first.action) - DispatchOrdersHelper._actionOrder.indexOf(second.action)
-      )
+    const sorted = drafts.sort(
+      (first: DispatchOrderDraft, second: DispatchOrderDraft) =>
+        Date.parse(first.startUtc) - Date.parse(second.startUtc) ||
+        DispatchOrdersHelper._actionOrder.indexOf(first.action) - DispatchOrdersHelper._actionOrder.indexOf(second.action)
+    );
+
+    return DispatchOrdersHelper.mergeToFit(sorted, input.date, dispatchOrderSettings.MAX_ROUTE_ROWS)
       .map((draft: DispatchOrderDraft, index: number) => ({
         ...draft,
         id: `${draft.action}-${draft.startUtc}`,
@@ -115,6 +124,28 @@ export class DispatchOrdersHelper {
     }
 
     return runs;
+  }
+
+  public static mergeToFit(drafts: DispatchOrderDraft[], date: string, maxRows: number): DispatchOrderDraft[] {
+    const merged = [...drafts];
+
+    while (merged.length > maxRows) {
+      const index = merged.findIndex(
+        (draft: DispatchOrderDraft, position: number) =>
+          position < merged.length - 1 &&
+          draft.action === merged[position + 1].action &&
+          draft.energyKwh !== undefined &&
+          merged[position + 1].energyKwh !== undefined
+      );
+
+      if (index < 0) {
+        break;
+      }
+
+      merged.splice(index, 2, DispatchOrdersHelper.mergePair(merged[index], merged[index + 1], date));
+    }
+
+    return merged;
   }
 
   public static csv(sheet: IDispatchSheet): string {
@@ -175,9 +206,26 @@ export class DispatchOrdersHelper {
         startUtc: slice[0].startUtc,
         endUtc: DispatchOrdersHelper.endUtc(slice[slice.length - 1]),
         amount: `${DispatchOrdersHelper.number(spinKwh + pulseKwh)} kWh`,
+        energyKwh: spinKwh + pulseKwh,
         why: DispatchOrdersHelper.chargeWhy(input, slice, averagePrice, dayMaxPrice, averageCo2, dayAverageCo2)
       };
     });
+  }
+
+  private static mergePair(first: DispatchOrderDraft, second: DispatchOrderDraft, date: string): DispatchOrderDraft {
+    const energyKwh = (first.energyKwh ?? 0) + (second.energyKwh ?? 0);
+    const rangeOf = (draft: DispatchOrderDraft): string => draft.timeRange ?? DispatchOrdersHelper.range(draft.startUtc, draft.endUtc, date);
+
+    return {
+      action: first.action,
+      asset: first.asset === second.asset ? first.asset : dispatchOrderAssets.BOTH,
+      startUtc: first.startUtc,
+      endUtc: second.endUtc,
+      timeRange: `${rangeOf(first)} + ${rangeOf(second)}`,
+      amount: `${DispatchOrdersHelper.number(energyKwh)} kWh`,
+      energyKwh,
+      why: first.why
+    };
   }
 
   private static chargeWhy(
@@ -277,6 +325,7 @@ export class DispatchOrdersHelper {
         startUtc: slice[0].startUtc,
         endUtc: DispatchOrdersHelper.endUtc(slice[slice.length - 1]),
         amount: `${DispatchOrdersHelper.number(spinKwh + pulseKwh)} kWh`,
+        energyKwh: spinKwh + pulseKwh,
         why: DispatchOrdersHelper.dischargeWhy(input, slice, capKw, asset === dispatchOrderAssets.BOTH)
       };
     });

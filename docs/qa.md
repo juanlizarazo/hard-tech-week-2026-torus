@@ -81,3 +81,19 @@ Why 42: convention, the Hitchhiker's Guide number everyone uses as a default see
 Why simulate: a real meter would be one anonymous customer I could not show you. Three labeled archetypes through the same engine is a stronger proof that the method holds, and every synthetic number is labeled.
 
 Mechanism, if asked: each day's load is hashed from "42|<site-id>|<date>" (FNV-1a) into a mulberry32 stream, so each day is independent of the others and of the replay's end date.
+
+## Is this an AI agent?
+
+It is an autonomous daily planner, not a language model. Every day at 3 p.m. the cloud batch runs by itself: it reads PACE load, forecast and fuel mix (EIA-930), EDAM prices (CAISO OASIS) and weather (Open-Meteo), validates the rows, fits marginal CO2 and the forecast, and publishes a snapshot. The plan is then solved by a linear program with HiGHS. The LP makes every decision; no LLM is on the decision path. The run log in Decide's solver rail shows each step with its real timestamp; the planning step is re-solved in your browser so the dials work live.
+
+## Why 100 stations?
+
+It is an illustrative fleet, and the screen says so: "Illustrative fleet, not Torus's installed base." One simulated site is too small to show up in PACE's load, so the fleet line scales the same plan by 100 to put the kW cut next to PACE's own forecast load at the rush peak (about 65 MW, 1.1% of the 7 p.m. forecast in the current snapshot). It is a sense of scale, not a deployment claim.
+
+## Does DETOUR charge from solar?
+
+Not in this snapshot, and the screen doesn't claim it does. DETOUR charged while PACE was about 11% solar, against about 14% for the simple shaver. The bill and the rush window decide when Pulse charges; carbon and solar are a tie-breaker, because PACE's marginal carbon barely varies by hour here (see the carbon-dial answer above). What DETOUR does do is take far more off the rush hour: at the airport it cuts the rush-hour peak by about 646 kW, where the simple shaver cuts about 95 kW. I checked the evening rebound too: the shaver doesn't recharge into a meaningfully bigger post-rush peak than DETOUR on this day, so I don't claim a rebound win.
+
+## Why is the cement plant's capture rate low?
+
+On Schedule 8 DETOUR reaches only 12–26% of the perfect-hindsight saving at the cement plant (it still saves about $46,700 over the ten replayed months). At the airport the figure is 21–78%. The cement plant's peak comes from crusher and raw-mill motor starts: one to three 15-minute spikes to about 4 MW, several times a day, at seeded random times on top of a flat 2.2 MW kiln load. DETOUR plans the day before on a load forecast (the same weekday's highest load over the last four weeks), so it can't know which interval a motor start will hit. Perfect hindsight knows every spike and shaves exactly the ones that set the month's peak. The live cap catches many spikes with Spin, but any one it misses resets the month's demand charge. The airport's peak is a predictable evening block, so a day-ahead plan gets much closer. Capture rate here measures how forecastable the peak is, not how good the hardware is.

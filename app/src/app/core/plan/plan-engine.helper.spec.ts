@@ -58,6 +58,7 @@ describe('plan engine', () => {
 
     expect(result.status).toBe('optimal');
     expect(result.plannedBill.total).toBe(result.baselineBill.total);
+    expect(result.metrics?.rushPeakCutKw).toBe(0);
     result.intervals.forEach((planInterval: IPlanInterval) => {
       expect(planInterval.gridKw).toBeCloseTo(planInterval.loadKw, 6);
     });

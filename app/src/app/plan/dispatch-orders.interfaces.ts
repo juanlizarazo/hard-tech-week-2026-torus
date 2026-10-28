@@ -30,6 +30,7 @@ export interface IDispatchOrder {
   timeRange: string;
   amount: string;
   why: string;
+  energyKwh?: number;
 }
 
 export interface IDispatchSheet {
@@ -39,7 +40,14 @@ export interface IDispatchSheet {
   revision: number;
   dayIntervals: IPlanInterval[];
   orders: IDispatchOrder[];
+  arrive: IDispatchArrive | null;
   fileName: string;
+}
+
+export interface IDispatchArrive {
+  rushPeakCutKw: number;
+  worthPerMonth: number;
+  wattsmartHeldKwh: number;
 }
 
 export interface IDispatchRun {

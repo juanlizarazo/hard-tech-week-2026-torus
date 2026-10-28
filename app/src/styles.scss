@@ -645,3 +645,35 @@ ol.dt-list {
   --dt-pulse: #6a4bd6;
   color: var(--dt-ink);
 }
+
+@media print {
+  @page {
+    size: letter;
+    margin: 0.45in;
+  }
+
+  html,
+  body {
+    background: var(--dt-panel) !important;
+    background-image: none !important;
+    color: var(--dt-ink);
+  }
+
+  .dt-shell__skip,
+  .dt-shell__progress,
+  .dt-shell__header,
+  .dt-shell__footer,
+  .cdk-overlay-container,
+  dt-side-panel {
+    display: none !important;
+  }
+
+  .dt-shell {
+    min-height: 0;
+  }
+
+  .dt-shell__main {
+    max-width: none;
+    padding: 0;
+  }
+}

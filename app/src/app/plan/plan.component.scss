@@ -145,6 +145,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+.plan__status:has(dt-run-log) {
+  flex: 0 1 auto;
+}
+
+.plan__status:has(details[open]) {
+  flex-basis: 100%;
+  order: 1;
+}
+
 .plan__figures {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -502,6 +511,18 @@
   color: var(--dt-clear);
 }
 
+.plan__order--arrive {
+  grid-template-areas: 'number action arrive arrive arrive';
+  margin: 0;
+  border-bottom-color: var(--dt-ink);
+}
+
+.plan__order-arrive {
+  grid-area: arrive;
+  font-weight: 600;
+  color: var(--dt-ink);
+}
+
 .plan__orders-actions {
   display: flex;
   flex-wrap: wrap;
@@ -599,6 +620,12 @@
 @media (max-width: 599.98px) {
   .plan__order-asset {
     justify-self: end;
+  }
+
+  .plan__order--arrive {
+    grid-template-areas:
+      'number action action'
+      '. arrive arrive';
   }
 }
 
@@ -721,4 +748,119 @@
 
 .plan__sources {
   margin: 0;
+}
+
+.plan__shared-tag {
+  margin-left: 12px;
+  vertical-align: middle;
+  cursor: help;
+}
+
+.plan__share {
+  --mat-button-outlined-label-text-color: var(--dt-panel);
+  --mat-button-outlined-outline-color: color-mix(in srgb, var(--dt-panel) 55%, transparent);
+  --mat-button-outlined-container-height: 44px;
+  min-height: 44px;
+  min-width: 132px;
+}
+
+@media print {
+  :host {
+    display: block;
+  }
+
+  .dt-page {
+    gap: 14px;
+    zoom: 0.76;
+  }
+
+  .dt-page__head,
+  .plan__dials,
+  .plan__rail,
+  .plan__stale,
+  .plan__unchanged,
+  .plan__lp-stats,
+  .plan__orders-actions,
+  .plan__orders-empty,
+  .plan__reserve,
+  dt-chart-frame[index='D1'],
+  dt-chart-frame[index='D3'],
+  .plan__body > .dt-section,
+  dt-under-the-hood,
+  dt-next-stop,
+  dt-alert-banner,
+  button,
+  .plan__delta {
+    display: none !important;
+  }
+
+  :host ::ng-deep .mat-mdc-button-base,
+  :host ::ng-deep .dt-chart-frame__info {
+    display: none !important;
+  }
+
+  .plan__layout {
+    display: block;
+  }
+
+  .plan__figures {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .plan__figures ::ng-deep .dt-figure__value {
+    font-size: var(--dt-text-27);
+  }
+
+  dt-chart-frame ::ng-deep .dt-chart-frame {
+    padding: 12px;
+  }
+
+  .plan__results,
+  .plan__body,
+  .plan__result {
+    gap: 14px;
+  }
+
+  .plan__body--solving {
+    opacity: 1;
+  }
+
+  .plan__orders {
+    gap: 8px;
+    padding: 10px 12px 12px;
+    background: var(--dt-panel);
+    break-inside: avoid;
+  }
+
+  dt-figure,
+  dt-chart-frame,
+  dt-load-chart {
+    display: block;
+  }
+
+  .plan__orders,
+  .plan__result,
+  .plan__figures,
+  dt-figure,
+  dt-chart-frame,
+  dt-chart-frame ::ng-deep .dt-chart-frame {
+    break-inside: avoid;
+  }
+
+  dt-load-chart ::ng-deep svg {
+    max-height: 300px;
+  }
+
+  dt-chart-frame,
+  dt-print-masthead,
+  .plan__orders {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  dt-chart-frame ::ng-deep svg {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
 }

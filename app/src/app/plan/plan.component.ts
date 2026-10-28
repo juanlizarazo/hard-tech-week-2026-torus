@@ -1,8 +1,13 @@
-import { Component, inject } from '@angular/core';
-import { AsyncPipe, CurrencyPipe, DecimalPipe } from '@angular/common';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AsyncPipe, CurrencyPipe, DecimalPipe, Location } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Clipboard } from '@angular/cdk/clipboard';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
@@ -37,6 +42,7 @@ import {
   FigureComponent,
   IndexTagComponent,
   NextStopComponent,
+  RunLogComponent,
   SourceChipComponent,
   TermComponent,
   ThreeClocksComponent,
@@ -47,7 +53,9 @@ import { SnapshotViewStateHelper } from '@app/shared/helpers/snapshot-view-state
 import {
   DispatchChartComponent,
   LoadChartComponent,
-  LpTextComponent
+  LpTextComponent,
+  PrintFooterComponent,
+  PrintMastheadComponent
 } from './components';
 import { IAssetRow, IPlanControls, IPlanDeltaState, IPlanHook, IPlanViewModel, IPlanDateContext, IPlanSiteCard, IPlanSolveState, IPlanTile } from './plan.interfaces';
 import { PeakSoFarMode, PlanDateMode, PlanSolverRailState } from './plan.types';
@@ -57,6 +65,8 @@ import { PlanDeltaHelper } from './plan-delta.helper';
 import { DispatchOrdersHelper } from './dispatch-orders.helper';
 import { IDispatchApproval, IDispatchOrder, IDispatchSheet } from './dispatch-orders.interfaces';
 import { TimeHelper } from '@app/core/helpers';
+import { PlanShareHelper } from './plan-share.helper';
+import { planShareSettings } from './plan-share.constants';
 
 @Component({
   selector: 'dt-plan',
@@ -67,6 +77,8 @@ import { TimeHelper } from '@app/core/helpers';
     MatButtonModule,
     MatButtonToggleModule,
     MatIconModule,
+    MatMenuModule,
+    MatTooltipModule,
     MatProgressSpinnerModule,
     MatSelectModule,
     MatSliderModule,
@@ -75,13 +87,16 @@ import { TimeHelper } from '@app/core/helpers';
     IndexTagComponent,
     FigureComponent,
     NextStopComponent,
+    RunLogComponent,
     SourceChipComponent,
     TermComponent,
     ThreeClocksComponent,
     UnderTheHoodComponent,
     DispatchChartComponent,
     LoadChartComponent,
-    LpTextComponent
+    LpTextComponent,
+    PrintFooterComponent,
+    PrintMastheadComponent
   ],
   templateUrl: './plan.component.html',
   styleUrl: './plan.component.scss'
@@ -89,7 +104,15 @@ import { TimeHelper } from '@app/core/helpers';
 export class PlanComponent {
   private readonly _snapshotService = inject(SnapshotService);
   private readonly _planSolverService = inject(PlanSolverService);
-  private readonly _controls$ = new BehaviorSubject<IPlanControls>(PlanHelper.defaultControls());
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
+  private readonly _location = inject(Location);
+  private readonly _clipboard = inject(Clipboard);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _controls$ = new BehaviorSubject<IPlanControls>(
+    PlanShareHelper.controlsFromParams(this._route.snapshot.queryParamMap)
+  );
+  private readonly _copied$ = new BehaviorSubject<number>(0);
   private readonly _gridSignalsService = inject(GridSignalsService);
   private readonly _planningDayService = inject(PlanningDayService);
   private readonly _mef$: Observable<IMarginalEmissionsSeries> = this._gridSignalsService.marginalEmissions$.pipe(
@@ -109,6 +132,20 @@ export class PlanComponent {
   public spinRows: IAssetRow[] = [];
   public pulseRows: IAssetRow[] = [];
   public maxReserveKwh = 0;
+  public isSharedPlan = PlanShareHelper.isShared(this._route.snapshot.queryParamMap);
+  public shareUrl = '';
+
+  public readonly linkCopied$: Observable<boolean> = this._copied$.pipe(
+    switchMap((copyCount: number) =>
+      copyCount === 0
+        ? of(false)
+        : concat(of(true), timer(planShareSettings.COPIED_VISIBLE_MS).pipe(map(() => false)))
+    )
+  );
+
+  public readonly pulledAt$: Observable<Date | null> = this._snapshotService.manifest$.pipe(
+    map((manifest) => manifest?.pulledAt?.toDate?.() ?? null)
+  );
 
   public readonly state$: Observable<ISnapshotViewState> = SnapshotViewStateHelper.fromManifest(
     this._snapshotService.manifest$
@@ -184,6 +221,7 @@ export class PlanComponent {
 
   public constructor() {
     this._refreshAssetRows();
+    this._syncShareUrl();
   }
 
   public get dialsSummary(): string {
@@ -222,10 +260,6 @@ export class PlanComponent {
     return tiles.filter((tile) => tile.id === 'energy' || tile.id === 'co2');
   }
 
-  public orderSummary(sheet: IDispatchSheet): string {
-    return PlanHelper.orderSummary(sheet.orders.length, sheet.dateLabel, sheet.input.siteName, sheet.input.scheduleLabel);
-  }
-
   public canApprove(solve: IPlanSolveState, sheet: IDispatchSheet | null): boolean {
     return this.railState(solve) === 'solved' && sheet !== null;
   }
@@ -258,6 +292,16 @@ export class PlanComponent {
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
+  public onCopyLink(): void {
+    if (this._clipboard.copy(this.shareUrl)) {
+      this._copied$.next(this._copied$.value + 1);
+    }
+  }
+
+  public onDownloadPdf(): void {
+    window.print();
   }
 
   public onToggleDials(): void {
@@ -303,9 +347,39 @@ export class PlanComponent {
   }
 
   private _update(changes: Partial<IPlanControls>): void {
+    this.isSharedPlan = false;
     this.controls = { ...this.controls, ...changes };
     this._refreshAssetRows();
     this._controls$.next(this.controls);
+  }
+
+  private _syncShareUrl(): void {
+    combineLatest([
+      this._controls$,
+      this._snapshotService.manifest$.pipe(map((manifest) => manifest?.id ?? null))
+    ])
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(([controls, snapshotId]) => {
+        const pageUrl = this._router.serializeUrl(
+          this._router.createUrlTree([], {
+            relativeTo: this._route,
+            queryParams: PlanShareHelper.toQueryParams(controls, snapshotId, this.isSharedPlan),
+            queryParamsHandling: 'merge'
+          })
+        );
+        const sharePath = this._router.serializeUrl(
+          this._router.createUrlTree([], {
+            relativeTo: this._route,
+            queryParams: PlanShareHelper.toQueryParams(controls, snapshotId, true)
+          })
+        );
+
+        this.shareUrl = `${window.location.origin}${this._location.prepareExternalUrl(sharePath)}`;
+
+        if (pageUrl !== this._location.path()) {
+          this._location.replaceState(pageUrl);
+        }
+      });
   }
 
   private _refreshAssetRows(): void {

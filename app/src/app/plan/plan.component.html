@@ -1,7 +1,7 @@
 <div class="dt-page">
   <header class="dt-page__head">
     <p class="dt-page__step"><span class="cdk-visually-hidden">Step 2 of 2: </span><span class="dt-page__step-number" aria-hidden="true">02</span><span class="dt-page__step-name">Decide</span></p>
-    <h1 class="dt-question">What should the <dt-term key="TORUS_STATION">Torus Station</dt-term> do {{ headingDay(solve$ | async, (day$ | async)?.word) }}?</h1>
+    <h1 class="dt-question">What should the <dt-term key="TORUS_STATION">Torus Station</dt-term> do {{ headingDay(solve$ | async, (day$ | async)?.word) }}?@if (isSharedPlan) {<span class="dt-tag dt-tag--clear plan__shared-tag" tabindex="0" matTooltip="Same frozen grid data, re-solved in your browser">Shared plan</span>}</h1>
     @if (solve$ | async; as solve) {
       @if (solve.viewModel; as viewModel) {
         <p class="dt-answer" aria-live="polite">{{ viewModel.answer }}</p>
@@ -178,7 +178,7 @@
                     @default { Failed }
                   }
                 </span>
-                <p class="plan__status">
+                <div class="plan__status">
                   @if (rail === 'solving') {
                     <span>Solving live…</span>
                   } @else if (rail === 'infeasible') {
@@ -186,11 +186,9 @@
                   } @else if (rail === 'failed') {
                     <span>The solver did not return a plan for these settings.</span>
                   } @else if (solve.viewModel) {
-                    <span>
-                      Solved live: {{ solve.viewModel.dateLabel }} and the next day, {{ solve.viewModel.result.intervals.length }} fifteen-minute steps, {{ solve.viewModel.result.solveMs | number: '1.0-0' }} ms with <dt-term key="HIGHS">HiGHS</dt-term>.
-                    </span>
+                    <dt-run-log [solveMs]="solve.viewModel.result.solveMs"></dt-run-log>
                   }
-                </p>
+                </div>
                 @if (solve.viewModel; as railModel) {
                   <span class="plan__rail-stats dt-mono">
                     <span class="plan__rail-stat">{{ railModel.result.lpStats.intervalCount | number }} <dt-term key="LP_SIZE">intervals</dt-term></span>
@@ -219,22 +217,32 @@
                 <p class="plan__stale" role="status">No feasible plan at these settings. The dispatch orders below are the last plan that solved.</p>
               }
 
+              @if (sheet) {
+                <dt-print-masthead
+                  [siteName]="sheet.input.siteName"
+                  [rateLabel]="sheet.input.scheduleLabel"
+                  [dayLabel]="sheet.dateLabel"
+                  [seed]="sheet.input.seed"
+                  [pulledAt]="pulledAt$ | async"
+                ></dt-print-masthead>
+              }
+
               <!-- dispatch orders run sheet -->
               <section class="plan__orders" aria-labelledby="plan-orders-title">
                 <header class="plan__orders-head">
                   <dt-index-tag index="D0" variant="tag"></dt-index-tag>
                   <h2 class="plan__orders-title" id="plan-orders-title">
                     @if (!sheet || sheet.isTargetDay) {
-                      {{ (day$ | async)?.possessive ?? "Tomorrow's" }} dispatch orders
+                      {{ (day$ | async)?.possessive ?? "Tomorrow's" }} route
                     } @else {
-                      Dispatch orders for {{ sheet.dateLabel }}
+                      Route for {{ sheet.dateLabel }}
                     }
                   </h2>
                   <span class="dt-tag dt-tag--sim">Simulated · seed {{ sheet?.input?.seed ?? 42 }}</span>
                 </header>
                 @if (sheet) {
                   <p class="plan__orders-meta dt-mono">
-                    {{ sheet.input.siteName }} · {{ sheet.input.scheduleLabel }} · {{ sheet.input.date }} · local time (America/Denver)
+                    {{ sheet.orders.length }} dispatch {{ sheet.orders.length === 1 ? 'order' : 'orders' }} · {{ sheet.input.siteName }} · {{ sheet.input.scheduleLabel }} · {{ sheet.input.date }} · local time (America/Denver)
                   </p>
                   @if (sheet.orders.length > 0) {
                     <ol class="plan__orders-list" [class.plan__orders-list--live]="sheet.revision > 1">
@@ -253,6 +261,15 @@
                         </li>
                       }
                     </ol>
+                    @if (sheet.arrive; as arrive) {
+                      <p class="plan__order plan__order--arrive">
+                        <span class="plan__order-number dt-mono" aria-hidden="true">→</span>
+                        <span class="plan__order-action dt-mono">Arrive</span>
+                        <span class="plan__order-arrive dt-mono">
+                          {{ arrive.rushPeakCutKw | number: '1.0-0' }} kW off the rush hour · {{ arrive.worthPerMonth | currency: 'USD' : 'symbol' : '1.0-0' }} a month@if (arrive.wattsmartHeldKwh >= 1) { · {{ arrive.wattsmartHeldKwh | number: '1.0-0' }} kWh held for Wattsmart}
+                        </span>
+                      </p>
+                    }
                   } @else {
                     <p class="dt-hint">The station sits idle on this day at these settings: no orders to send.</p>
                   }
@@ -264,7 +281,6 @@
                         <span class="plan__approved-stamp dt-mono">Approved {{ approval?.approvedAtLabel }} · queued for <dt-term key="LATTICE">Lattice</dt-term> · SIMULATED</span>
                       </p>
                     } @else {
-                      <p class="plan__orders-summary dt-mono">{{ orderSummary(sheet) }}</p>
                       @if (approval) {
                         <p class="plan__changed dt-mono" role="status">Plan changed since approval at {{ approval.approvedAtLabel }}</p>
                       }
@@ -275,7 +291,27 @@
                         </div>
                       </button>
                     }
-                    <button type="button" class="plan__csv-link" (click)="onDownloadCsv(sheet)">Download schedule (CSV)</button>
+                    @let linkCopied = linkCopied$ | async;
+                    <button mat-stroked-button type="button" class="plan__share" [matMenuTriggerFor]="shareMenu" aria-haspopup="menu">
+                      <div class="btn-content">
+                        <mat-icon aria-hidden="true">{{ linkCopied ? 'check' : 'ios_share' }}</mat-icon>
+                        <span role="status">{{ linkCopied ? 'Link copied' : 'Share' }}</span>
+                      </div>
+                    </button>
+                    <mat-menu #shareMenu="matMenu" xPosition="before" class="plan__share-menu">
+                      <button mat-menu-item type="button" (click)="onCopyLink()">
+                        <mat-icon aria-hidden="true">link</mat-icon>
+                        <span>Copy link</span>
+                      </button>
+                      <button mat-menu-item type="button" (click)="onDownloadPdf()">
+                        <mat-icon aria-hidden="true">picture_as_pdf</mat-icon>
+                        <span>Download PDF</span>
+                      </button>
+                      <button mat-menu-item type="button" (click)="onDownloadCsv(sheet)">
+                        <mat-icon aria-hidden="true">table_view</mat-icon>
+                        <span>Download schedule (CSV)</span>
+                      </button>
+                    </mat-menu>
                     <dt-next-stop
                       [variant]="isApproved(sheet) ? 'hero' : 'inline'"
                       path="/backtest"
@@ -319,6 +355,9 @@
                       </dt-figure>
                     }
                   </div>
+                  @if (viewModel.fleetLine) {
+                    <p class="dt-hint plan__fleet">{{ viewModel.fleetLine }}</p>
+                  }
                   <p class="plan__costs">
                     <span class="plan__costs-title">What it costs</span>
                     @for (tile of secondaryTiles(viewModel.tiles); track tile.id + tile.value) {
@@ -373,6 +412,7 @@
                       [rushHourWindows]="viewModel.result.metrics?.rushHourWindows ?? []"
                       [demandKw]="viewModel.result.demandKw"
                       [demandLabel]="viewModel.demandLabel"
+                      [compareKw]="viewModel.result.metrics?.shaverGridKw ?? []"
                     ></dt-load-chart>
                     <div how-to-read>
                       <ul class="dt-list">
@@ -380,6 +420,7 @@
                         <li><strong>Green area:</strong> the planned grid draw with the Torus Station working. Where green is below black, the station is feeding the site.</li>
                         <li><strong>Dashed line:</strong> the billed demand the plan holds. One 15-minute interval above it would raise the whole month's demand charge.</li>
                         <li><strong>Orange stripes:</strong> rush hour.</li>
+                        <li><strong>Faint dashed line:</strong> a simple shaver with the same station. It trims anything above a fixed line and refills whenever the bill allows, without reading PACE's forecast.</li>
                       </ul>
                       <p class="dt-hint">Good looks like a flat green top at the dashed line and a dip inside the stripes. Green above black outside rush hour is the station recharging.</p>
                     </div>
@@ -480,6 +521,10 @@
                     </div>
                   </dt-under-the-hood>
                 </div>
+              }
+
+              @if (sheet) {
+                <dt-print-footer [shareUrl]="shareUrl"></dt-print-footer>
               }
             }
           </div>

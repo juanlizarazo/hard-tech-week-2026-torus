@@ -1,7 +1,38 @@
-import { architectureNarrowLayout, architectureWideLayout } from './architecture.constants';
-import { IArchitectureEdge, IArchitectureLabel, IArchitectureLayout, IArchitectureNode, IArchitectureStage } from './architecture.interfaces';
+import { architectureLastRun, architectureNarrowLayout, architectureWideLayout } from './architecture.constants';
+import {
+  IArchitectureEdge,
+  IArchitectureLabel,
+  IArchitectureLayout,
+  IArchitectureNode,
+  IArchitectureStage,
+  IArchitectureView
+} from './architecture.interfaces';
 
 export class ArchitectureHelper {
+  public static withLastRun(stages: IArchitectureStage[], lastRunLabel: string | null): IArchitectureStage[] {
+    if (!lastRunLabel) {
+      return stages;
+    }
+
+    return stages.map((stage) =>
+      stage.id === architectureLastRun.STAGE_ID
+        ? {
+            ...stage,
+            items: stage.items.map((item) =>
+              item.title === architectureLastRun.ITEM_TITLE ? { ...item, detail: `${item.detail}|Last ran ${lastRunLabel}` } : item
+            )
+          }
+        : stage
+    );
+  }
+
+  public static views(stages: IArchitectureStage[]): IArchitectureView[] {
+    return [
+      { id: 'wide', layout: ArchitectureHelper.wide(stages) },
+      { id: 'narrow', layout: ArchitectureHelper.narrow(stages) }
+    ];
+  }
+
   public static wide(stages: IArchitectureStage[]): IArchitectureLayout {
     const layout = architectureWideLayout;
     const totalColumns = layout.COLUMN_WIDTHS.reduce((sum, width) => sum + width, 0);

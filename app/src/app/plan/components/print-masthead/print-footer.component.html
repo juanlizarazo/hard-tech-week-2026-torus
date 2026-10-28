@@ -1,0 +1,9 @@
+<footer class="dt-print-footer">
+  @if (qrSvg$ | async; as qrSvg) {
+    <span class="dt-print-footer__qr" [innerHTML]="qrSvg" aria-hidden="true"></span>
+  }
+  <span class="dt-print-footer__text">
+    <span class="dt-print-footer__label">Open this plan, re-solved on the same frozen grid data</span>
+    <span class="dt-print-footer__url dt-mono">{{ shareUrl }}</span>
+  </span>
+</footer>

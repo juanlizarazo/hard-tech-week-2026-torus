@@ -18,6 +18,7 @@
 | 08 | Year-to-date proof: month ledger on Prove, any-month replay, pre-judging polish | — | — (07 merged) | `phase-08-year-to-date.md` | Done |
 | 09 | Coherence, honesty and demo readiness: replay seed fix, consistent copy, home launcher over a living map, script and Q&A | — | — (08 merged) | `phase-09-coherence.md` | In development |
 | 10 | Two steps and the record: Prove becomes Record and leads with the year, CTAs at the decision moment, plain words over the LP and rail; cloud batch for MEF, forecast and month replays with browser fallback | — | — (09 merged); track B merges only if green by Wed 1 p.m. | `phase-10-record-and-batch.md` | Planned |
+| 12 | Congestion, the agent and a shareable plan: kW off PACE's rush hour as the lead figure, the simple shaver on D2, a run log in the solver rail, D0 as tomorrow's route with an Arrive row, share link and PDF | — | Three tracks in parallel (engine + figures, route + run log + copy, share + PDF); merged 1 → 2 → 3 | `phase-12-congestion-agent-share.md` | In development |
 
 ### Phase scope
 

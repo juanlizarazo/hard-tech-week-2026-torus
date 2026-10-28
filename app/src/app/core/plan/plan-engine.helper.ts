@@ -17,10 +17,11 @@ import {
   IStationAssets,
   ITariffSchedule,
 } from '../models';
+import { NaiveShaverHelper } from '../backtest/naive-shaver.helper';
 import { SiteGeneratorHelper } from '../sites/site-generator.helper';
 import { TariffHelper } from '../tariff/tariff.helper';
 import { LpBuilderHelper } from './lp-builder.helper';
-import { ILpInput, ILpModel, IMonthToDate } from './plan-engine.interfaces';
+import { ILpInput, ILpModel, IMonthToDate, IRushPeaks, IShaverComparison, ISolarDay } from './plan-engine.interfaces';
 import { mefConversions } from './placeholder-mef.constants';
 import { planEngineSettings } from './plan-engine.constants';
 
@@ -90,6 +91,7 @@ export class PlanEngineHelper {
       rushHourWindows,
       monthToDateIntervals: monthToDate.intervals,
       monthToDateLoadKw: monthToDate.loadKw,
+      site,
     };
   }
 
@@ -209,6 +211,7 @@ export class PlanEngineHelper {
     let spinThroughputKwh = 0;
     let pulseThroughputKwh = 0;
     let minimumHeldKwh = Number.POSITIVE_INFINITY;
+    const rushPeaks: IRushPeaks = { baselineRushPeakKw: 0, plannedRushPeakKw: 0 };
     const pulseFloorKwh = assets.pulse.minSocFraction * assets.pulse.energyKwh;
 
     for (let t = 0; t < intervals.length; t++) {
@@ -222,18 +225,31 @@ export class PlanEngineHelper {
       if (input.rushHourMask[t]) {
         baselineRushHourKwh += input.loadKw[t] * stepHours;
         plannedRushHourKwh += planInterval.gridKw * stepHours;
+        rushPeaks.baselineRushPeakKw = Math.max(rushPeaks.baselineRushPeakKw, input.loadKw[t]);
+        rushPeaks.plannedRushPeakKw = Math.max(rushPeaks.plannedRushPeakKw, planInterval.gridKw);
         minimumHeldKwh = Math.min(minimumHeldKwh, planInterval.pulseSocKwh - pulseFloorKwh);
       }
     }
 
     const rushHourPulseMinKwh = Number.isFinite(minimumHeldKwh) ? Math.max(0, minimumHeldKwh) : 0;
     const wattsmartHeldKwh = input.request.wattsmartReserveKwh > 0 ? rushHourPulseMinKwh : 0;
+    const shaver = PlanEngineHelper.shaverComparison(input);
+    const reboundMask = PlanEngineHelper.reboundMask(input.intervals, input.rushHourWindows[0]);
     const metrics: IPlanMetrics = {
       baselineCo2Kg,
       plannedCo2Kg,
       baselineRushHourKwh,
       plannedRushHourKwh,
       trafficAvoidedKwh: baselineRushHourKwh - plannedRushHourKwh,
+      ...rushPeaks,
+      rushPeakCutKw: Math.max(0, rushPeaks.baselineRushPeakKw - rushPeaks.plannedRushPeakKw),
+      chargeSolarShare: null,
+      shaverChargeSolarShare: null,
+      solarShareProxyDate: null,
+      reboundPeakKw: PlanEngineHelper.maskedPeak(gridKw, reboundMask),
+      shaverReboundPeakKw: shaver ? PlanEngineHelper.maskedPeak(shaver.gridKw, reboundMask) : 0,
+      shaverGridKw: shaver?.gridKw,
+      shaverChargeKw: shaver?.chargeKw,
       rushHourWindows: input.rushHourWindows,
       wattsmartHeldKwh,
       rushHourPulseMinKwh,
@@ -256,6 +272,160 @@ export class PlanEngineHelper {
       lpStats,
       metrics,
     };
+  }
+
+  public static shaverComparison(input: ILpInput): IShaverComparison | null {
+    if (!input.site || input.intervals.length === 0) {
+      return null;
+    }
+
+    const shaverIntervals = NaiveShaverHelper.runShaver({
+      month: input.request.date.slice(0, 7),
+      throughDate: null,
+      site: input.site,
+      schedule: input.schedule,
+      assets: input.assets,
+      intervals: input.intervals,
+      loadKw: input.loadKw,
+      onPeakMask: input.onPeakMask,
+      energyPricePerKwh: input.energyPricePerKwh,
+      edamLmpPerMwh: [],
+      marginalKgCo2PerKwh: input.marginalKgCo2PerKwh,
+      marginalEmissions: { method: 'demand', points: [], provenance: [] },
+      gridHours: [],
+      rushHourMask: input.rushHourMask,
+      wattsmartReserveKwh: input.request.wattsmartReserveKwh,
+      initialPulseSocKwh: input.request.initialPulseSocKwh,
+      initialSpinSocKwh: input.request.initialSpinSocKwh,
+    });
+
+    return {
+      gridKw: shaverIntervals.map((planInterval: IPlanInterval) => planInterval.gridKw),
+      chargeKw: shaverIntervals.map((planInterval: IPlanInterval) => planInterval.spinChargeKw + planInterval.pulseChargeKw),
+    };
+  }
+
+  public static withSolarShares(result: IPlanResult, gridHours: Detour.Firestore.Snapshot.IGridHour[]): IPlanResult {
+    if (!result.metrics) {
+      return result;
+    }
+
+    const exactByUtcHour = PlanEngineHelper.solarShareByUtcHour(gridHours);
+    const hourStarts = result.intervals.map((planInterval: IPlanInterval) => {
+      const startMs = Date.parse(planInterval.startUtc);
+
+      return startMs - (startMs % planEngineSettings.MS_PER_HOUR);
+    });
+    const chargeKw = result.intervals.map((planInterval: IPlanInterval) => planInterval.spinChargeKw + planInterval.pulseChargeKw);
+    const shaverChargeKw = result.metrics.shaverChargeKw ?? [];
+    const exactShares = hourStarts.map((hourStartMs: number) => exactByUtcHour.get(hourStartMs) ?? null);
+    const isCovered = (series: number[]): boolean =>
+      series.every((kw: number, t: number) => kw <= planEngineSettings.TINY_VALUE || exactShares[t] !== null);
+    const isExact = isCovered(chargeKw) && isCovered(shaverChargeKw);
+    const proxyDay = isExact ? null : PlanEngineHelper.latestSolarDay(gridHours);
+    const shares = isExact
+      ? exactShares
+      : hourStarts.map((hourStartMs: number) => proxyDay?.sharesByHour.get(TimeHelper.localParts(hourStartMs).hour) ?? null);
+
+    return {
+      ...result,
+      metrics: {
+        ...result.metrics,
+        chargeSolarShare: PlanEngineHelper.chargeWeightedShare(chargeKw, shares),
+        shaverChargeSolarShare: result.metrics.shaverChargeKw ? PlanEngineHelper.chargeWeightedShare(shaverChargeKw, shares) : null,
+        solarShareProxyDate: proxyDay?.date ?? null,
+      },
+    };
+  }
+
+  public static solarShareByUtcHour(gridHours: Detour.Firestore.Snapshot.IGridHour[]): Map<number, number> {
+    const shares = new Map<number, number>();
+
+    for (const gridHour of gridHours) {
+      const share = PlanEngineHelper.solarShareOf(gridHour);
+
+      if (share !== null) {
+        const hourEndingMs = Date.parse(`${gridHour.utcHourEnding.slice(0, 13)}:00:00Z`);
+        shares.set(hourEndingMs - planEngineSettings.MS_PER_HOUR, share);
+      }
+    }
+
+    return shares;
+  }
+
+  public static latestSolarDay(gridHours: Detour.Firestore.Snapshot.IGridHour[]): ISolarDay | null {
+    const days = new Map<string, Map<number, number>>();
+
+    for (const gridHour of gridHours) {
+      const share = PlanEngineHelper.solarShareOf(gridHour);
+
+      if (share === null) {
+        continue;
+      }
+
+      const date = gridHour.localHourStart.slice(0, 10);
+      const sharesByHour = days.get(date) ?? new Map<number, number>();
+      sharesByHour.set(Number(gridHour.localHourStart.slice(11, 13)), share);
+      days.set(date, sharesByHour);
+    }
+
+    const fullDates = [...days.keys()]
+      .filter((date: string) => (days.get(date)?.size ?? 0) >= planEngineSettings.SOLAR_DAY_MIN_HOURS)
+      .sort();
+    const date = fullDates[fullDates.length - 1];
+
+    return date ? { date, sharesByHour: days.get(date) as Map<number, number> } : null;
+  }
+
+  private static solarShareOf(gridHour: Detour.Firestore.Snapshot.IGridHour): number | null {
+    const values = Object.values(gridHour.fuelMw ?? {}).filter(
+      (megawatts): megawatts is number => megawatts !== null && Number.isFinite(megawatts) && megawatts > 0,
+    );
+    const totalMw = values.reduce((sum: number, megawatts: number) => sum + megawatts, 0);
+    const solarMw = gridHour.fuelMw?.[planEngineSettings.SOLAR_FUEL_KEY];
+
+    if (totalMw <= 0 || solarMw === null || solarMw === undefined) {
+      return null;
+    }
+
+    return Math.max(0, solarMw) / totalMw;
+  }
+
+  private static chargeWeightedShare(chargeKw: number[], shares: (number | null)[]): number | null {
+    let weightedShare = 0;
+    let weight = 0;
+
+    for (let t = 0; t < chargeKw.length; t++) {
+      const share = shares[t];
+
+      if (share === null || chargeKw[t] <= planEngineSettings.TINY_VALUE) {
+        continue;
+      }
+
+      weightedShare += share * chargeKw[t];
+      weight += chargeKw[t];
+    }
+
+    return weight > 0 ? weightedShare / weight : null;
+  }
+
+  private static reboundMask(intervals: IInterval[], window: IRushHourWindow | undefined): boolean[] {
+    if (!window) {
+      return intervals.map(() => false);
+    }
+
+    const endMs = Date.parse(window.endUtc);
+    const reboundEndMs = endMs + planEngineSettings.REBOUND_HOURS * planEngineSettings.MS_PER_HOUR;
+
+    return intervals.map((interval: IInterval) => {
+      const startMs = Date.parse(interval.startUtc);
+
+      return startMs >= endMs && startMs < reboundEndMs;
+    });
+  }
+
+  private static maskedPeak(series: number[], mask: boolean[]): number {
+    return series.reduce((peak: number, kw: number, t: number) => (mask[t] ? Math.max(peak, kw) : peak), 0);
   }
 
   public static spinBurstCount(intervals: IPlanInterval[]): number {

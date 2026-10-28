@@ -17,6 +17,12 @@
       Billed demand
     </li>
   }
+  @if (compareLinePath) {
+    <li class="chart__legend-item">
+      <span class="chart__key chart__key--dash load-chart__key-compare"></span>
+      {{ compareName }}
+    </li>
+  }
 </ul>
 
 @if (intervals.length === 0) {
@@ -79,6 +85,17 @@
       <path class="load-chart__grid-area" [attr.d]="gridAreaPath" [style.d]="cssPath(gridAreaPath)"></path>
       <path class="load-chart__grid-line" [attr.d]="gridLinePath" [style.d]="cssPath(gridLinePath)"></path>
       <path class="load-chart__load-line" [attr.d]="loadLinePath"></path>
+      @if (compareLinePath) {
+        <path class="load-chart__compare-line" [attr.d]="compareLinePath"></path>
+      }
+      @if (compareNote) {
+        <text
+          class="load-chart__compare-text chart__halo-text"
+          [attr.x]="compareNote.x"
+          [attr.y]="compareNote.y"
+          [attr.text-anchor]="compareNote.anchor"
+        >{{ compareNote.text }}</text>
+      }
 
       <!-- Demand D -->
       @if (showDemand) {

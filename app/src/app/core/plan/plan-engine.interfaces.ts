@@ -1,4 +1,4 @@
-import { IInterval, ILpStats, IPlanRequest, IRushHourWindow, IStationAssets, ITariffSchedule } from '../models';
+import { IInterval, ILpStats, IPlanRequest, IRushHourWindow, ISiteArchetype, IStationAssets, ITariffSchedule } from '../models';
 
 export interface ILpInput {
   request: IPlanRequest;
@@ -13,6 +13,7 @@ export interface ILpInput {
   rushHourWindows: IRushHourWindow[];
   monthToDateIntervals: IInterval[];
   monthToDateLoadKw: number[];
+  site?: ISiteArchetype;
 }
 
 export interface ILpModel {
@@ -29,4 +30,19 @@ export interface ILpTerm {
 export interface IMonthToDate {
   intervals: IInterval[];
   loadKw: number[];
+}
+
+export interface IShaverComparison {
+  gridKw: number[];
+  chargeKw: number[];
+}
+
+export interface IRushPeaks {
+  baselineRushPeakKw: number;
+  plannedRushPeakKw: number;
+}
+
+export interface ISolarDay {
+  date: string;
+  sharesByHour: Map<number, number>;
 }
