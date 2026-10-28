@@ -1,6 +1,10 @@
 export const runLogSettings = {
   TIMEZONE: 'America/Denver',
-  BATCH_SOURCE: 'Cloud batch'
+  BATCH_SOURCE: 'Cloud batch',
+  SCHEDULED_HOUR: 15,
+  SCHEDULED_WINDOW_HOURS: 3,
+  SCHEDULED_LABEL: 'Ran itself at',
+  OTHER_LABEL: 'Data pulled at'
 };
 
 export const runStatusLabels: Record<Detour.Firestore.Snapshot.RunStatus, string> = {

@@ -34,7 +34,7 @@ It is a Pulse-only minimum state of charge held through rush hour for a possible
 
 ## What runs where?
 
-The cloud does the daily batch at 3 p.m.: fetch, validate, regress, forecast, replay. Your screen does the live part: the tariff maths and the LP re-solve. No upstream API is called while you use the app.
+The cloud does the daily batch at 3 p.m.: fetch, validate, fit marginal CO2 and the forecast. The airport's month replays are precomputed and served with the app; other sites re-run in your browser. Your screen does the live part: the tariff maths and the LP re-solve. No upstream API is called while you use the app.
 
 ## Is the LP running on a server?
 
@@ -66,7 +66,7 @@ Perfect hindsight saved money in every site, month and rate plan, so the hardwar
 
 ## Why is June weak and September strong?
 
-The demand charge is most of the saving. In September the airport's evening peak is tall and narrow, so a small amount of stored energy shaves a large kW. In June the peak is flatter, so the same energy shaves fewer kW, and the saving is mostly smaller energy-price differences.
+Not because June has less to win: it pays the full summer demand rate, and perfect hindsight saves $17,008 there, more than in September ($16,661). The gap is the forecast. DETOUR plans each day from the same weekday's highest load over the last four weeks, and June's peak days don't look like the four weeks before them, so the day-ahead plan misses the spike that sets the month (billed peak 1,908 kW against 1,366 kW for perfect hindsight). Given a perfect load forecast, the same planner captures 96% of June. In June the fixed-threshold battery beats DETOUR ($7,793 against $3,586), because reacting to every spike as it happens beats a plan built on the wrong day. A better site forecast is the next thing to build.
 
 ## What is Lattice?
 
@@ -88,12 +88,21 @@ It is an autonomous daily planner, not a language model. Every day at 3 p.m. the
 
 ## Why 100 stations?
 
-It is an illustrative fleet, and the screen says so: "Illustrative fleet, not Torus's installed base." One simulated site is too small to show up in PACE's load, so the fleet line scales the same plan by 100 to put the kW cut next to PACE's own forecast load at the rush peak (about 65 MW, 1.1% of the 7 p.m. forecast in the current snapshot). It is a sense of scale, not a deployment claim.
+It is an illustrative fleet, and the screen says so: "Illustrative fleet, not Torus's installed base." One simulated site is too small to show up in PACE's load, so the fleet line scales the same plan by 100 to put the kW cut next to PACE's own forecast load at the rush peak (about 59 MW, 1.0% of the 7 p.m. forecast in the current snapshot, both measured on the planning day). It is a sense of scale, not a deployment claim.
 
 ## Does DETOUR charge from solar?
 
-Not in this snapshot, and the screen doesn't claim it does. DETOUR charged while PACE was about 11% solar, against about 14% for the simple shaver. The bill and the rush window decide when Pulse charges; carbon and solar are a tie-breaker, because PACE's marginal carbon barely varies by hour here (see the carbon-dial answer above). What DETOUR does do is take far more off the rush hour: at the airport it cuts the rush-hour peak by about 646 kW, where the simple shaver cuts about 95 kW. I checked the evening rebound too: the shaver doesn't recharge into a meaningfully bigger post-rush peak than DETOUR on this day, so I don't claim a rebound win.
+Not in this snapshot, and the screen doesn't claim it does. DETOUR charged while PACE was about 11% solar, against about 14% for the fixed-threshold battery. The bill and the rush window decide when Pulse charges; carbon and solar are a tie-breaker, because PACE's marginal carbon barely varies by hour here (see the carbon-dial answer above). What DETOUR does do is take far more off the rush hour: at the airport it cuts the planning day's rush-hour peak by about 587 kW. The fixed-threshold battery cuts about 36 kW, but that is mostly its design: it only trims load above its 1,600 kW line, and the rush peak is 1,636 kW. I checked the evening rebound too: the shaver doesn't recharge into a meaningfully bigger post-rush peak than DETOUR on this day, so I don't claim a rebound win.
 
 ## Why is the cement plant's capture rate low?
 
 On Schedule 8 DETOUR reaches only 12–26% of the perfect-hindsight saving at the cement plant (it still saves about $46,700 over the ten replayed months). At the airport the figure is 21–78%. The cement plant's peak comes from crusher and raw-mill motor starts: one to three 15-minute spikes to about 4 MW, several times a day, at seeded random times on top of a flat 2.2 MW kiln load. DETOUR plans the day before on a load forecast (the same weekday's highest load over the last four weeks), so it can't know which interval a motor start will hit. Perfect hindsight knows every spike and shaves exactly the ones that set the month's peak. The live cap catches many spikes with Spin, but any one it misses resets the month's demand charge. The airport's peak is a predictable evening block, so a day-ahead plan gets much closer. Capture rate here measures how forecastable the peak is, not how good the hardware is.
+
+## What is the fixed-threshold battery?
+
+The baseline DETOUR has to beat: the same Spin and Pulse, run by one fixed rule. It discharges whenever site load goes above 80% of the site's nominal peak (1,600 kW at the airport) and recharges off-peak below that line. It reads no forecast, no prices and no carbon. The industry name is rule-based or threshold peak shaving.
+
+## How would you manage the grid's congestion?
+
+Price it. The LP carries a grid-relief term: a price per kW on the site's highest grid draw inside PACE's rush hour, set by the Grid relief dial. At $1/kW it only breaks ties: where many plans cost the customer the same, it picks the one kindest to PACE. On today's snapshot that alone takes about 235 kW more off the cement plant's rush hour for no extra cost. Raise it and you see what each extra kW of relief costs the customer: at the airport, going from $1 to $10/kW takes about 50 kW more off the rush peak for about $245 a month. Above that it stops moving, because the Wattsmart reserve is what limits it, and that is a hard constraint.
+

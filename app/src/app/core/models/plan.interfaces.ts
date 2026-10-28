@@ -8,6 +8,7 @@ export interface IPlanRequest {
   horizonDays: number;
   co2WeightPerKg: number;
   wattsmartReserveKwh: number;
+  gridReliefPerKw?: number;
   peakSoFarOnPeakKw: number;
   peakSoFarAllHoursKw: number;
   initialSpinSocKwh: number;

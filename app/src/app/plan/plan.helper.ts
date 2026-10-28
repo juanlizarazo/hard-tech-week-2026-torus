@@ -102,7 +102,8 @@ export class PlanHelper {
       scheduleId: site.scheduleId,
       peakSoFarMode: planDefaults.PEAK_SO_FAR_MODE,
       co2WeightPerKg: planDefaults.CO2_WEIGHT_PER_KG,
-      wattsmartReserveKwh: PlanHelper.defaultReserveKwh(SitesHelper.getAssets(site.id) as IStationAssets)
+      wattsmartReserveKwh: PlanHelper.defaultReserveKwh(SitesHelper.getAssets(site.id) as IStationAssets),
+      gridReliefPerKw: planDefaults.GRID_RELIEF_PER_KW
     };
   }
 
@@ -159,7 +160,8 @@ export class PlanHelper {
     return {
       ...PlanEngineHelper.defaultRequest(site, assets, PlanHelper.scheduleFor(controls.scheduleId), date),
       co2WeightPerKg: controls.co2WeightPerKg,
-      wattsmartReserveKwh: Math.min(controls.wattsmartReserveKwh, PlanHelper.maxReserveKwh(assets))
+      wattsmartReserveKwh: Math.min(controls.wattsmartReserveKwh, PlanHelper.maxReserveKwh(assets)),
+      gridReliefPerKw: controls.gridReliefPerKw
     };
   }
 
@@ -450,7 +452,7 @@ export class PlanHelper {
       ? `Billed ${isOnPeakBasis ? 'on-peak' : 'any-hour'} demand ${PlanHelper.formatNumber(value.baselinePeakKw)} → ${PlanHelper.formatNumber(value.plannedPeakKw)} kW`
       : 'No plan at these settings';
     const isSameCut = !!value && Math.abs(rushCutKw - peakCutKw) < 1;
-    const movedDetail = `${PlanHelper.formatNumber(metrics?.trafficAvoidedKwh ?? 0)} kWh moved out of ${windowLabel}, both days`;
+    const movedDetail = `${PlanHelper.formatNumber(metrics?.trafficAvoidedKwh ?? 0)} kWh moved out of ${windowLabel}`;
 
     const tiles: IPlanTile[] = [
       {

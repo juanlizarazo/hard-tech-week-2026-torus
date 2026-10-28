@@ -19,7 +19,7 @@ export class ArchitectureHelper {
         ? {
             ...stage,
             items: stage.items.map((item) =>
-              item.title === architectureLastRun.ITEM_TITLE ? { ...item, detail: `${item.detail}|Last ran ${lastRunLabel}` } : item
+              item.title === architectureLastRun.ITEM_TITLE ? { ...item, detail: `${item.detail}|Data pulled ${lastRunLabel}` } : item
             )
           }
         : stage

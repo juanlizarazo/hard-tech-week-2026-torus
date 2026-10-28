@@ -121,6 +121,12 @@ export const glossary = {
     long: 'At $0 the plan only cares about the bill. Raise it and the plan shifts more charging into low-carbon hours, even when that costs a little more.',
     whyItMatters: 'It is the dial between saving money and saving CO2.'
   },
+  GRID_RELIEF: {
+    term: 'Grid relief',
+    short: "A price per kW on the site's highest grid draw in PACE's rush hour.",
+    long: "The LP adds this price to the bill it minimizes, so it now chooses how much to take off PACE's rush hour. Where many plans cost the customer the same, even $1 picks the one kindest to the grid. Higher values show what each extra kW of relief costs the customer.",
+    whyItMatters: "It turns staying out of PACE's traffic from a side effect into a decision you can price."
+  },
   WATTSMART: {
     term: 'Wattsmart',
     short: "Rocky Mountain Power's battery program that can call on stored energy when the grid is stressed.",
@@ -176,8 +182,8 @@ export const glossary = {
     whyItMatters: 'Nothing is precomputed: the plan you see is solved live.'
   },
   SIMPLE_SHAVER: {
-    term: 'Simple shaver',
-    short: 'A baseline strategy that discharges whenever load goes above a fixed line.',
+    term: 'Fixed-threshold battery',
+    short: 'A baseline that discharges whenever load goes above a fixed line at 80% of the site nominal peak (1,600 kW at the airport).',
     long: 'It reads no prices, no forecast and no CO2. It is what a basic peak-shaving controller would do with the same Torus Station.',
     whyItMatters: 'Beating it shows the value of planning ahead, not just of owning storage.'
   },

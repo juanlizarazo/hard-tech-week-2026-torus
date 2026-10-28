@@ -346,6 +346,10 @@ export class PlanComponent {
     this._update({ wattsmartReserveKwh });
   }
 
+  public onGridReliefChange(gridReliefPerKw: number): void {
+    this._update({ gridReliefPerKw });
+  }
+
   private _update(changes: Partial<IPlanControls>): void {
     const next = { ...this.controls, ...changes };
 

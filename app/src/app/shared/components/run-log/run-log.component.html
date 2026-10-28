@@ -2,7 +2,7 @@
 <details class="dt-run-log">
   <summary class="dt-run-log__summary dt-mono">
     @if (view?.ranAt; as ranAt) {
-      <span>Ran itself at {{ ranAt }}</span>
+      <span>{{ view?.ranLabel }} {{ ranAt }}</span>
     }
     @if (solveMs() !== null) {
       <span>{{ view?.ranAt ? 'planned' : 'Planned' }} in {{ solveMs() | number: '1.0-0' }} ms</span>

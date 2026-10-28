@@ -21,7 +21,7 @@ export class ArchitectureComponent {
   public readonly stages = architectureStages;
   public readonly views$: Observable<IArchitectureView[]> = this._snapshotService.status$.pipe(
     map((status) => {
-      const ranAt = status.lastRun?.at?.toDate() ?? status.manifest?.pulledAt?.toDate() ?? null;
+      const ranAt = status.manifest?.pulledAt?.toDate() ?? null;
 
       return ArchitectureHelper.views(ArchitectureHelper.withLastRun(architectureStages, ranAt ? RunLogHelper.clock(ranAt, new Date()) : null));
     }),
