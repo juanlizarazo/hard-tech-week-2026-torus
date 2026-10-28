@@ -226,8 +226,13 @@ export class PlanHelper {
         ? `moves ${PlanHelper.formatNumber(movedKwh)} kWh out of PACE's rush hour (${windowLabel})`
         : `keeps its grid draw where it is in PACE's rush hour (${windowLabel})`;
 
+    const check = result.metrics.realized
+      ? 'Planned the day before from a forecast of the site load, then checked against the simulated day.'
+      : '';
+
     return [
       `Plan for the ${siteName}: ${relief}.`,
+      check,
       PlanHelper.peakSentence(controls, result.metrics.value, date),
       PlanHelper.flywheelSentence(result, assets),
       PlanHelper.co2Sentence(controls, result)
