@@ -7,7 +7,7 @@ import { ActivatedRouteSnapshot, PreloadAllModules, TitleStrategy, provideRouter
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
 import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { initializeFirestore, persistentLocalCache, provideFirestore } from '@angular/fire/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, provideFirestore } from '@angular/fire/firestore';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { connectFunctionsEmulator, getFunctions, provideFunctions } from '@angular/fire/functions';
 import { routes } from './app.routes';
@@ -43,7 +43,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     provideHttpClient(),
     provideFirebaseApp(() => initializeApp(firebaseConfig)),
-    provideFirestore(() => initializeFirestore(getApp(), { localCache: persistentLocalCache() })),
+    provideFirestore(() => initializeFirestore(getApp(), { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) })),
     provideAuth(() => getAuth()),
     provideFunctions(() => {
       const functions = getFunctions();
