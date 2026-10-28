@@ -49,7 +49,7 @@ import {
   LoadChartComponent,
   LpTextComponent
 } from './components';
-import { IAssetRow, IPlanControls, IPlanDeltaState, IPlanHook, IPlanTryChip, IPlanViewModel, IPlanDateContext, IPlanSiteCard, IPlanSolveState, IPlanTile } from './plan.interfaces';
+import { IAssetRow, IPlanControls, IPlanDeltaState, IPlanHook, IPlanViewModel, IPlanDateContext, IPlanSiteCard, IPlanSolveState, IPlanTile } from './plan.interfaces';
 import { PeakSoFarMode, PlanDateMode, PlanSolverRailState } from './plan.types';
 import { PlanHelper } from './plan.helper';
 import { planBaseline, planDefaults, planDeltaSettings } from './plan.constants';
@@ -114,26 +114,13 @@ export class PlanComponent {
     this._snapshotService.manifest$
   );
 
-  private readonly _julyPeakDate$: Observable<string> = this._snapshotService
-    .getGridMonth(planBaseline.MONTH)
-    .pipe(
-      map((gridMonth) => PlanHelper.julyPeakDate(gridMonth)),
-      catchError(() => of(planDefaults.JULY_PEAK_FALLBACK_DATE as string))
-    );
-
-  public readonly dates$: Observable<Record<PlanDateMode, string>> = combineLatest([
-    this._snapshotService.manifest$,
-    this._julyPeakDate$
-  ]).pipe(
-    map(([manifest, julyPeakDate]) => ({
-      target: manifest?.targetDate ?? planDefaults.JULY_PEAK_FALLBACK_DATE,
-      'july-peak': julyPeakDate
-    })),
+  public readonly dates$: Observable<Record<PlanDateMode, string>> = this._snapshotService.manifest$.pipe(
+    map((manifest) => ({ target: manifest?.targetDate ?? planDefaults.JULY_PEAK_FALLBACK_DATE })),
     shareReplay(1)
   );
 
-  public readonly hook$: Observable<IPlanHook> = combineLatest([this.dates$, this._controls$]).pipe(
-    map(([dates, controls]) => PlanHelper.buildHook(dates[controls.dateMode])),
+  public readonly hook$: Observable<IPlanHook> = this.dates$.pipe(
+    map((dates) => PlanHelper.buildHook(dates.target)),
     distinctUntilChanged((previous, current) => previous.subtitle === current.subtitle)
   );
 
@@ -164,7 +151,6 @@ export class PlanComponent {
     shareReplay(1)
   );
 
-  public readonly tryChips: IPlanTryChip[] = PlanDeltaHelper.chips();
 
   public readonly sheet$: Observable<IDispatchSheet | null> = this.solve$.pipe(
     filter(
@@ -206,20 +192,6 @@ export class PlanComponent {
 
   public siteShortName(site: ISiteArchetype): string {
     return PlanHelper.siteShortName(site);
-  }
-
-  public isChipActive(chip: IPlanTryChip): boolean {
-    return PlanDeltaHelper.chipIsActive(chip, this.controls, this.maxReserveKwh);
-  }
-
-  public onTryChip(chip: IPlanTryChip): void {
-    if (chip.changes.siteId) {
-      this.onSiteChange(chip.changes.siteId);
-
-      return;
-    }
-
-    this._update(PlanDeltaHelper.chipChanges(chip, this.maxReserveKwh));
   }
 
   public onResetDials(): void {
@@ -308,10 +280,6 @@ export class PlanComponent {
     const viewModel = solve?.viewModel ?? null;
 
     return PlanHelper.dayPhrase(viewModel?.controls.dateMode ?? null, planningDayWord ?? 'tomorrow', viewModel?.dateLabel ?? '');
-  }
-
-  public onDateModeChange(dateMode: PlanDateMode): void {
-    this._update({ dateMode });
   }
 
   public onScheduleChange(scheduleId: TariffScheduleId): void {

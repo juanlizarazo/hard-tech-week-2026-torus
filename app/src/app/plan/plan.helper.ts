@@ -278,7 +278,7 @@ export class PlanHelper {
   }
 
   public static dayPhrase(dateMode: PlanDateMode | null, planningDayWord: string, dateLabel: string): string {
-    return dateMode === 'july-peak' ? `on ${dateLabel}` : planningDayWord;
+    return planningDayWord;
   }
 
   private static co2Sentence(controls: IPlanControls, result: IPlanResult): string {

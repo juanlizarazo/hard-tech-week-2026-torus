@@ -44,7 +44,7 @@ Move the CO2 weight. Say:
 
 > Watch the plan re-solve. Because PACE's carbon signal barely varies in this snapshot, this dial nudges the result; the tariff peak and rush-hour constraints do most of the work.
 
-Click “Hold 1,000 kWh for Wattsmart” or move the reserve slider. Say:
+Move the Wattsmart reserve slider. Say:
 
 > More reserve protects a future grid call, but leaves less energy available for today's bill. That is the operational trade Torus hardware makes visible.
 

@@ -121,20 +121,6 @@
               <hr class="plan__dials-rule" />
 
               <div class="plan__dial">
-                <span class="plan__dial-label" id="dial-day">Day</span>
-                <mat-button-toggle-group
-                  class="plan__toggle"
-                  [value]="controls.dateMode"
-                  (change)="onDateModeChange($event.value)"
-                  aria-labelledby="dial-day"
-                  hideSingleSelectionIndicator
-                >
-                  <mat-button-toggle value="target">{{ (day$ | async)?.name }}</mat-button-toggle>
-                  <mat-button-toggle value="july-peak">July's peak day</mat-button-toggle>
-                </mat-button-toggle-group>
-              </div>
-
-              <div class="plan__dial">
                 <span class="plan__dial-label" id="dial-tariff">Rate plan</span>
                 <mat-button-toggle-group
                   class="plan__toggle"
@@ -233,6 +219,40 @@
                 <p class="plan__stale" role="status">No feasible plan at these settings. The dispatch orders below are the last plan that solved.</p>
               }
 
+              @if (solve.viewModel; as viewModel) {
+                @let deltaState = deltas$ | async;
+                @let deltas = deltaState?.deltas ?? {};
+                @if (deltaState?.isUnchanged) {
+                  <p class="plan__unchanged" role="status">Same plan as the last solve: at these settings nothing in the figures moved.</p>
+                }
+                <div class="plan__result" [class.plan__body--solving]="solve.status === 'solving'">
+                    <div class="dt-figures plan__figures">
+                      @for (tile of leadTiles(viewModel.tiles); track tile.id + tile.value) {
+                        <dt-figure class="plan__figure" [class.plan__figure--changed]="!!deltas[tile.id]" [value]="tile.value" [label]="tile.label" [detail]="tile.detail" [tone]="tile.tone">
+                          @if (deltas[tile.id]; as delta) {
+                            <span figure-delta class="plan__delta" role="status">{{ delta.text }}</span>
+                          }
+                          @if (tile.source) {
+                            <dt-source-chip figure-source [label]="tile.source"></dt-source-chip>
+                          }
+                        </dt-figure>
+                      }
+                    </div>
+                    <div class="dt-figures dt-figures--secondary plan__figures plan__figures--secondary">
+                      @for (tile of secondaryTiles(viewModel.tiles); track tile.id + tile.value) {
+                        <dt-figure class="plan__figure" [class.plan__figure--changed]="!!deltas[tile.id]" [value]="tile.value" [label]="tile.label" [detail]="tile.detail" [tone]="tile.tone" size="small">
+                          @if (deltas[tile.id]; as delta) {
+                            <span figure-delta class="plan__delta" role="status">{{ delta.text }}</span>
+                          }
+                          @if (tile.source) {
+                            <dt-source-chip figure-source [label]="tile.source"></dt-source-chip>
+                          }
+                        </dt-figure>
+                      }
+                    </div>
+                </div>
+              }
+
               <!-- dispatch orders run sheet -->
               <section class="plan__orders" aria-labelledby="plan-orders-title">
                 <header class="plan__orders-head">
@@ -291,7 +311,7 @@
                     }
                     <button type="button" class="plan__csv-link" (click)="onDownloadCsv(sheet)">Download schedule (CSV)</button>
                     <dt-next-stop
-                      variant="inline"
+                      [variant]="isApproved(sheet) ? 'hero' : 'inline'"
                       path="/backtest"
                       sign="REC"
                       label="Next · Record"
@@ -316,57 +336,8 @@
                 }
               </section>
 
-              <section class="plan__try" aria-labelledby="plan-try-title">
-                <h2 class="plan__try-title" id="plan-try-title">Try this</h2>
-                <ul class="plan__try-list">
-                  @for (chip of tryChips; track chip.id) {
-                    <li class="plan__try-item">
-                      <button
-                        type="button"
-                        class="plan__try-chip"
-                        [attr.aria-pressed]="isChipActive(chip)"
-                        [attr.aria-describedby]="'plan-try-' + chip.id"
-                        (click)="onTryChip(chip)"
-                      >
-                        {{ chip.label }}
-                      </button>
-                      <span class="plan__try-effect" [id]="'plan-try-' + chip.id">{{ chip.effect }}</span>
-                    </li>
-                  }
-                </ul>
-              </section>
-
               @if (solve.viewModel; as viewModel) {
-                @let deltaState = deltas$ | async;
-                @let deltas = deltaState?.deltas ?? {};
-                @if (deltaState?.isUnchanged) {
-                  <p class="plan__unchanged" role="status">Same plan as the last solve: at these settings nothing in the figures moved.</p>
-                }
                 <div class="plan__body" [class.plan__body--solving]="solve.status === 'solving'">
-                  <div class="dt-figures plan__figures">
-                    @for (tile of leadTiles(viewModel.tiles); track tile.id + tile.value) {
-                      <dt-figure class="plan__figure" [class.plan__figure--changed]="!!deltas[tile.id]" [value]="tile.value" [label]="tile.label" [detail]="tile.detail" [tone]="tile.tone">
-                        @if (deltas[tile.id]; as delta) {
-                          <span figure-delta class="plan__delta" role="status">{{ delta.text }}</span>
-                        }
-                        @if (tile.source) {
-                          <dt-source-chip figure-source [label]="tile.source"></dt-source-chip>
-                        }
-                      </dt-figure>
-                    }
-                  </div>
-                  <div class="dt-figures dt-figures--secondary plan__figures plan__figures--secondary">
-                    @for (tile of secondaryTiles(viewModel.tiles); track tile.id + tile.value) {
-                      <dt-figure class="plan__figure" [class.plan__figure--changed]="!!deltas[tile.id]" [value]="tile.value" [label]="tile.label" [detail]="tile.detail" [tone]="tile.tone" size="small">
-                        @if (deltas[tile.id]; as delta) {
-                          <span figure-delta class="plan__delta" role="status">{{ delta.text }}</span>
-                        }
-                        @if (tile.source) {
-                          <dt-source-chip figure-source [label]="tile.source"></dt-source-chip>
-                        }
-                      </dt-figure>
-                    }
-                  </div>
                   @if (viewModel.lpStatsLine) {
                     <p class="dt-hint plan__lp-stats">{{ viewModel.lpStatsLine }} <dt-term key="LP_SIZE">What do these mean?</dt-term></p>
                   }
