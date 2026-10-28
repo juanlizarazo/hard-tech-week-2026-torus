@@ -1,0 +1,26 @@
+<button
+  type="button"
+  class="dt-index-tag"
+  [class.dt-index-tag--tag]="variant === 'tag'"
+  [class.dt-tag]="variant === 'tag'"
+  [class.dt-tag--ink]="variant === 'tag'"
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
+  #trigger
+  [attr.aria-describedby]="descriptionId"
+  (mouseenter)="show()"
+  (mouseleave)="hideSoon()"
+  (click)="isOpen ? hide() : show()"
+  (keydown.escape)="hide()"
+>{{ index }}</button><span class="cdk-visually-hidden" [id]="descriptionId">{{ description }}</span>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="isOpen"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayFlexibleDimensions]="false"
+  [cdkConnectedOverlayPush]="true"
+>
+  <div class="dt-index-tag__popover" role="tooltip" [id]="popoverId" (mouseenter)="cancelHide()" (mouseleave)="hideSoon()" (keydown.escape)="hide()">{{ description }}</div>
+</ng-template>

@@ -17,9 +17,12 @@
   @if (state$ | async; as state) {
     @switch (state.status) {
       @case ('loading') {
-        <div class="dt-state" role="status">
-          <mat-spinner diameter="24"></mat-spinner>
-          <span>Reading PACE grid data and loading the solver…</span>
+        <div class="plan__layout plan__reserve">
+          <div class="plan__reserve-rack dt-state" aria-hidden="true"></div>
+          <div class="plan__reserve-workspace dt-state" role="status">
+            <mat-spinner diameter="24"></mat-spinner>
+            <span>Reading PACE grid data and loading the solver…</span>
+          </div>
         </div>
       }
       @case ('error') {
@@ -217,7 +220,7 @@
               <!-- dispatch orders run sheet -->
               <section class="plan__orders" aria-labelledby="plan-orders-title">
                 <header class="plan__orders-head">
-                  <span class="dt-tag dt-tag--ink">D0</span>
+                  <dt-index-tag index="D0" variant="tag"></dt-index-tag>
                   <h2 class="plan__orders-title" id="plan-orders-title">
                     @if (!sheet || sheet.isTargetDay) {
                       {{ (day$ | async)?.possessive ?? "Tomorrow's" }} dispatch orders
@@ -406,7 +409,7 @@
                       Base rates only, <dt-term key="RIDERS">riders</dt-term> excluded. The
                       <dt-term key="FACILITIES_CHARGE">facilities charge</dt-term> bills the highest draw in any hour.
                     </p>
-                    <p class="dt-hint plan__monthly-note">Why the monthly figure can be larger than July's: it assumes this two-day peak repeats for a full month; July's proof uses the peak that actually occurred across the month.</p>
+                    <p class="dt-hint plan__monthly-note">Why the monthly figure can be larger than July's: it assumes this two-day peak repeats for a full month; The proof uses the peak that actually occurred across the month.</p>
                     <div class="dt-table-wrap">
                       <table class="dt-table plan__bill">
                         <thead>
@@ -475,7 +478,7 @@
                 </div>
               }
             }
-            <dt-next-stop path="/backtest" sign="3" label="Next stop · Prove" title="July's proof: would it have paid off?"></dt-next-stop>
+            <dt-next-stop path="/backtest" sign="3" label="Next stop · Prove" title="The proof: would it have paid off?"></dt-next-stop>
           </div>
         </div>
       }

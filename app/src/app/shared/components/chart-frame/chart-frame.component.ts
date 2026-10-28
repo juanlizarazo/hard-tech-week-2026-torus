@@ -1,11 +1,12 @@
 import { Component, Input, TemplateRef, ViewChild, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { siteArchetypes } from '@app/core/sites/sites.constants';
+import { IndexTagComponent } from '../index-tag/index-tag.component';
 import { SidePanelService } from '../side-panel/side-panel.service';
 
 @Component({
   selector: 'dt-chart-frame',
-  imports: [MatIconModule],
+  imports: [MatIconModule, IndexTagComponent],
   templateUrl: './chart-frame.component.html',
   styleUrl: './chart-frame.component.scss'
 })

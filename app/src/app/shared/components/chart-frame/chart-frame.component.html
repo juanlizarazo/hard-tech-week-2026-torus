@@ -3,7 +3,7 @@
     <div class="dt-chart-frame__titles">
       <div class="dt-chart-frame__title-row">
         @if (index) {
-          <span class="dt-chart-frame__index" aria-hidden="true">{{ index }}</span>
+          <dt-index-tag [index]="index"></dt-index-tag>
         }
         <h3 class="dt-chart-frame__title">{{ title }}</h3>
         @if (hasHowToRead) {

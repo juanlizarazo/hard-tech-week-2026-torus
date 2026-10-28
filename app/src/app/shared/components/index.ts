@@ -7,6 +7,7 @@ export * from './side-panel/side-panel.component';
 export * from './side-panel/side-panel.service';
 export * from './term/term.component';
 export * from './chart-frame/chart-frame.component';
+export * from './index-tag/index-tag.component';
 export * from './figure/figure.component';
 export * from './source-chip/source-chip.component';
 export * from './under-the-hood/under-the-hood.component';

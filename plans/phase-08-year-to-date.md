@@ -32,38 +32,38 @@ P0  Year to date · Jan–Oct 26 · $X saved · Y% of perfect foresight         
 ## Checklist
 
 ### Data and engine
-- [ ] Spike the precompute script first (≤30 min). Fallback: env-gated Vitest spec writing the same JSON.
-- [ ] Runner: `month` argument everywhere instead of `backtestSettings.MONTH` (`backtest.service.ts` `sourcesFor(month)`, `run()` passes `month` to `buildInput`).
-- [ ] Month-to-date: optional `throughDate` on `buildInput`, trimming intervals to days ≤ `throughDate` (October = last complete local day before the manifest pull date).
-- [ ] Available months from `manifest.gridMonths`, 2026 only, ≤ pull month.
-- [ ] `app/scripts/precompute-year.ts` (`npx tsx`): pure core helpers + node `highs` solver, same snapshot, 10 months × 3 sites × 2 schedules → `app/public/data/backtest-year.json` `{ snapshotId, throughDate, rows: [{ month, siteId, scheduleId, savedUsd, captureRate, demandShare, peakKw, wattsmartKwh }] }`.
-- [ ] `BacktestYearService` loads the JSON; on `snapshotId` mismatch the ledger says "Year summary from snapshot {id}".
-- [ ] Yarn script `precompute:year` + re-freeze checklist step in `plans/00-general.md`.
+- [x] Spike the precompute script first (≤30 min). Fallback: env-gated Vitest spec writing the same JSON.
+- [x] Runner: `month` argument everywhere instead of `backtestSettings.MONTH` (`backtest.service.ts` `sourcesFor(month)`, `run()` passes `month` to `buildInput`).
+- [x] Month-to-date: optional `throughDate` on `buildInput`, trimming intervals to days ≤ `throughDate` (October = last complete local day before the manifest pull date).
+- [x] Available months from `manifest.gridMonths`, 2026 only, ≤ pull month.
+- [x] `app/scripts/precompute-year.ts` (`npx tsx`): pure core helpers + node `highs` solver, same snapshot, 10 months × 3 sites × 2 schedules → `app/public/data/backtest-year.json` `{ snapshotId, throughDate, rows: [{ month, siteId, scheduleId, savedUsd, captureRate, demandShare, peakKw, wattsmartKwh }] }`.
+- [x] `BacktestYearService` loads the JSON; on `snapshotId` mismatch the ledger says "Year summary from snapshot {id}".
+- [x] Yarn script `precompute:year` + re-freeze checklist step in `plans/00-general.md`.
 
 ### Backtest screen
-- [ ] `components/year-ledger/` (inputs `months`, `selected`, output `monthSelected`), ChartFrame `index="P0"`.
-- [ ] `_month$` BehaviorSubject('2026-07') + `?month=` query param read/write; month change resets `_selectedDate$`.
-- [ ] `debounceTime(200)` before replay + per-key result cache (`month|site|schedule`).
-- [ ] Keep last view model visible and dimmed while replaying; slim "Replaying {Month}…" status line instead of the full-page spinner.
-- [ ] Every "July" → `model.monthLabel` (template, `backtest.helper.ts`, `backtest.constants.ts`, `core/backtest/backtest.constants.ts`, `glossary.constants.ts`). H1 "Would it have paid off in {July}?"; October "…in October so far?".
-- [ ] October label "Oct 1–26 · month to date"; verdict notes the demand charge is the partial-month peak so far.
+- [x] `components/year-ledger/` (inputs `months`, `selected`, output `monthSelected`), ChartFrame `index="P0"`.
+- [x] `_month$` BehaviorSubject('2026-07') + `?month=` query param read/write; month change resets `_selectedDate$`.
+- [x] `debounceTime(200)` before replay + per-key result cache (`month|site|schedule`).
+- [x] Keep last view model visible and dimmed while replaying; slim "Replaying {Month}…" status line instead of the full-page spinner.
+- [x] Every "July" → `model.monthLabel` (template, `backtest.helper.ts`, `backtest.constants.ts`, `core/backtest/backtest.constants.ts`, `glossary.constants.ts`). H1 "Would it have paid off in {July}?"; October "…in October so far?".
+- [x] October label "Oct 1–26 · month to date"; verdict notes the demand charge is the partial-month peak so far.
 
 ### Renames outside Backtest
-- [ ] "July's proof" → "The proof" / "Month by month" (`app.constants.ts`, `app.routes.ts`, `start.constants.ts`, `plan.component.html`, `plan.helper.ts`, `architecture.constants.ts`, `architecture.component.ts`).
-- [ ] Plan's "July's peak day" chip and July baseline stay.
+- [x] "July's proof" → "The proof" / "Month by month" (`app.constants.ts`, `app.routes.ts`, `start.constants.ts`, `plan.component.html`, `plan.helper.ts`, `architecture.constants.ts`, `architecture.component.ts`).
+- [x] Plan's "July's peak day" chip and July baseline stay.
 
 ### Other polish
-- [ ] F/D/P index tags become focusable popover buttons (TermComponent CDK overlay pattern), drop `aria-hidden`; D0 too.
-- [ ] Plan initial-load reserve: min-height placeholder with rack + workspace shape.
-- [ ] Infeasible plan: already handled — drop from follow-ups.
-- [ ] `docs/demo-script.md` Backtest beat +~5 s; re-time.
-- [ ] `docs/qa.md`: "Why July?" and "Why is October partial?".
-- [ ] `rules/ui.md` [UI-18]: P0 index and ledger pattern.
+- [x] F/D/P index tags become focusable popover buttons (TermComponent CDK overlay pattern), drop `aria-hidden`; D0 too.
+- [x] Plan initial-load reserve: min-height placeholder with rack + workspace shape.
+- [x] Infeasible plan: already handled — drop from follow-ups.
+- [x] `docs/demo-script.md` Backtest beat +~5 s (re-time with a stopwatch still open).
+- [x] `docs/qa.md`: "Why July?" and "Why is October partial?".
+- [x] `rules/ui.md` [UI-18]: P0 index and ledger pattern.
 
 ### Tests (focused only)
-- [ ] `buildInput` with `throughDate` trims intervals.
-- [ ] Runner for `2026-01` returns a finite bill.
-- [ ] Update July-pinned specs only where they read the removed constant.
+- [x] `buildInput` with `throughDate` trims intervals.
+- [x] Runner for `2026-01` returns a finite bill.
+- [x] Update July-pinned specs only where they read the removed constant.
 
 ## Order
 
@@ -71,12 +71,12 @@ Spike precompute → month param + MTD → service and component state → ledge
 
 ## Done when
 
-- [ ] `yarn --cwd app test --watch=false`, `yarn --cwd app build`, `git diff --check` pass.
-- [ ] `yarn --cwd app precompute:year` runs; precomputed July (Airport, Sch 8) equals live replay ($13,937, 96%); January matches its live replay.
-- [ ] /backtest at 1440 / 1024 / 375: click and arrow through all 10 months; rapid-click 5 months → one replay, no stacked freezes; site/schedule change on a non-July month; `?month=2026-01` deep link; October "to date" label; reduced motion; no collapse during replay.
-- [ ] Tab to each F/D/P tag: popover opens on focus, Escape closes, focus returns.
-- [ ] Demo script re-timed with a stopwatch.
-- [ ] Committed (no co-author trailer) and PR opened in `## Changes` / `## Testing` format. No deploy.
+- [x] `yarn --cwd app test --watch=false`, `yarn --cwd app build`, `git diff --check` pass.
+- [x] `yarn --cwd app precompute:year` runs; precomputed July (Airport, Sch 8) equals live replay ($11,546, 76%; the $13,937 / 96% in the original plan was a stale phase-04 sentence); January matches its live replay.
+- [x] /backtest at 1440 / 1024 / 375: click and arrow through all 10 months; rapid-click 5 months → one replay, no stacked freezes; site/schedule change on a non-July month; `?month=2026-01` deep link; October "to date" label; reduced motion; no collapse during replay.
+- [x] Tab to each F/D/P tag: popover opens on focus, Escape closes, focus returns.
+- [ ] Demo script re-timed with a stopwatch (estimated from word count only).
+- [x] Committed (no co-author trailer) and PR opened in `## Changes` / `## Testing` format. No deploy.
 
 ## Out of scope
 

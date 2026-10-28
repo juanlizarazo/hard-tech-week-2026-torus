@@ -1,7 +1,8 @@
 import { IProvenance } from '../models';
 
 export const backtestSettings = {
-  MONTH: '2026-07',
+  DEFAULT_MONTH: '2026-07',
+  YEAR: '2026',
   DEFAULT_SITE_ID: 'airport',
   NAIVE_TARGET_FRACTION: 0.8,
   WATTSMART_RESERVE_FRACTION: 0.25,
@@ -52,6 +53,6 @@ export const backtestProvenance: Record<
     label: 'Perfect hindsight: one LP over the whole month with the real load',
     kind: 'derived',
     url: '',
-    note: 'Knows every interval of July in advance and minimizes only the bill. No real controller can match it; capture rate is measured against it.',
+    note: 'Knows every interval of the month in advance and minimizes only the bill. No real controller can match it; capture rate is measured against it.',
   },
 };

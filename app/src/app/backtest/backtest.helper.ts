@@ -40,11 +40,14 @@ export class BacktestHelper {
       secondaryTiles: tiles.slice(4),
       comparisonRows: BacktestHelper.comparisonRows(result),
       valueNotice: BacktestHelper.valueNotice(result),
-      monthLabel: backtestScreenSettings.MONTH_LABEL,
+      monthLabel: BacktestHelper.monthLabel(result.summary.month, result.summary.throughDate),
+      monthName: BacktestHelper.monthName(result.summary.month),
+      monthPhrase: BacktestHelper.monthPhrase(result.summary.month, result.summary.throughDate),
+      isPartialMonth: result.summary.throughDate !== null,
       peakLabel: BacktestHelper.peakLabel(result.baseline),
       calendarNotice: BacktestHelper.calendarNotice(result),
       componentNotice: BacktestHelper.componentNotice(result),
-      cyclesNotice: BacktestHelper.cyclesNotice(cycleRows),
+      cyclesNotice: BacktestHelper.cyclesNotice(cycleRows, BacktestHelper.monthName(result.summary.month)),
       dayNotice: BacktestHelper.dayNotice(result, activeDate),
       calendarCells,
       calendarScale,
@@ -81,7 +84,7 @@ export class BacktestHelper {
     const leadName = BacktestHelper.strategyName(lead);
 
     if (total <= 0) {
-      return `Not this time: planning one day ahead on a load forecast, ${leadName} did not lower the July bill on a simulated ${megawatts} ${scheduleName} ${siteNoun}. ${BacktestHelper.co2Clause(result)}`;
+      return `Not this time: planning one day ahead on a load forecast, ${leadName} did not lower the ${BacktestHelper.monthName(result.summary.month)} bill${result.summary.throughDate ? ' so far' : ''} on a simulated ${megawatts} ${scheduleName} ${siteNoun}. ${BacktestHelper.co2Clause(result)}`;
     }
 
     const demandClause = BacktestHelper.demandClause(lead.savings);
@@ -90,7 +93,31 @@ export class BacktestHelper {
       capture === null ? '' : `, ${BacktestHelper.formatNumber(capture * 100)}% of the ${backtestStrategyNames.oracle.toLowerCase()} optimum`;
     const leadSentence = `${BacktestHelper.formatMoney(total)} saved on a simulated ${megawatts} ${scheduleName} ${siteNoun}, ${demandClause}${captureText}, with ${BacktestHelper.formatNumber(lead.wattsmart.minimumHeldKwh)} kWh held for Wattsmart.`;
 
-    return [leadSentence, BacktestHelper.shaverClause(result), BacktestHelper.co2Clause(result)].filter(Boolean).join(' ');
+    return [leadSentence, BacktestHelper.partialClause(result), BacktestHelper.shaverClause(result), BacktestHelper.co2Clause(result)]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  public static partialClause(result: IBacktestResult): string {
+    return result.summary.throughDate
+      ? `Month to date: the demand charge is the peak so far, through ${BacktestHelper.formatDay(result.summary.throughDate)}.`
+      : '';
+  }
+
+  public static monthName(month: string): string {
+    return longMonthNames[Number(month.slice(5, 7)) - 1];
+  }
+
+  public static monthPhrase(month: string, throughDate: string | null): string {
+    return throughDate ? `${BacktestHelper.monthName(month)} so far` : BacktestHelper.monthName(month);
+  }
+
+  public static monthLabel(month: string, throughDate: string | null): string {
+    if (throughDate) {
+      return `${monthNames[Number(month.slice(5, 7)) - 1]} 1–${Number(throughDate.slice(8, 10))} · month to date`;
+    }
+
+    return `${BacktestHelper.monthName(month)} ${month.slice(0, 4)}`;
   }
 
   public static demandClause(savings: IComponentSavings): string {
@@ -160,7 +187,7 @@ export class BacktestHelper {
     return [
       {
         id: 'saved',
-        label: 'Saved in July',
+        label: `Saved in ${BacktestHelper.monthPhrase(result.summary.month, result.summary.throughDate)}`,
         value: BacktestHelper.formatMoney(total),
         hint: `${backtestStrategyNames.baseline} ${BacktestHelper.formatMoney(result.baseline.bill.total)}, ${leadName} ${BacktestHelper.formatMoney(lead.bill.total)}. Base rates, riders excluded.`,
         tone: total > 0 ? 'good' : 'neutral',
@@ -350,14 +377,14 @@ export class BacktestHelper {
     return `On the demand line ${leadName} saves ${ratio.toFixed(1)}× what the ${backtestStrategyNames.heuristic.toLowerCase()} does with the same machines.`;
   }
 
-  public static cyclesNotice(rows: IBacktestCycleRow[]): string {
+  public static cyclesNotice(rows: IBacktestCycleRow[], monthName: string): string {
     const maxPercent = Math.max(0, ...rows.flatMap((row: IBacktestCycleRow) => [row.pulsePercentOfLife, row.spinPercentOfLife]));
 
     if (maxPercent < 1) {
-      return `Small is good: July used under 1% of either machine's life in every strategy (at most ${maxPercent.toFixed(2)}%).`;
+      return `Small is good: ${monthName} used under 1% of either machine's life in every strategy (at most ${maxPercent.toFixed(2)}%).`;
     }
 
-    return `July used up to ${maxPercent.toFixed(1)}% of a machine's rated life. Lower is better.`;
+    return `${monthName} used up to ${maxPercent.toFixed(1)}% of a machine's rated life. Lower is better.`;
   }
 
   public static dayNotice(result: IBacktestResult, localDate: string): string {

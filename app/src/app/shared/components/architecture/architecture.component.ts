@@ -18,5 +18,5 @@ export class ArchitectureComponent {
     { id: 'narrow', layout: ArchitectureHelper.narrow(architectureStages) }
   ];
   public readonly summary =
-    'Pipeline: free public data from EIA-930, CAISO OASIS, Open-Meteo, Rocky Mountain Power tariffs and EIA-860 flows into the refreshSnapshot Cloud Function every day at 3 p.m. Mountain, which validates and publishes a Firestore snapshot. Your browser reads that snapshot and runs the tariff engine, marginal CO2 regression, ridge forecast, site generator, LP with HiGHS and the July replay, which feed the four screens.';
+    'Pipeline: free public data from EIA-930, CAISO OASIS, Open-Meteo, Rocky Mountain Power tariffs and EIA-860 flows into the refreshSnapshot Cloud Function every day at 3 p.m. Mountain, which validates and publishes a Firestore snapshot. Your browser reads that snapshot and runs the tariff engine, marginal CO2 regression, ridge forecast, site generator, LP with HiGHS and the month-by-month replay, which feed the four screens.';
 }

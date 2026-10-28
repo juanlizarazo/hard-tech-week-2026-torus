@@ -179,6 +179,7 @@ export class BacktestMetricsHelper {
     return {
       summary: {
         month: input.month,
+        throughDate: input.throughDate,
         siteId: input.site.id,
         siteName: input.site.name,
         nominalPeakKw: input.site.nominalPeakKw,

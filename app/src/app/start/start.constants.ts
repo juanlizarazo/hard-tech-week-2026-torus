@@ -36,10 +36,10 @@ export const startSteps: IStartStep[] = [
     step: '3',
     code: '03',
     stage: 'Prove',
-    title: "July's proof",
-    question: 'Would it have paid off last July?',
+    title: 'The proof',
+    question: 'Would it have paid off, month by month?',
     description: 'A month replayed day by day against a simple shaver and perfect hindsight.',
-    linkLabel: "See July's proof",
+    linkLabel: 'See the proof',
     isPrimary: false
   }
 ];

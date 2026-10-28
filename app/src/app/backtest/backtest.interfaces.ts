@@ -49,6 +49,7 @@ export interface IBacktestViewState {
   status: BacktestViewStatus;
   result: IBacktestResult | null;
   errorMessage: string;
+  isReplaying: boolean;
 }
 
 export interface IBacktestTile {
@@ -144,6 +145,9 @@ export interface IBacktestViewModel {
   comparisonRows: IBacktestComparisonRow[];
   valueNotice: string;
   monthLabel: string;
+  monthName: string;
+  monthPhrase: string;
+  isPartialMonth: boolean;
   peakLabel: string;
   calendarNotice: string;
   componentNotice: string;
@@ -165,6 +169,18 @@ export interface IBacktestViewModel {
 export interface IBacktestScreenModel {
   state: IBacktestViewState;
   model: IBacktestViewModel | null;
+  isReplaying: boolean;
+  replayingLabel: string;
+}
+
+export interface IBacktestHeading {
+  question: string;
+  monthLabel: string;
+}
+
+export interface IYearLedgerScreen {
+  ledger: IYearLedger;
+  selected: string;
 }
 
 export interface IBacktestScheduleOption {
@@ -177,4 +193,26 @@ export interface IBacktestBillComponentDefinition {
   label: string;
   match: (id: string) => boolean;
   pick: (entry: IBacktestStrategyResult) => number;
+}
+
+export interface IYearLedgerMonth {
+  month: string;
+  shortLabel: string;
+  initialLabel: string;
+  valueLabel: string;
+  savedFraction: number;
+  ceilingFraction: number;
+  hasData: boolean;
+  isSummer: boolean;
+  isPartial: boolean;
+  ariaLabel: string;
+}
+
+export interface IYearLedger {
+  months: IYearLedgerMonth[];
+  title: string;
+  summary: string;
+  summerRange: [number, number] | null;
+  partialLabel: string;
+  note: string;
 }
