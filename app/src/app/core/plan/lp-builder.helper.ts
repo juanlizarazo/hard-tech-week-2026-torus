@@ -20,6 +20,8 @@ export class LpBuilderHelper {
     const rampLimitKw = pulse.rampLimitKwPerStep;
     const hasRampRows = rampLimitKw < 2 * pulse.powerKw;
     const hasReserve = request.wattsmartReserveKwh > 0;
+    const gridReliefRate = request.gridReliefPerKw ?? 0;
+    const hasRelief = gridReliefRate > 0 && input.rushHourMask.some((isRush: boolean) => isRush);
     const lines: string[] = [];
 
     lines.push(
@@ -31,7 +33,9 @@ export class LpBuilderHelper {
       '\\ HiGHS finds the cheapest schedule that breaks no rule. Paste this file into any LP solver to check it.',
       '\\ SIMULATED Torus Station, seed 42. No device is connected.',
       '',
-      '\\ Objective: energy price + lambda * marginal CO2 + demand + facilities + degradation',
+      hasRelief
+        ? '\\ Objective: energy price + lambda * marginal CO2 + demand + facilities + grid relief + degradation'
+        : '\\ Objective: energy price + lambda * marginal CO2 + demand + facilities + degradation',
       'Minimize',
     );
 
@@ -44,6 +48,10 @@ export class LpBuilderHelper {
 
     objectiveTerms.push({ coefficient: demandRate, variable: 'D' });
     objectiveTerms.push({ coefficient: schedule.facilitiesRatePerKw, variable: 'Df' });
+
+    if (hasRelief) {
+      objectiveTerms.push({ coefficient: gridReliefRate, variable: 'R' });
+    }
 
     for (let t = 0; t < intervalCount; t++) {
       objectiveTerms.push({ coefficient: pulse.degradationCostPerKwh * stepHours, variable: `pd_${t}` });
@@ -169,6 +177,28 @@ export class LpBuilderHelper {
       );
     }
 
+    if (hasRelief) {
+      lines.push('', `\\ Grid relief: R >= grid in PACE's rush hour, priced at ${LpBuilderHelper.formatNumber(gridReliefRate)} $/kW`);
+
+      for (let t = 0; t < intervalCount; t++) {
+        if (!input.rushHourMask[t]) {
+          continue;
+        }
+
+        lines.push(
+          ...LpBuilderHelper.formatRow(
+            `rush_${t}`,
+            [
+              { coefficient: 1, variable: 'R' },
+              { coefficient: -1, variable: `g_${t}` },
+            ],
+            '>=',
+            0,
+          ),
+        );
+      }
+    }
+
     lines.push('', `\\ Wattsmart reserve: Pulse energy above its floor >= ${LpBuilderHelper.formatNumber(request.wattsmartReserveKwh)} kWh in rush hour`);
 
     for (let t = 0; t < intervalCount && hasReserve; t++) {
@@ -226,6 +256,12 @@ export class LpBuilderHelper {
     }
 
     columnNames.push('D', 'Df');
+
+    if (hasRelief) {
+      lines.push(' 0 <= R <= +inf');
+      columnNames.push('R');
+    }
+
     lines.push('', 'End', '');
 
     return {

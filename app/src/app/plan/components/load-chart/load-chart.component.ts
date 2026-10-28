@@ -17,7 +17,7 @@ export class LoadChartComponent extends ResponsiveChartDirective implements OnCh
   @Input() public demandKw = 0;
   @Input() public demandLabel = '';
   @Input() public compareKw: number[] = [];
-  @Input() public compareName = 'Simple shaver';
+  @Input() public compareName = 'Fixed-threshold battery';
 
   public readonly colors = chartColors;
   public viewHeight = 300;

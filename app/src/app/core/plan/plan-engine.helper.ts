@@ -223,11 +223,14 @@ export class PlanEngineHelper {
       pulseThroughputKwh += planInterval.pulseDischargeKw * stepHours;
 
       if (input.rushHourMask[t]) {
+        minimumHeldKwh = Math.min(minimumHeldKwh, planInterval.pulseSocKwh - pulseFloorKwh);
+      }
+
+      if (input.rushHourMask[t] && input.intervals[t].localDate === input.request.date) {
         baselineRushHourKwh += input.loadKw[t] * stepHours;
         plannedRushHourKwh += planInterval.gridKw * stepHours;
         rushPeaks.baselineRushPeakKw = Math.max(rushPeaks.baselineRushPeakKw, input.loadKw[t]);
         rushPeaks.plannedRushPeakKw = Math.max(rushPeaks.plannedRushPeakKw, planInterval.gridKw);
-        minimumHeldKwh = Math.min(minimumHeldKwh, planInterval.pulseSocKwh - pulseFloorKwh);
       }
     }
 

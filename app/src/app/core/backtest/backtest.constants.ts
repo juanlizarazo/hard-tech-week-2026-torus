@@ -21,10 +21,10 @@ export const backtestProvenance: Record<
 > = {
   NAIVE_TARGET: {
     id: 'backtest-naive-target',
-    label: 'Simple shaver: discharges above 80% of the site nominal peak',
+    label: 'Fixed-threshold battery: discharges above 80% of the site nominal peak',
     kind: 'assumption',
     url: '',
-    note: 'A fixed threshold. The simple shaver does not adapt to prices or forecasts.',
+    note: 'A fixed threshold. The fixed-threshold battery does not adapt to prices or forecasts.',
   },
   WATTSMART_RESERVE: {
     id: 'backtest-wattsmart-reserve',

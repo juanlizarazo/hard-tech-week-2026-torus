@@ -19,7 +19,7 @@ export const backtestScreenSettings = {
 
 export const backtestStrategyNames: Record<BacktestStrategyRole, string> = {
   baseline: 'No storage',
-  heuristic: 'Simple shaver',
+  heuristic: 'Fixed-threshold battery',
   realistic: 'DETOUR',
   'perfect-load': 'DETOUR with a perfect load forecast',
   oracle: 'Perfect hindsight',

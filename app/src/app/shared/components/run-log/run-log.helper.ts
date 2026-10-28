@@ -11,6 +11,12 @@ export class RunLogHelper {
     minute: '2-digit'
   });
 
+  private static readonly _hourFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: runLogSettings.TIMEZONE,
+    hour: 'numeric',
+    hourCycle: 'h23'
+  });
+
   private static readonly _weekdayFormatter = new Intl.DateTimeFormat('en-US', {
     timeZone: runLogSettings.TIMEZONE,
     weekday: 'short'
@@ -26,7 +32,6 @@ export class RunLogHelper {
     const pulledAt = RunLogHelper.dateOf(manifest.pulledAt);
     const weatherPulledAt = RunLogHelper.dateOf(manifest.weatherPulledAt);
     const derivedAt = derived?.derivedAt ? new Date(derived.derivedAt) : null;
-    const ranAt = RunLogHelper.dateOf(status.lastRun?.at) ?? pulledAt;
     const isRunForThisSnapshot = !!status.lastRun && (!status.lastRun.snapshotId || status.lastRun.snapshotId === manifest.id);
     const filteredRows = manifest.filteredRows ?? null;
     const rows: (IRunLogRow | null)[] = [
@@ -45,13 +50,20 @@ export class RunLogHelper {
     ];
 
     return {
-      ranAt: ranAt ? RunLogHelper.clock(ranAt, now) : null,
+      ranAt: pulledAt ? RunLogHelper.clock(pulledAt, now) : null,
+      ranLabel: pulledAt && RunLogHelper.isScheduledWindow(pulledAt) ? runLogSettings.SCHEDULED_LABEL : runLogSettings.OTHER_LABEL,
       rows: rows.filter((row): row is IRunLogRow => row !== null)
     };
   }
 
   public static empty(): IRunLogView {
-    return { ranAt: null, rows: [] };
+    return { ranAt: null, ranLabel: runLogSettings.OTHER_LABEL, rows: [] };
+  }
+
+  public static isScheduledWindow(instant: Date): boolean {
+    const hour = Number(RunLogHelper._hourFormatter.format(instant));
+
+    return hour >= runLogSettings.SCHEDULED_HOUR && hour < runLogSettings.SCHEDULED_HOUR + runLogSettings.SCHEDULED_WINDOW_HOURS;
   }
 
   public static clock(instant: Date, now: Date): string {

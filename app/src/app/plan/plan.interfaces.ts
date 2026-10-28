@@ -33,6 +33,7 @@ export interface IPlanControls {
   peakSoFarMode: PeakSoFarMode;
   co2WeightPerKg: number;
   wattsmartReserveKwh: number;
+  gridReliefPerKw: number;
 }
 
 export interface IPlanDateContext {

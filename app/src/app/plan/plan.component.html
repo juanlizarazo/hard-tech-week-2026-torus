@@ -118,6 +118,29 @@
                 <span class="plan__dial-hint">Modeled reserve held in Pulse through the load-forecast rush; this is not a forecast or confirmation of a Wattsmart call.</span>
               </div>
 
+              <div class="plan__dial">
+                <div class="plan__dial-label plan__dial-label--value">
+                  <dt-term key="GRID_RELIEF">Grid relief</dt-term>
+                  <strong class="dt-num plan__dial-value">${{ controls.gridReliefPerKw | number: '1.1-1' }}/kW</strong>
+                </div>
+                <mat-slider
+                  class="plan__slider"
+                  [min]="0"
+                  [max]="defaults.GRID_RELIEF_MAX_PER_KW"
+                  [step]="defaults.GRID_RELIEF_STEP_PER_KW"
+                  discrete
+                >
+                  <input
+                    id="grid-relief"
+                    aria-label="Grid relief"
+                    matSliderThumb
+                    [value]="controls.gridReliefPerKw"
+                    (valueChange)="onGridReliefChange($event)"
+                  />
+                </mat-slider>
+                <span class="plan__dial-hint">What one kW off PACE's rush-hour peak is worth to the plan. $0 leaves rush hour to the bill; higher trades customer savings for grid relief.</span>
+              </div>
+
               <hr class="plan__dials-rule" />
 
               <div class="plan__dial">
@@ -420,7 +443,7 @@
                         <li><strong>Green area:</strong> the planned grid draw with the Torus Station working. Where green is below black, the station is feeding the site.</li>
                         <li><strong>Dashed line:</strong> the billed demand the plan holds. One 15-minute interval above it would raise the whole month's demand charge.</li>
                         <li><strong>Orange stripes:</strong> rush hour.</li>
-                        <li><strong>Faint dashed line:</strong> a simple shaver with the same station. It trims anything above a fixed line and refills whenever the bill allows, without reading PACE's forecast.</li>
+                        <li><strong>Faint dashed line:</strong> a fixed-threshold battery with the same station. It trims anything above a fixed line at 80% of the site's nominal peak and refills whenever the bill allows, without reading PACE's forecast.</li>
                       </ul>
                       <p class="dt-hint">Good looks like a flat green top at the dashed line and a dip inside the stripes. Green above black outside rush hour is the station recharging.</p>
                     </div>

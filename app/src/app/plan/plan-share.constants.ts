@@ -3,6 +3,7 @@ export const planShareParams = {
   RATE: 'rate',
   CO2: 'co2',
   RESERVE: 'reserve',
+  RELIEF: 'relief',
   PEAK: 'peak',
   DAY: 'day',
   SNAPSHOT: 'snap',

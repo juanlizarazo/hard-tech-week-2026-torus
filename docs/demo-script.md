@@ -26,7 +26,7 @@ Point out the rush-hour band, the price trough and evening ramp, then the carbon
 
 Show the forecast comparison figures and say:
 
-> I beat PACE's own day-ahead forecast by the margin shown here, so the plan starts from a better forecast than the utility's own.
+> My forecast beats PACE's own day-ahead forecast by the margin shown here. The plan still takes its rush window from PACE's forecast, because that is the utility's own view of when it is jammed.
 
 Then add one line on carbon: marginal and average CO2 rank tomorrow's hours differently, and marginal is the one a shift actually changes.
 
@@ -50,9 +50,9 @@ Move the Wattsmart reserve slider. Say:
 
 Point at D0, tomorrow's route, and read it top to bottom. Say:
 
-> This is tomorrow's route: a handful of timed turns, each with its reason. Charge in the price trough, cap the grid through the on-peak window, discharge through rush hour, and arrive with 646 kW off PACE's rush hour and 800 kWh still held for Wattsmart.
+> This is tomorrow's route: a handful of timed turns, each with its reason. Charge in the price trough, cap the grid through the on-peak window, discharge through rush hour, and arrive with 587 kW off PACE's rush hour and 800 kWh still held for Wattsmart.
 
-Read the numbers off the Arrive row; they change when the snapshot re-freezes. If asked whether it runs itself, open the run log in the solver rail ("Ran itself at …"): each cloud step has its real timestamp, and the last row is the re-solve in this browser.
+Read the numbers off the Arrive row; they change when the snapshot re-freezes. If asked whether it runs itself, open the run log in the solver rail: each cloud step has its real timestamp, and the last row is the re-solve in this browser. The summary says "Ran itself at" only when the data was pulled in the 3 p.m. window; otherwise it says "Data pulled at".
 
 Press Approve and queue for Lattice. Say:
 
@@ -72,7 +72,7 @@ Skip Under the hood unless a judge asks.
 
 Open Record. Say:
 
-> This is the honest backtest: a simple shaver, DETOUR planning one day ahead, and perfect hindsight as the ceiling. The capture rate is how much of that ceiling DETOUR reaches.
+> This is the honest backtest: a fixed-threshold battery that discharges whenever load passes 80% of the site's peak, DETOUR planning one day ahead, and perfect hindsight as the ceiling. The capture rate is how much of that ceiling DETOUR reaches.
 
 Read the lead sentence on the screen aloud:
 
@@ -80,7 +80,7 @@ Read the lead sentence on the screen aloud:
 
 Point to the year ledger at the top, which is the lead, then the calendar and the peak note:
 
-> Same engine, every month: best is September at $13,000 and 78%, weakest is June at about 21%, and here's why: summer shoulder months have a smaller demand charge to shave. Winter runs 63 to 69%, so about two-thirds. October is the month to date.
+> Same engine, every month: best is September at $13,000 and 78%, weakest is June at about 21%, and here's why: June's peak days are hard to forecast from the last four weeks, so the day-ahead plan misses the spike that sets the month. With a perfect load forecast the same planner captures 96%. January to March run 63 to 69%; April and May are weaker, at 35% and 24%. October is the month to date.
 
 Then click July in the ledger and say:
 
@@ -90,7 +90,7 @@ Then click July in the ledger and say:
 
 Return to Start here and open How DETOUR works. Say two steps and the record, then:
 
-> DETOUR plans every Torus station for tomorrow's rush hour. At this site it takes 646 kW off PACE's peak (the simple shaver takes 95) and still saves the customer $12,437 a month if that day sets the month's peak. Every simulated number is labeled; every public input has a source.
+> DETOUR plans every Torus station for tomorrow's rush hour. At this site it takes 587 kW off PACE's peak and still saves the customer $12,437 a month at October's $14.90 demand rate, if those two days set the month's peak. Every simulated number is labeled; every public input has a source.
 
 Read the kW and dollar figures off Decide on the day; they are today's airport, Schedule 8 defaults and move when the snapshot re-freezes.
 

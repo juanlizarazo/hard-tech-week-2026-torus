@@ -29,13 +29,20 @@ export class PlanShareHelper {
       planDefaults.RESERVE_STEP_KWH
     );
 
+    const gridReliefPerKw = PlanShareHelper.steppedNumber(
+      params.get(planShareParams.RELIEF),
+      planDefaults.GRID_RELIEF_MAX_PER_KW,
+      planDefaults.GRID_RELIEF_STEP_PER_KW
+    );
+
     return {
       siteId,
       dateMode: PlanShareHelper.oneOf(params.get(planShareParams.DAY), dateModes) ?? defaults.dateMode,
       scheduleId,
       peakSoFarMode: PlanShareHelper.oneOf(params.get(planShareParams.PEAK), peakSoFarModes) ?? defaults.peakSoFarMode,
       co2WeightPerKg: co2WeightPerKg ?? defaults.co2WeightPerKg,
-      wattsmartReserveKwh: wattsmartReserveKwh ?? PlanHelper.defaultReserveKwh(assets)
+      wattsmartReserveKwh: wattsmartReserveKwh ?? PlanHelper.defaultReserveKwh(assets),
+      gridReliefPerKw: gridReliefPerKw ?? defaults.gridReliefPerKw
     };
   }
 
@@ -49,6 +56,7 @@ export class PlanShareHelper {
       [planShareParams.RATE]: controls.scheduleId,
       [planShareParams.CO2]: Number(controls.co2WeightPerKg.toFixed(2)),
       [planShareParams.RESERVE]: Math.round(controls.wattsmartReserveKwh),
+      [planShareParams.RELIEF]: Number(controls.gridReliefPerKw.toFixed(1)),
       [planShareParams.PEAK]: controls.peakSoFarMode,
       [planShareParams.DAY]: controls.dateMode,
       [planShareParams.SNAPSHOT]: snapshotId ?? undefined,

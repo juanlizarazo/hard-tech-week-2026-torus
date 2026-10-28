@@ -14,7 +14,7 @@ export class NaiveShaverHelper {
 
   public static readonly naiveShaver: IBacktestStrategy = {
     id: 'naive-shaver',
-    label: 'Simple shaver',
+    label: 'Fixed-threshold battery',
     description:
       'Discharges Spin first and then Pulse whenever the site load is above 80% of its nominal peak, and recharges off-peak under that line. It does not read prices or forecasts.',
     role: 'heuristic',

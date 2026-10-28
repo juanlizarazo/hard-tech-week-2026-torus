@@ -6,5 +6,6 @@ export interface IRunLogRow {
 
 export interface IRunLogView {
   ranAt: string | null;
+  ranLabel: string;
   rows: IRunLogRow[];
 }
