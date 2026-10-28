@@ -243,6 +243,8 @@ export class PlanEngineHelper {
     const wattsmartHeldKwh = input.request.wattsmartReserveKwh > 0 ? rushHourPulseMinKwh : 0;
     const shaver = PlanEngineHelper.shaverComparison(input);
     const reboundMask = PlanEngineHelper.reboundMask(input.intervals, input.rushHourWindows[0]);
+    const realized = PlanEngineHelper.realized(input, intervals);
+    const plannedValue = PlanEngineHelper.planValue(input, gridKw, plannedCo2Kg - baselineCo2Kg);
     const metrics: IPlanMetrics = {
       baselineCo2Kg,
       plannedCo2Kg,
@@ -265,9 +267,16 @@ export class PlanEngineHelper {
       spinThroughputKwh,
       pulseThroughputKwh,
       objectiveValue,
-      value: PlanEngineHelper.planValue(input, gridKw, plannedCo2Kg - baselineCo2Kg),
-      realized: PlanEngineHelper.realized(input, intervals),
+      value: realized ? PlanEngineHelper.withRealizedPeaks(plannedValue, realized.value) : plannedValue,
+      realized,
     };
+
+    if (realized) {
+      metrics.baselineRushPeakKw = realized.baselineRushPeakKw;
+      metrics.plannedRushPeakKw = realized.realizedRushPeakKw;
+      metrics.rushPeakCutKw = realized.rushPeakCutKw;
+      metrics.trafficAvoidedKwh = realized.rushKwhMoved;
+    }
 
     return {
       request: input.request,
@@ -312,7 +321,7 @@ export class PlanEngineHelper {
         pulseNetKw: input.request.initialPulseNetKw ?? 0,
         billedPeakKw: billedFloorKw,
         billedLoadPeakKw: billedFloorKw,
-        facilitiesPeakKw: input.request.peakSoFarAllHoursKw,
+        facilitiesPeakKw: Math.max(input.request.peakSoFarAllHoursKw, ...dayIndexes.map((t: number) => planned[t].gridKw)),
         facilitiesLoadPeakKw: input.request.peakSoFarAllHoursKw,
       },
     });
@@ -320,13 +329,31 @@ export class PlanEngineHelper {
     const baselinePeakKw = PlanEngineHelper.maskedPeak(dayLoadKw, billedMask);
     const realizedPeakKw = PlanEngineHelper.maskedPeak(replayedKw, billedMask);
     const forecastKw = dayIndexes.map((t: number) => input.loadKw[t]);
+    const baselineRushPeakKw = PlanEngineHelper.maskedPeak(dayLoadKw, rushHourMask);
+    const realizedRushPeakKw = PlanEngineHelper.maskedPeak(replayedKw, rushHourMask);
+    const stepHours = input.intervals[0]?.hours ?? 0.25;
+    const rushKwhMoved = rushHourMask.reduce(
+      (sum: number, isRush: boolean, i: number) => (isRush ? sum + (dayLoadKw[i] - replayedKw[i]) * stepHours : sum),
+      0,
+    );
+    const dayInput: ILpInput = {
+      ...input,
+      intervals: dayIndexes.map((t: number) => input.intervals[t]),
+      loadKw: dayLoadKw,
+      onPeakMask: dayIndexes.map((t: number) => input.onPeakMask[t]),
+      energyPricePerKwh: dayIndexes.map((t: number) => input.energyPricePerKwh[t]),
+    };
 
     return {
-      rushPeakCutKw: Math.max(0, PlanEngineHelper.maskedPeak(dayLoadKw, rushHourMask) - PlanEngineHelper.maskedPeak(replayedKw, rushHourMask)),
+      rushPeakCutKw: Math.max(0, baselineRushPeakKw - realizedRushPeakKw),
       peakCutKw: Math.max(0, Math.max(baselinePeakKw, billedFloorKw) - Math.max(realizedPeakKw, billedFloorKw)),
       baselinePeakKw,
       realizedPeakKw,
       forecastErrorPeakKw: Math.max(...dayLoadKw) - Math.max(...forecastKw),
+      baselineRushPeakKw,
+      realizedRushPeakKw,
+      rushKwhMoved,
+      value: PlanEngineHelper.planValue(dayInput, replayedKw, 0),
     };
   }
 
@@ -499,6 +526,21 @@ export class PlanEngineHelper {
     }
 
     return count;
+  }
+
+  public static withRealizedPeaks(planned: IPlanValue, realized: IPlanValue): IPlanValue {
+    return {
+      ...planned,
+      baselinePeakKw: realized.baselinePeakKw,
+      plannedPeakKw: realized.plannedPeakKw,
+      peakCutKw: realized.peakCutKw,
+      baselineFacilitiesKw: realized.baselineFacilitiesKw,
+      plannedFacilitiesKw: realized.plannedFacilitiesKw,
+      facilitiesCutKw: realized.facilitiesCutKw,
+      demandWorthPerMonth: realized.demandWorthPerMonth,
+      facilitiesWorthPerMonth: realized.facilitiesWorthPerMonth,
+      worthPerMonth: realized.worthPerMonth,
+    };
   }
 
   public static planValue(input: ILpInput, gridKw: number[], co2ChangeKg: number): IPlanValue {

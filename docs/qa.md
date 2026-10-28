@@ -88,11 +88,11 @@ It is an autonomous daily planner, not a language model. Every day at 3 p.m. the
 
 ## Why 100 stations?
 
-It is an illustrative fleet, and the screen says so: "Illustrative fleet, not Torus's installed base." One simulated site is too small to show up in PACE's load, so the fleet line scales the same plan by 100 to put the kW cut next to PACE's own forecast load at the rush peak (about 59 MW, 1.0% of the 7 p.m. forecast in the current snapshot, both measured on the planning day). It is a sense of scale, not a deployment claim.
+It is an illustrative fleet, and the screen says so: "Illustrative fleet, not Torus's installed base." One simulated site is too small to show up in PACE's load, so the fleet line scales the same plan by 100 to put the kW cut next to PACE's own forecast load at the rush peak (about 53 MW, 0.9% of the 7 p.m. forecast in the current snapshot, both measured on the planning day). It is a sense of scale, not a deployment claim.
 
 ## Does DETOUR charge from solar?
 
-Not in this snapshot, and the screen doesn't claim it does. DETOUR charged while PACE was about 11% solar, against about 14% for the fixed-threshold battery. The bill and the rush window decide when Pulse charges; carbon and solar are a tie-breaker, because PACE's marginal carbon barely varies by hour here (see the carbon-dial answer above). What DETOUR does do is take far more off the rush hour: at the airport it cuts the planning day's rush-hour peak by about 587 kW. The fixed-threshold battery cuts about 36 kW, but that is mostly its design: it only trims load above its 1,600 kW line, and the rush peak is 1,636 kW. I checked the evening rebound too: the shaver doesn't recharge into a meaningfully bigger post-rush peak than DETOUR on this day, so I don't claim a rebound win.
+Not in this snapshot, and the screen doesn't claim it does. DETOUR charged while PACE was about 11% solar, against about 14% for the fixed-threshold battery. The bill and the rush window decide when Pulse charges; carbon and solar are a tie-breaker, because PACE's marginal carbon barely varies by hour here (see the carbon-dial answer above). What DETOUR does do is take far more off the rush hour: at the airport it cuts the planning day's rush-hour peak by about 531 kW, planned from a forecast and checked against the simulated day. The fixed-threshold battery barely touches the rush peak, but that is mostly its design: it only trims load above its 1,600 kW line, and the rush peak is 1,636 kW. I checked the evening rebound too: the shaver doesn't recharge into a meaningfully bigger post-rush peak than DETOUR on this day, so I don't claim a rebound win.
 
 ## Why is the cement plant's capture rate low?
 
@@ -104,5 +104,9 @@ The baseline DETOUR has to beat: the same Spin and Pulse, run by one fixed rule.
 
 ## How would you manage the grid's congestion?
 
-Price it. The LP carries a grid-relief term: a price per kW on the site's highest grid draw inside PACE's rush hour, set by the Grid relief dial. At $1/kW it only breaks ties: where many plans cost the customer the same, it picks the one kindest to PACE. On today's snapshot that alone takes about 235 kW more off the cement plant's rush hour for no extra cost. Raise it and you see what each extra kW of relief costs the customer: at the airport, going from $1 to $10/kW takes about 50 kW more off the rush peak for about $245 a month. Above that it stops moving, because the Wattsmart reserve is what limits it, and that is a hard constraint.
+Price it. The LP carries a grid-relief term: a price per kW on the site's highest grid draw inside PACE's rush hour, set by the Grid relief dial. At $1/kW it only breaks ties: where many plans cost the customer the same, it picks the one kindest to PACE. Raise it and the plan holds more back for the evening: at the cement plant, $5/kW takes about 37 kW more off the rush peak on the simulated day. At the airport it adds only about 7 kW, because the Wattsmart reserve (a hard constraint) and the forecast's error are what limit it, not the price. That is the honest answer: past a point, relieving the grid more needs a smaller reserve or a better forecast, not a bigger incentive.
+
+## Does the plan know tomorrow's load?
+
+No. Decide plans the day before from a forecast of the site load: each 15 minutes, the highest load on the same weekday over the last four weeks of the simulated site. The headline figures (kW off rush hour, billed peak, worth per month) are then checked against the simulated day, with the same live cap Record uses. On the current snapshot the forecast overshoots the airport's peak by about 320 kW; with the day known in advance, the same plan would take 587 kW off instead of 531. Record uses the same forecast for every day of 2026.
 
