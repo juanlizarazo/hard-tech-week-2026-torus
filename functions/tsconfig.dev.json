@@ -6,7 +6,13 @@
   },
   "include": [
     "src",
-    "lib/firestore/index.d.ts"
+    "../app/src/app/core",
+    "../app/src/types"
   ],
-  "exclude": []
+  "exclude": [
+    "../app/src/app/core/**/*.spec.ts",
+    "../app/src/app/core/services/**",
+    "../app/src/app/core/plan/plan-solver.service.ts",
+    "../app/src/app/core/index.ts"
+  ]
 }

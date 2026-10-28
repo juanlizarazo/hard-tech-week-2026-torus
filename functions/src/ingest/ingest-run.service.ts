@@ -1,4 +1,5 @@
 import { Timestamp } from 'firebase-admin/firestore';
+import { DeriveSignalsService } from '../derive/derive-signals.service';
 import { IngestFetchService } from './ingest-fetch.service';
 import { IngestStoreService } from './ingest-store.service';
 import { gridHourFlags, ingestConstants, weatherPoints } from './ingest-snapshot.constants';
@@ -184,6 +185,12 @@ export class IngestRunService {
 
       await storeService.writeSnapshot(result);
       log.info(`Snapshot ${manifest.id} written`);
+
+      try {
+        await storeService.writeDerived(manifest.id, DeriveSignalsService.build(manifest, result.gridMonths, result.weatherMonths));
+      } catch (deriveError) {
+        log.warn(`Derived signals for ${manifest.id} failed; snapshot kept`, deriveError);
+      }
 
       if (!validation.isValid) {
         const message = `Rejected: ${validation.reasons.join('; ')}`;

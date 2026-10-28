@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync } from 'fs';
 import { DocumentReference, FieldValue, Firestore, Timestamp } from 'firebase-admin/firestore';
+import { IDerivedSignals } from '../../../app/src/app/core/models/derived.interfaces';
 import { ingestConstants } from './ingest-snapshot.constants';
 import { IngestSnapshotHelper } from './ingest-snapshot.helper';
 import { IIngestResult } from './ingest-snapshot.interfaces';
@@ -86,6 +87,25 @@ export class IngestStoreService {
     }
 
     await snapshotReference.set(result.manifest);
+  }
+
+  public async readMonths<T>(snapshotId: string, collectionName: 'gridMonths' | 'priceMonths' | 'weatherMonths'): Promise<T[]> {
+    const monthsSnapshot = await this._firestore.collection('snapshots').doc(snapshotId).collection(collectionName).get();
+
+    return monthsSnapshot.docs.map((document) => document.data() as T);
+  }
+
+  public async writeDerived(snapshotId: string, derived: IDerivedSignals): Promise<number> {
+    const byteSize = Buffer.byteLength(JSON.stringify(derived));
+
+    if (byteSize >= ingestConstants.DERIVED_MAX_BYTES) {
+      throw new Error(`Derived signals are ${byteSize} bytes; the limit is ${ingestConstants.DERIVED_MAX_BYTES}`);
+    }
+
+    await this._firestore.collection('snapshots').doc(snapshotId).collection('derived').doc('signals').set(derived);
+    console.log(`Derived signals for ${snapshotId} written: ${byteSize} bytes`);
+
+    return byteSize;
   }
 
   public async flipPointer(snapshotId: string, lastRun: Detour.Firestore.Snapshot.ILastRun): Promise<void> {

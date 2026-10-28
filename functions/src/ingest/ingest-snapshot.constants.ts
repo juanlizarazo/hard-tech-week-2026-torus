@@ -29,6 +29,7 @@ export const ingestConstants = {
   MONTH_SIZE_WARNING_BYTES: 900 * 1024,
   FIRESTORE_DOCUMENT_LIMIT_BYTES: 1024 * 1024,
   LAST_GOOD_SNAPSHOT_LIMIT: 5,
+  DERIVED_MAX_BYTES: 900_000,
   MIN_GRID_ROW_RATIO: 0.95,
   DEFAULT_OUTPUT_DIRECTORY: `${scratchDirectory}/ingest-dry`,
   CACHE_DIRECTORY: `${scratchDirectory}/ingest-cache`,

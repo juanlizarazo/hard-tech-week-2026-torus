@@ -60,7 +60,7 @@ export class StartComponent implements OnInit, OnDestroy {
 
   public readonly state$: Observable<IStartViewState> = combineLatest([
     this._snapshotService.manifest$,
-    this._gridSignalsService.history$,
+    this._gridSignalsService.recentHistory$,
     this._gridSignalsService.targetPriceHours$,
     this._gridSignalsService.marginalEmissions$
   ]).pipe(

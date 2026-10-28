@@ -1,8 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, doc, getDoc } from '@angular/fire/firestore';
-import { Observable, combineLatest, defer, finalize, from, map, shareReplay, switchMap, tap } from 'rxjs';
+import { Observable, catchError, combineLatest, defer, finalize, from, map, of, shareReplay, switchMap, tap, timeout } from 'rxjs';
+import { IDerivedSignals } from '../models';
 import { LoadingService } from './loading.service';
 import { ISnapshotResolution, ISnapshotStatus } from './snapshot.interfaces';
+
+const derivedReadTimeoutMs = 3000;
 
 @Injectable({ providedIn: 'root' })
 export class SnapshotService {
@@ -31,6 +34,25 @@ export class SnapshotService {
 
   public readonly manifest$: Observable<Detour.Firestore.Snapshot.IManifest | null> = this._resolution$.pipe(
     map((resolution) => resolution.manifest),
+    shareReplay(1)
+  );
+
+  public readonly derived$: Observable<IDerivedSignals | null> = this.manifest$.pipe(
+    switchMap((manifest) => {
+      if (!manifest) {
+        return of(null);
+      }
+
+      return from(getDoc(doc(this._firestore, `snapshots/${manifest.id}/derived/signals`))).pipe(
+        timeout({ first: derivedReadTimeoutMs }),
+        map((snapshot) => (snapshot.exists() ? (snapshot.data() as IDerivedSignals) : null)),
+        catchError((error: unknown) => {
+          console.error('Failed to load derived signals, computing locally', error);
+
+          return of(null);
+        })
+      );
+    }),
     shareReplay(1)
   );
 

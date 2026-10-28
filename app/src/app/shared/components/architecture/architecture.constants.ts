@@ -17,36 +17,39 @@ export const architectureStages: IArchitectureStage[] = [
     id: 'cloud',
     title: 'Every day at 3 p.m. MT',
     tone: 'cloud',
-    items: [{ title: 'refreshSnapshot', detail: 'Cloud Function|Validate, then publish' }]
+    items: [
+      { title: 'refreshSnapshot', detail: 'Fetch, validate, publish' },
+      { title: 'deriveSignals', detail: 'Marginal CO2, forecast, score' }
+    ]
   },
   {
     id: 'store',
     title: 'Stored',
     tone: 'store',
-    items: [{ title: 'Firestore snapshot', detail: 'Frozen for judging|Pull time on every screen' }]
+    items: [
+      { title: 'Firestore snapshot', detail: 'Rows and derived signals' },
+      { title: 'Hosting', detail: 'Month replays, pinned' }
+    ]
   },
   {
     id: 'browser',
-    title: 'In your browser',
+    title: 'Live on your screen',
     tone: 'browser',
     items: [
       { title: 'Tariff engine', detail: 'Bills every 15 minutes' },
-      { title: 'MEF regression', detail: 'Marginal CO2 by hour' },
-      { title: 'Ridge forecast', detail: 'PACE load with P10–P90' },
       { title: 'Site generator', detail: 'Simulated loads, seed 42' },
-      { title: 'LP text + HiGHS WASM', detail: 'The plan, solved live' },
-      { title: 'Month replay', detail: 'Day by day, real-time cap' }
+      { title: 'LP text + HiGHS WASM', detail: 'The plan, solved live' }
     ]
   },
   {
     id: 'screens',
-    title: 'Start and three steps',
+    title: 'Start, two steps, the record',
     tone: 'screen',
     items: [
       { title: 'Start here', detail: 'Three clocks' },
       { title: '1 Forecast', detail: 'When is it jammed?' },
       { title: '2 Decide', detail: 'What should it do?' },
-      { title: '3 Prove', detail: 'Would it have paid off?' }
+      { title: 'Record', detail: 'Did it pay off?' }
     ]
   }
 ];
@@ -57,8 +60,8 @@ export const architectureWideLayout = {
   TITLE_Y: 20,
   STAGE_GAP: 44,
   COLUMN_WIDTHS: [176, 160, 160, 196, 176],
-  ITEM_HEIGHTS: [50, 96, 96, 44, 56],
-  ITEM_GAPS: [12, 0, 0, 8, 14]
+  ITEM_HEIGHTS: [50, 56, 56, 56, 56],
+  ITEM_GAPS: [12, 14, 14, 14, 14]
 };
 
 export const architectureNarrowLayout = {

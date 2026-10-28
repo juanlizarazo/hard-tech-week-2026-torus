@@ -10,7 +10,18 @@ export class LoadForecastService {
   private readonly _snapshotService = inject(SnapshotService);
   private readonly _gridSignalsService = inject(GridSignalsService);
 
-  public readonly forecast$: Observable<ILoadForecast | null> = this._snapshotService.manifest$.pipe(
+  public readonly forecast$: Observable<ILoadForecast | null> = this._snapshotService.derived$.pipe(
+    switchMap((derived) => {
+      if (derived && derived.loadForecast) {
+        return of(derived.loadForecast);
+      }
+
+      return this._localForecast$;
+    }),
+    shareReplay(1),
+  );
+
+  private readonly _localForecast$: Observable<ILoadForecast | null> = this._snapshotService.manifest$.pipe(
     switchMap((manifest) => {
       if (!manifest || !manifest.weatherMonths || manifest.weatherMonths.length === 0) {
         return of(null);
