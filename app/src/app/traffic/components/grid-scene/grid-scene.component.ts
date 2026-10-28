@@ -31,6 +31,16 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   @Output() public readonly failed = new EventEmitter<void>();
 
+  private readonly _pointerTarget = { x: 0, y: 0 };
+  private readonly _pointerTilt = { x: 0, y: 0 };
+  private readonly _onPointerMove = (event: PointerEvent): void => {
+    this._pointerTarget.x = (event.clientX / window.innerWidth) * 2 - 1;
+    this._pointerTarget.y = (event.clientY / window.innerHeight) * 2 - 1;
+  };
+  private readonly _onPointerLeave = (): void => {
+    this._pointerTarget.x = 0;
+    this._pointerTarget.y = 0;
+  };
   private _modules: IDeckModules | null = null;
   private _deck: Deck<MapView> | null = null;
   private _palette!: IScenePalette;
@@ -42,6 +52,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
   private _cores: ISceneDot[] = [];
   private _wires: ISceneWire[] = [];
   private _edges: ISceneEdge[] = [];
+  private _edgeSegments: ISceneWire[] = [];
   private _staticLayers: Layer[] = [];
   private _isStaticDirty = true;
   private _isDataDirty = true;
@@ -80,6 +91,8 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
     cancelAnimationFrame(this._frameId);
     this._resizeObserver?.disconnect();
     this._intersectionObserver?.disconnect();
+    window.removeEventListener('pointermove', this._onPointerMove);
+    document.documentElement.removeEventListener('pointerleave', this._onPointerLeave);
     this._deck?.finalize();
     this._deck = null;
   }
@@ -105,6 +118,12 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
         onError: () => this._fail()
       });
       this._observe();
+
+      if (this.home && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        window.addEventListener('pointermove', this._onPointerMove, { passive: true });
+        document.documentElement.addEventListener('pointerleave', this._onPointerLeave);
+      }
+
       this._frameId = requestAnimationFrame((time) => this._tick(time));
     } catch (error) {
       console.error('The 3D grid scene could not start', error);
@@ -204,9 +223,13 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       GridSceneHelper.beam(particle, t, this._clock, relative, color, dots, cores);
     }
 
+    const edgeSegments: ISceneWire[] = [];
+
     for (const edge of this._edges) {
-      GridSceneHelper.edgeComet(edge, this._clock, this._palette.lineStrong, dots, cores);
+      GridSceneHelper.edgeComet(edge, this._clock, gridSceneSettings.EDGE_COLOR, edgeSegments);
     }
+
+    this._edgeSegments = edgeSegments;
 
     this._dots = dots;
     this._cores = cores;
@@ -234,7 +257,16 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     const sway = this.drift ? gridSceneSettings.DRIFT_DEGREES * Math.sin((2 * Math.PI * time) / 1000 / gridSceneSettings.DRIFT_PERIOD_S) : 0;
 
-    return { ...this._fit, pitch: gridSceneSettings.PITCH, bearing: gridSceneSettings.BEARING + sway };
+    const { PARALLAX_EASE, PARALLAX_BEARING, PARALLAX_PITCH } = gridSceneSettings;
+
+    this._pointerTilt.x += (this._pointerTarget.x - this._pointerTilt.x) * PARALLAX_EASE;
+    this._pointerTilt.y += (this._pointerTarget.y - this._pointerTilt.y) * PARALLAX_EASE;
+
+    return {
+      ...this._fit,
+      pitch: gridSceneSettings.PITCH - this._pointerTilt.y * PARALLAX_PITCH,
+      bearing: gridSceneSettings.BEARING + sway + this._pointerTilt.x * PARALLAX_BEARING
+    };
   }
 
   private _buildStaticLayers(modules: IDeckModules): Layer[] {
@@ -250,7 +282,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       stroked: true,
       filled: true,
       getFillColor: [...palette.lineStrong, 16],
-      getLineColor: [...palette.lineStrong, 255],
+      getLineColor: [...palette.lineStrong, 105],
       getLineWidth: 1.5,
       lineWidthUnits: 'pixels'
     });
@@ -320,7 +352,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
     const markers = new ScatterplotLayer<{ lon: number; lat: number; radius: number; color: number[]; edge: number[] }>({
       id: 'scene-markers',
       data: [
-        { lon: paceNode.lon, lat: paceNode.lat, radius: gridSceneSettings.NODE_RADIUS_PX, color: [...palette.ink, 255], edge: [...palette.rush, 255] },
+        { lon: paceNode.lon, lat: paceNode.lat, radius: gridSceneSettings.NODE_RADIUS_PX, color: [...palette.ink, 255], edge: [...palette.rush, 200] },
         { lon: sitePin.lon, lat: sitePin.lat, radius: 5, color: [...palette.ink, 255], edge: [...palette.panel, 255] },
         ...cityLabels.map((city) => ({ lon: city.lon, lat: city.lat, radius: 3.5, color: [...palette.clear, 255], edge: [...palette.panel, 255] }))
       ],
@@ -337,7 +369,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
     const nodeGlow = new ScatterplotLayer<{ radius: number; alpha: number }>({
       id: 'scene-node-glow',
       data: [
-        { radius: gridSceneSettings.NODE_HALO_PX, alpha: 55 },
+        { radius: gridSceneSettings.NODE_HALO_PX, alpha: 26 },
         { radius: gridSceneSettings.NODE_RING_PX, alpha: 0 }
       ],
       stroked: true,
@@ -347,8 +379,8 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       getPosition: () => [paceNode.lon, paceNode.lat],
       getRadius: (ring) => ring.radius,
       getFillColor: (ring) => [...palette.rush, ring.alpha],
-      getLineColor: (ring) => [...palette.rush, ring.alpha === 0 ? 255 : 0],
-      getLineWidth: 2.5,
+      getLineColor: (ring) => [...palette.rush, ring.alpha === 0 ? 190 : 0],
+      getLineWidth: 1.5,
       parameters: gridSceneSettings.ADDITIVE
     });
 
@@ -368,7 +400,11 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       fontSettings: { sdf: true },
       outlineWidth: 3,
       outlineColor: [...palette.paper, 255],
-      billboard: true
+      background: true,
+      getBackgroundColor: [...palette.paper, 150],
+      backgroundPadding: [4, 2],
+      billboard: true,
+      parameters: { depthCompare: 'always' }
     });
 
     return [states, ...footprints, ...columns, ...caps, nodeGlow, markers, labels];
@@ -385,6 +421,16 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       widthUnits: 'pixels',
       getWidth: 1,
       capRounded: true,
+      parameters: gridSceneSettings.ADDITIVE
+    });
+    const edgeComet = new PathLayer<ISceneWire>({
+      id: 'scene-edge-comet',
+      data: this._edgeSegments,
+      getPath: (segment) => segment.path,
+      getColor: (segment) => segment.color,
+      widthUnits: 'pixels',
+      getWidth: gridSceneSettings.EDGE_WIDTH_PX,
+      updateTriggers: { getPath: frame, getColor: frame },
       parameters: gridSceneSettings.ADDITIVE
     });
     const cores = new ScatterplotLayer<ISceneDot>({
@@ -419,7 +465,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
     });
 
     if (!this.hourView.isRush) {
-      return [wires, halos, particles, cores];
+      return [wires, edgeComet, halos, particles, cores];
     }
 
     const rings = [0, 0.5].map((shift) => {
@@ -434,12 +480,12 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
         lineWidthUnits: 'pixels',
         getPosition: () => [paceNode.lon, paceNode.lat],
         getRadius: (ring) => gridSceneSettings.RING_MIN_RADIUS_M + gridSceneSettings.RING_RADIUS_RANGE_M * ring.progress,
-        getLineColor: (ring) => [...this._palette.rush, Math.round(230 * (1 - ring.progress))],
-        getLineWidth: 2.5,
+        getLineColor: (ring) => [...this._palette.rush, Math.round(110 * (1 - ring.progress))],
+        getLineWidth: 1.5,
         updateTriggers: { getRadius: frame, getLineColor: frame }
       });
     });
 
-    return [wires, halos, particles, cores, ...rings];
+    return [wires, edgeComet, halos, particles, cores, ...rings];
   }
 }

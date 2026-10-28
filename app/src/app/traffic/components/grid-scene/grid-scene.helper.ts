@@ -222,11 +222,12 @@ export class GridSceneHelper {
     });
   }
 
-  public static edgeComet(edge: ISceneEdge, clock: number, color: SceneColor, dots: ISceneDot[], cores: ISceneDot[]): void {
+  public static edgeComet(edge: ISceneEdge, clock: number, color: SceneColor, segments: ISceneWire[]): void {
     const { EDGE_SPEED_UNITS_PER_S, EDGE_TAIL_FRACTION, EDGE_SAMPLES } = gridSceneSettings;
     const head = (((clock * EDGE_SPEED_UNITS_PER_S) / edge.length + edge.offset) % 1 + 1) % 1;
+    let previous: [number, number, number] | null = null;
 
-    for (let index = 0; index < EDGE_SAMPLES; index += 1) {
+    for (let index = 0; index <= EDGE_SAMPLES; index += 1) {
       const fraction = (((head - (index / EDGE_SAMPLES) * EDGE_TAIL_FRACTION) % 1) + 1) % 1;
       const distance = fraction * edge.length;
       let segment = 1;
@@ -240,14 +241,14 @@ export class GridSceneHelper {
       const from = edge.points[segment - 1];
       const to = edge.points[segment];
       const position: [number, number, number] = [from[0] + (to[0] - from[0]) * mix, from[1] + (to[1] - from[1]) * mix, 0];
-      const taper = 1 - index / EDGE_SAMPLES;
-      const alpha = Math.round(185 * taper * taper);
 
-      dots.push({ position, color: [color[0], color[1], color[2], alpha], size: 1.7 + 2.3 * taper });
+      if (previous && Math.hypot(position[0] - previous[0], position[1] - previous[1]) < edge.length * 0.5) {
+        const taper = 1 - index / EDGE_SAMPLES;
 
-      if (index < 10) {
-        cores.push({ position, color: [255, 255, 255, Math.round(alpha * 0.8 * (1 - index / 10))], size: 1.1 + 0.9 * taper });
+        segments.push({ path: [previous, position], color: [color[0], color[1], color[2], Math.round(gridSceneSettings.EDGE_ALPHA * taper)] });
       }
+
+      previous = position;
     }
   }
 
@@ -294,7 +295,7 @@ export class GridSceneHelper {
       lat: label.lat,
       size: 11,
       color: ink,
-      offset: [12, 6],
+      offset: [14, 16],
       anchor: 'start'
     });
 
@@ -302,7 +303,7 @@ export class GridSceneHelper {
       ...stateLabels.map(state),
       ...cityLabels.filter((label) => gridSceneSettings.LABELED_CITIES.includes(label.label)).map(city),
       { text: paceNode.label.toUpperCase(), lon: paceNode.lon, lat: paceNode.lat, size: 17, color: ink, offset: [0, -34], anchor: 'middle' },
-      { text: sitePin.label, lon: sitePin.lon, lat: sitePin.lat, size: 12, color: ink, offset: [-12, 12], anchor: 'end' }
+      { text: sitePin.label, lon: sitePin.lon, lat: sitePin.lat, size: 12, color: ink, offset: [-16, 26], anchor: 'end' }
     ];
   }
 

@@ -617,6 +617,7 @@ ol.dt-list {
   --dt-muted: #aabdcc;
   --dt-clear: #4fe0aa;
   --dt-clear-mark: #4fe0aa;
+  --dt-pulse: #8fd3f4;
   background: var(--dt-paper);
   color: var(--dt-ink);
 }
@@ -632,5 +633,6 @@ ol.dt-list {
   --dt-muted: #56626e;
   --dt-clear: #0e6b4e;
   --dt-clear-mark: #14875f;
+  --dt-pulse: #6a4bd6;
   color: var(--dt-ink);
 }

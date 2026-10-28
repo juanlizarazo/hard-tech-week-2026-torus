@@ -69,11 +69,14 @@
 }
 
 .home__tagline {
+  padding-left: 12px;
+  border-left: 3px solid var(--dt-rush);
   font-family: var(--dt-mono);
-  font-size: var(--dt-text-11);
+  font-size: var(--dt-text-15);
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--dt-muted);
+  color: var(--dt-ink);
 }
 
 .home__badges {
