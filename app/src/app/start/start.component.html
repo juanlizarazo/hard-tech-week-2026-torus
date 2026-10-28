@@ -1,4 +1,4 @@
-<section class="home" [class.home--tiles-in]="areTilesIn" aria-labelledby="home-title">
+<section class="home dt-stage" [class.home--tiles-in]="areTilesIn" aria-labelledby="home-title">
   <div class="home__scene">
     @if (scene$ | async; as scene) {
       @if (scene.data && scene.hourView) {
@@ -64,7 +64,7 @@
       <ol class="home__tiles">
         @for (tile of tiles$ | async; track tile.path; let index = $index) {
           <li class="home__tile-item" [style.--tile-index]="index">
-            <a class="home__tile" [class.home__tile--muted]="tile.isMuted" [routerLink]="tile.path">
+            <a class="home__tile dt-stage-light" [class.home__tile--muted]="tile.isMuted" [routerLink]="tile.path">
               <span class="home__tile-head">
                 <span class="dt-tag dt-tag--ink">{{ tile.code }}</span>
                 <span class="home__tile-stage">{{ tile.stage }}</span>

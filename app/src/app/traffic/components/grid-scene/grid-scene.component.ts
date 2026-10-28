@@ -242,7 +242,8 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       id: 'scene-states',
       data: this._stateFeatures as never,
       stroked: true,
-      filled: false,
+      filled: true,
+      getFillColor: [...palette.lineStrong, 16],
       getLineColor: [...palette.lineStrong, 255],
       getLineWidth: 1.5,
       lineWidthUnits: 'pixels'
@@ -300,8 +301,8 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
             GridSceneHelper.elevation(GridSceneHelper.relative(view, column.fuelKey))
           ],
           getElevation: gridSceneSettings.CAP_HEIGHT_M,
-          getFillColor: [...palette.panel, 255],
-          getLineColor: [...palette.ink, 255],
+          getFillColor: [...palette.ink, 255],
+          getLineColor: [...palette.lineStrong, 255],
           wireframe: true,
           lineWidthMinPixels: 1,
           material: { ambient: 0.9, diffuse: 0.2, shininess: 8 },
@@ -360,7 +361,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       widthUnits: 'pixels',
       getWidth: 1.2,
       capRounded: true,
-      parameters: { depthWriteEnabled: false }
+      parameters: gridSceneSettings.ADDITIVE
     });
     const cores = new ScatterplotLayer<ISceneDot>({
       id: 'scene-cores',
@@ -370,7 +371,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       getRadius: (dot) => dot.size,
       getFillColor: (dot) => dot.color,
       updateTriggers: { getPosition: frame, getRadius: frame, getFillColor: frame },
-      parameters: { depthWriteEnabled: false }
+      parameters: gridSceneSettings.ADDITIVE
     });
     const halos = new ScatterplotLayer<ISceneDot>({
       id: 'scene-halos',
@@ -380,7 +381,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       getRadius: (dot) => dot.size * gridSceneSettings.HALO_SCALE,
       getFillColor: (dot) => [dot.color[0], dot.color[1], dot.color[2], Math.round(dot.color[3] * 0.18)],
       updateTriggers: { getPosition: frame, getRadius: frame, getFillColor: frame },
-      parameters: { depthWriteEnabled: false }
+      parameters: gridSceneSettings.ADDITIVE
     });
     const particles = new ScatterplotLayer<ISceneDot>({
       id: 'scene-particles',
@@ -390,7 +391,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       getRadius: (dot) => dot.size,
       getFillColor: (dot) => dot.color,
       updateTriggers: { getPosition: frame, getRadius: frame, getFillColor: frame },
-      parameters: { depthWriteEnabled: false }
+      parameters: gridSceneSettings.ADDITIVE
     });
 
     if (!this.hourView.isRush) {

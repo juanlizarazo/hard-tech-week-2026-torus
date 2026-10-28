@@ -604,3 +604,33 @@ ol.dt-list {
     animation: none !important;
   }
 }
+
+.dt-stage {
+  --dt-ink: #e8f3fb;
+  --dt-ink-soft: #c6d9e8;
+  --dt-paper: #06142a;
+  --dt-paper-rule: #0d2340;
+  --dt-panel: #0c1f3a;
+  --dt-line: #1c3a5c;
+  --dt-line-soft: #14304f;
+  --dt-line-strong: #6fb9e0;
+  --dt-muted: #9fbad0;
+  --dt-clear: #4fe0aa;
+  --dt-clear-mark: #4fe0aa;
+  background: var(--dt-paper);
+  color: var(--dt-ink);
+}
+
+.dt-stage-light {
+  --dt-ink: #17202b;
+  --dt-ink-soft: #2c3846;
+  --dt-paper: #eef1f0;
+  --dt-panel: #ffffff;
+  --dt-line: #d2d9db;
+  --dt-line-soft: #e6eaeb;
+  --dt-line-strong: #9aa6ae;
+  --dt-muted: #56626e;
+  --dt-clear: #0e6b4e;
+  --dt-clear-mark: #14875f;
+  color: var(--dt-ink);
+}

@@ -36,7 +36,17 @@ export const gridSceneSettings = {
   HALO_SCALE: 3.4,
   PULSE_HZ: 1.6,
   FLICKER_HZ: 23,
-  WIRE_ALPHA: 46,
+  WIRE_ALPHA: 70,
+  ADDITIVE: {
+    depthWriteEnabled: false,
+    blend: true,
+    blendColorOperation: 'add',
+    blendColorSrcFactor: 'src-alpha',
+    blendColorDstFactor: 'one',
+    blendAlphaOperation: 'add',
+    blendAlphaSrcFactor: 'one',
+    blendAlphaDstFactor: 'one'
+  } as const,
   RING_PERIOD_S: 2.4,
   RING_MIN_RADIUS_M: 14000,
   RING_RADIUS_RANGE_M: 42000,

@@ -183,7 +183,7 @@ export class GridSceneHelper {
       const position = GridSceneHelper.curvePoint(particle, along);
       const alpha = 255 * energy * fade * Math.pow(taper, 2.2);
 
-      dots.push({ position, color: [color[0], color[1], color[2], Math.round(alpha)], size: (1.3 + 2.4 * relative) * (0.4 + 0.6 * taper) });
+      dots.push({ position, color: [color[0], color[1], color[2], Math.round(alpha)], size: (1.3 + 2.4 * relative) * (0.4 + 0.6 * taper) * (index < 3 ? 1.7 : 1) });
 
       if (index < CORE_SAMPLES) {
         cores.push({ position, color: [255, 255, 255, Math.round(alpha * (1 - index / CORE_SAMPLES))], size: 0.9 + 1.1 * relative });
