@@ -654,10 +654,6 @@
   min-width: 0;
 }
 
-.dt-backtest__controls-title {
-  flex-basis: 100%;
-  margin: 0;
-}
 
 .dt-page__step-number--record {
   letter-spacing: 0.14em;
@@ -690,25 +686,7 @@
   opacity: 0.55;
 }
 
-.dt-backtest__month {
-  scroll-margin-top: 190px;
-}
-
-.dt-backtest__jump {
-  margin: 12px 0 0;
-  font-size: var(--dt-text-15);
-  font-weight: 800;
-
-  a {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    color: var(--dt-ink);
-  }
-
-  mat-icon {
-    width: 18px;
-    height: 18px;
-    font-size: 18px;
-  }
+.dt-backtest__control-hint {
+  flex: 1 1 260px;
+  margin: 0 0 14px;
 }

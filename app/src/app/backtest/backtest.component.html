@@ -17,9 +17,8 @@
 
   @if (controls$ | async; as controls) {
     <section class="dt-backtest__controls" aria-label="Site and rate plan">
-      <p class="dt-backtest__control-label dt-backtest__controls-title">Site and rate plan apply to every month</p>
       <div class="dt-backtest__control">
-        <span class="dt-backtest__control-label" id="backtest-site-label">Site</span>
+        <span class="dt-backtest__control-label" id="backtest-site-label">Site for every month</span>
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dt-backtest__site">
           <mat-select aria-labelledby="backtest-site-label" [value]="controls.siteId" (selectionChange)="onSiteChange($event.value)">
             @for (site of sites; track site.id) {
@@ -29,7 +28,7 @@
         </mat-form-field>
       </div>
       <div class="dt-backtest__control">
-        <span class="dt-backtest__control-label" id="backtest-rate-label">Rate plan</span>
+        <span class="dt-backtest__control-label" id="backtest-rate-label">Rate plan for every month</span>
         <mat-button-toggle-group
           class="dt-backtest__schedule"
           aria-labelledby="backtest-rate-label"
@@ -62,22 +61,14 @@
         @if (screen.ledger.note) {
           <p class="dt-hint dt-backtest__ledger-note">{{ screen.ledger.note }}</p>
         }
-        @if (heading$ | async; as heading) {
-          <p class="dt-backtest__jump"><a href="#backtest-month" (click)="onJumpToMonth($event)">Open the {{ heading.monthLabel }} replay below <mat-icon aria-hidden="true">south</mat-icon></a></p>
-        }
         <div how-to-read>
           <p class="dt-backtest__how">Each column is a month of 2026. The green bar is what DETOUR saved on the bill versus no storage, and the dark tick above it is what perfect hindsight saved, so the gap is what a forecast cannot see.</p>
           <p class="dt-backtest__how">Summer rates (June to September) put a higher price on each kilowatt of peak demand, so a shaved kilowatt is worth more then. October is the month to date, so its demand charge is the peak so far.</p>
           <p class="dt-backtest__how">Pick any month to replay it below. The site and rate plan above apply to every column.</p>
         </div>
       </dt-chart-frame>
-      <div class="dt-figures">
-        @for (tile of screen.ledger.leadFigures; track tile.id) {
-          <dt-figure [value]="tile.value" [label]="tile.label" [detail]="tile.hint" [tone]="tile.tone"></dt-figure>
-        }
-      </div>
       @if (screen.ledger.leadFigures.length > 0) {
-        <p class="dt-section__lede">{{ screen.ledger.hindsightLine }}</p>
+        <p class="dt-section__lede dt-backtest__hindsight">{{ screen.ledger.hindsightLine }}</p>
       }
     </section>
   }
@@ -109,7 +100,7 @@
               }
             </p>
             <div class="dt-backtest__body" [class.dt-backtest__body--replaying]="viewModel.isReplaying" [attr.aria-busy]="viewModel.isReplaying">
-            <section class="dt-section dt-backtest__month" id="backtest-month" aria-labelledby="backtest-month-question">
+            <section class="dt-section" aria-labelledby="backtest-month-question">
               <h2 class="dt-section__title" id="backtest-month-question">{{ (heading$ | async)?.monthQuestion }}</h2>
               <p class="dt-section__lede">{{ model.answer }}</p>
             <section class="dt-backtest__verdict" aria-labelledby="backtest-capture-title">
@@ -504,6 +495,19 @@
           }
         }
       }
+    }
+  }
+
+  @if (ledger$ | async; as screen) {
+    @if (screen.ledger.leadFigures.length > 0) {
+      <section class="dt-section" aria-labelledby="backtest-year-title">
+        <h2 class="dt-section__title" id="backtest-year-title">The year in four numbers</h2>
+        <div class="dt-figures">
+          @for (tile of screen.ledger.leadFigures; track tile.id) {
+            <dt-figure [value]="tile.value" [label]="tile.label" [detail]="tile.hint" [tone]="tile.tone"></dt-figure>
+          }
+        </div>
+      </section>
     }
   }
 
