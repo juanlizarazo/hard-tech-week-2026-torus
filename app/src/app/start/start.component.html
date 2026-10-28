@@ -29,7 +29,7 @@
     <div class="home__copy">
       <h1 class="cdk-visually-hidden" id="home-title">Two steps, then the record</h1>
       <p class="cdk-visually-hidden">
-        {{ hook.demandRateLabel }} per kW every month in summer, versus {{ hook.spreadLabel }} per kWh for moving energy to a cheaper hour. {{ hookSentence }} {{ hookLine }}
+        {{ hook.demandRateLabel }} per kW every month in summer, versus {{ hook.spreadLabel }} per kWh for moving energy to a cheaper hour. {{ hookSentence }}
       </p>
       <dl class="home__figures" aria-hidden="true">
         <div class="home__figure">
@@ -96,11 +96,16 @@
           </li>
         }
       </ol>
-      <button type="button" class="home__how" [attr.aria-controls]="architectureId" (click)="openArchitecture()">
-        <mat-icon aria-hidden="true">account_tree</mat-icon>
-        <span>How DETOUR works</span>
-        <mat-icon aria-hidden="true">south</mat-icon>
-      </button>
+      <div class="home__foot">
+        <button type="button" class="home__how" [attr.aria-controls]="architectureId" (click)="openArchitecture()">
+          <mat-icon aria-hidden="true">account_tree</mat-icon>
+          <span>How DETOUR works</span>
+          <mat-icon aria-hidden="true">south</mat-icon>
+        </button>
+        <p class="home__credit">
+          Built by <a class="home__credit-link" href="https://www.linkedin.com/in/juanlizarazo/" target="_blank" rel="noopener">Juan Lizarazo</a> for the Torus bounty, Hard Tech Week 2026, Salt Lake City
+        </p>
+      </div>
     </div>
   </div>
 </section>

@@ -50,6 +50,7 @@
   border-bottom: 1px solid var(--dt-ink);
   border-top: 4px solid var(--dt-rush);
   box-shadow: 0 3px 0 -1px var(--dt-line), 0 6px 16px -8px rgb(23 32 43 / 35%);
+  view-transition-name: dt-header;
 }
 
 .dt-shell__bar {
@@ -280,6 +281,20 @@
   font-size: var(--dt-text-11);
   letter-spacing: 0.02em;
   color: var(--dt-muted);
+}
+
+.dt-shell__footer-credit {
+  margin-top: 4px;
+}
+
+.dt-shell__footer-link {
+  color: var(--dt-ink);
+  text-underline-offset: 2px;
+
+  &:focus-visible {
+    outline: 2px solid var(--dt-spin);
+    outline-offset: 2px;
+  }
 }
 
 .dt-shell--home {
