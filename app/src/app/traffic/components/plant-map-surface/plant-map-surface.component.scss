@@ -73,4 +73,21 @@
   .surface--fill .surface__legend {
     display: none;
   }
+
+  .surface:not(.surface--fill) {
+    aspect-ratio: 4 / 5 !important;
+
+    .surface__legend {
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      max-width: none;
+      padding: 6px 8px;
+      font-size: var(--dt-text-11);
+
+      strong {
+        font-size: var(--dt-text-13);
+      }
+    }
+  }
 }
