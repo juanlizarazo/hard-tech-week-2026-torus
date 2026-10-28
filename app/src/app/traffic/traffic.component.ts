@@ -81,7 +81,7 @@ export class TrafficComponent {
   public readonly viewModel$ = combineLatest([
     TrafficViewStateHelper.fromSources({
       manifest$: this._snapshotService.manifest$,
-      history$: this._gridSignalsService.history$,
+      history$: this._gridSignalsService.recentHistory$,
       priceHours$: this._gridSignalsService.targetPriceHours$,
       marginalSeries$: this._gridSignalsService.marginalEmissions$,
       averagePoints$: this._gridSignalsService.averageEmissions$,

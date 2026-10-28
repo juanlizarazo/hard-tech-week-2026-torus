@@ -3,6 +3,7 @@ export interface INavLink {
   label: string;
   shortLabel: string;
   step: string;
+  kind: 'start' | 'step' | 'record';
   description: string;
   dayNoun?: string;
 }

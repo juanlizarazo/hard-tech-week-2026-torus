@@ -36,8 +36,8 @@ export class BacktestHelper {
       answer: BacktestHelper.answerSentence(result),
       capture: BacktestHelper.captureGauge(result),
       selectedDay: BacktestHelper.selectedDay(calendarCells),
-      leadTiles: tiles.slice(0, 4),
-      secondaryTiles: tiles.slice(4),
+      leadTiles: tiles.slice(0, 3),
+      secondaryTiles: tiles.slice(3),
       comparisonRows: BacktestHelper.comparisonRows(result),
       valueNotice: BacktestHelper.valueNotice(result),
       monthLabel: BacktestHelper.monthLabel(result.summary.month, result.summary.throughDate),
@@ -177,7 +177,6 @@ export class BacktestHelper {
     const total = lead.savings.total;
     const demandShare = total > 0 ? (lead.savings.demand / total) * 100 : 0;
     const isDemandOverNet = demandShare > 100;
-    const capture = lead.captureRate;
     const shaver = result.shaver;
     const perfectLoad = result.perfectLoad;
     const leadName = BacktestHelper.strategyName(lead);
@@ -200,17 +199,6 @@ export class BacktestHelper {
         hint: `${leadName} cut billed demand from ${BacktestHelper.formatNumber(result.baseline.bill.determinants.demandKw)} kW to ${BacktestHelper.formatNumber(lead.bill.determinants.demandKw)} kW.${isDemandOverNet ? ` More than the net saving: other bill lines gave back ${BacktestHelper.formatMoney(lead.savings.demand - total)}.` : ''}`,
         tone: 'neutral',
         source: result.sources.tariff,
-      },
-      {
-        id: 'capture',
-        label: 'Capture rate',
-        value: capture === null ? 'Not available' : BacktestHelper.isLoss(result) ? 'Cost money' : `${BacktestHelper.formatNumber(capture * 100)}%`,
-        hint:
-          capture === null
-            ? `${oracleName} could not be solved for this site.`
-            : `${leadName}'s share of the ${result.oracle ? BacktestHelper.formatMoney(result.oracle.savings.total) : ''} ${oracleName.toLowerCase()} saved.`,
-        tone: 'neutral',
-        source: result.sources.oracle,
       },
       {
         id: 'wattsmart',

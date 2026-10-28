@@ -18,5 +18,5 @@ export const startSettings = {
 export const startTileSpecs = [
   { path: '/traffic', code: '01', stage: 'Forecast' },
   { path: '/plan', code: '02', stage: 'Decide' },
-  { path: '/backtest', code: '03', stage: 'Prove' }
+  { path: '/backtest', code: 'REC', stage: 'Record' }
 ];

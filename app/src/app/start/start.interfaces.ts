@@ -29,6 +29,7 @@ export interface IStartTile {
   unit: string;
   caption: string;
   isMuted: boolean;
+  isRecord?: boolean;
 }
 
 export interface IStartScene {

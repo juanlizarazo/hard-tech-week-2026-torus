@@ -1,15 +1,28 @@
 <section class="lp-text" aria-labelledby="lp-text-title">
+  <div class="lp-text__plain">
+    <h4>What this is</h4>
+    <p>A linear program is a list of every 15 minutes of the next two days, each with a price for grid energy, carbon and machine wear, and the rules the station must obey: energy balance, charge limits, ramp limits, the Wattsmart reserve.</p>
+    <p>HiGHS, an open-source solver, finds the cheapest schedule that breaks no rule. The text below is that list, exactly as solved; paste it into any LP solver to check the plan.</p>
+  </div>
   <div class="lp-text__toolbar">
     <div class="lp-text__titles">
       <h3 class="lp-text__title" id="lp-text-title">The LP, exactly as solved</h3>
       <p class="lp-text__meta">{{ metaLabel }}</p>
     </div>
+    <div class="lp-text__actions">
     <button mat-stroked-button type="button" [disabled]="!lpText" (click)="onCopy($event)">
       <div class="btn-content">
         <mat-icon>{{ isCopied ? 'check' : 'content_copy' }}</mat-icon>
         <span>{{ isCopied ? 'Copied' : copyFailed ? 'Copy failed' : 'Copy LP' }}</span>
       </div>
     </button>
+    <button mat-stroked-button type="button" [disabled]="!lpText" (click)="onDownload()">
+      <div class="btn-content">
+        <mat-icon>download</mat-icon>
+        <span>Download LP</span>
+      </div>
+    </button>
+    </div>
   </div>
   <pre class="lp-text__pre" tabindex="0" aria-label="Generated LP text">{{ lpText }}</pre>
 </section>

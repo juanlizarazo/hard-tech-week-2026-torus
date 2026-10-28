@@ -19,7 +19,7 @@ export const routes: Routes = [
   },
   {
     path: 'backtest',
-    title: 'DETOUR · The proof',
+    title: 'DETOUR · The record',
     loadComponent: () => import('./backtest/backtest.component').then((module) => module.BacktestComponent)
   },
   { path: '**', redirectTo: 'start' }

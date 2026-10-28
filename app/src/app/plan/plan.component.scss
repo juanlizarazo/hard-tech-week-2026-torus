@@ -663,3 +663,68 @@
   min-height: 720px;
   align-items: flex-start;
 }
+
+.plan__orders-actions {
+  margin: 4px -18px -18px;
+  padding: 14px 18px;
+  background: var(--dt-ink);
+  color: var(--dt-panel);
+  border-radius: 0 0 var(--dt-radius-frame) var(--dt-radius-frame);
+  gap: 12px 16px;
+  transition: background-color var(--dt-motion-2) var(--dt-ease);
+}
+
+.plan__orders-actions--approved {
+  background: var(--dt-clear);
+}
+
+.plan__orders-summary {
+  flex: 1 1 260px;
+  margin: 0;
+  font-size: var(--dt-text-13);
+}
+
+.plan__orders-actions .plan__approved {
+  flex: 1 1 260px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--dt-panel);
+}
+
+.plan__orders-actions .plan__changed {
+  color: var(--dt-panel);
+}
+
+.plan__approve {
+  font-size: var(--dt-text-17);
+}
+
+.plan__csv-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--dt-panel);
+  font: inherit;
+  font-size: var(--dt-text-13);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.plan__orders-actions dt-next-stop {
+  flex: 1 1 100%;
+  border-radius: var(--dt-radius-frame);
+  outline: 1px solid color-mix(in srgb, var(--dt-panel) 35%, transparent);
+  max-width: 420px;
+}
+
+.plan__rail-approve {
+  margin-left: auto;
+}
+
+@media (max-width: 599.98px) {
+  .plan__orders-actions {
+    margin: 4px -12px -14px;
+    padding: 12px;
+  }
+}

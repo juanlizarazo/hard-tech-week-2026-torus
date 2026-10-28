@@ -61,3 +61,32 @@
     font-size: 11px;
   }
 }
+
+.lp-text__plain {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-left: 2px solid var(--dt-clear);
+  color: var(--dt-ink);
+  font-size: var(--dt-text-15);
+
+  h4 {
+    margin: 0;
+    font-size: var(--dt-text-13);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.lp-text__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -8,6 +8,33 @@
   border-top: 1px dashed var(--dt-line-strong);
 }
 
+.dt-next-stop--inline {
+  padding-top: 0;
+  border-top: none;
+
+  .dt-next-stop__link {
+    max-width: 420px;
+    padding: 10px 14px;
+    gap: 12px;
+  }
+
+  .dt-next-stop__sign {
+    width: 32px;
+    height: 32px;
+    font-size: var(--dt-text-13);
+  }
+
+  .dt-next-stop__title {
+    font-size: var(--dt-text-15);
+  }
+}
+
+@media (max-width: 599px) {
+  .dt-next-stop--inline .dt-next-stop__label {
+    display: none;
+  }
+}
+
 .dt-next-stop__link {
   display: flex;
   align-items: center;

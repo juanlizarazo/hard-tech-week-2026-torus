@@ -648,7 +648,19 @@
 }
 
 .dt-backtest__ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
   min-width: 0;
+}
+
+.dt-backtest__controls-title {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.dt-page__step-number--record {
+  letter-spacing: 0.14em;
 }
 
 .dt-backtest__ledger-note {

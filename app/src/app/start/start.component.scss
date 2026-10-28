@@ -421,6 +421,19 @@
   }
 }
 
+.home__tile--record {
+  border-top-style: dashed;
+}
+
+.home__tile-ledger {
+  flex: none;
+  margin-left: auto;
+
+  + .home__tile-arrow {
+    margin-left: 0;
+  }
+}
+
 .home__tile--muted .home__tile-figure {
   color: var(--dt-muted);
 }

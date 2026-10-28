@@ -49,7 +49,7 @@ import {
   LoadChartComponent,
   LpTextComponent
 } from './components';
-import { IAssetRow, IPlanControls, IPlanDeltaState, IPlanHook, IPlanTryChip, IPlanViewModel, IPlanDateContext, IPlanSiteCard, IPlanSolveState } from './plan.interfaces';
+import { IAssetRow, IPlanControls, IPlanDeltaState, IPlanHook, IPlanTryChip, IPlanViewModel, IPlanDateContext, IPlanSiteCard, IPlanSolveState, IPlanTile } from './plan.interfaces';
 import { PeakSoFarMode, PlanDateMode, PlanSolverRailState } from './plan.types';
 import { PlanHelper } from './plan.helper';
 import { planBaseline, planDefaults, planDeltaSettings } from './plan.constants';
@@ -236,6 +236,18 @@ export class PlanComponent {
     }
 
     return !solve.isStale && solve.viewModel?.result.status === 'infeasible' ? 'infeasible' : 'failed';
+  }
+
+  public leadTiles(tiles: IPlanTile[]): IPlanTile[] {
+    return tiles.filter((tile) => tile.id !== 'energy' && tile.id !== 'co2');
+  }
+
+  public secondaryTiles(tiles: IPlanTile[]): IPlanTile[] {
+    return tiles.filter((tile) => tile.id === 'energy' || tile.id === 'co2');
+  }
+
+  public orderSummary(sheet: IDispatchSheet): string {
+    return PlanHelper.orderSummary(sheet.orders.length, sheet.dateLabel, sheet.input.siteName, sheet.input.scheduleLabel);
   }
 
   public canApprove(solve: IPlanSolveState, sheet: IDispatchSheet | null): boolean {

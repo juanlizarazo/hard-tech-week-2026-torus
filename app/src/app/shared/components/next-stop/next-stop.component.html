@@ -1,4 +1,4 @@
-<nav class="dt-next-stop" [attr.aria-label]="label">
+<nav class="dt-next-stop" [class.dt-next-stop--inline]="variant === 'inline'" [attr.aria-label]="label">
   <a class="dt-next-stop__link" [routerLink]="path" [fragment]="fragment">
     @if (sign) {
       <span class="dt-next-stop__sign" aria-hidden="true">{{ sign }}</span>

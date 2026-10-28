@@ -1,23 +1,53 @@
 <div class="dt-page">
   <header class="dt-page__head">
-    <p class="dt-page__step"><span class="cdk-visually-hidden">Step 3 of 3: </span><span class="dt-page__step-number" aria-hidden="true">03</span><span class="dt-page__step-name">Prove · The proof</span></p>
+    <p class="dt-page__step"><span class="cdk-visually-hidden">The record: </span><span class="dt-page__step-number dt-page__step-number--record" aria-hidden="true">REC</span><span class="dt-page__step-name">2026, month by month</span></p>
     @if (heading$ | async; as heading) {
       <h1 class="dt-question">{{ heading.question }}</h1>
     }
-    @if (viewModel$ | async; as viewModel) {
-      @if (viewModel.model; as model) {
-        <p class="dt-answer">{{ model.answer }}</p>
+    @if (ledger$ | async; as screen) {
+      @if (screen.ledger.leadFigures.length > 0) {
+        <p class="dt-answer">{{ screen.ledger.summary }}</p>
       } @else {
-        <p class="dt-answer dt-backtest__answer-pending">
-          {{ (heading$ | async)?.monthLabel }} replayed day by day on a simulated site, against a
-          <dt-term key="SIMPLE_SHAVER">Simple shaver</dt-term> and <dt-term key="PERFECT_HINDSIGHT">Perfect hindsight</dt-term>.
-        </p>
+        <ng-container *ngTemplateOutlet="pending"></ng-container>
       }
+    } @else {
+      <ng-container *ngTemplateOutlet="pending"></ng-container>
     }
   </header>
 
+  @if (ledger$ | async; as screen) {
+    <section class="dt-backtest__ledger" aria-label="Year to date, month by month">
+      <dt-chart-frame index="P0" [title]="screen.ledger.title" [notice]="screen.ledger.summary" [simulated]="true">
+        <dt-year-ledger
+          [months]="screen.ledger.months"
+          [selected]="screen.selected"
+          [summerRange]="screen.ledger.summerRange"
+          [partialLabel]="screen.ledger.partialLabel"
+          (monthSelected)="onMonthSelected($event)"
+        ></dt-year-ledger>
+        @if (screen.ledger.note) {
+          <p class="dt-hint dt-backtest__ledger-note">{{ screen.ledger.note }}</p>
+        }
+        <div how-to-read>
+          <p class="dt-backtest__how">Each column is a month of 2026. The green bar is what DETOUR saved on the bill versus no storage, and the dark tick above it is what perfect hindsight saved, so the gap is what a forecast cannot see.</p>
+          <p class="dt-backtest__how">Summer rates (June to September) put a higher price on each kilowatt of peak demand, so a shaved kilowatt is worth more then. October is the month to date, so its demand charge is the peak so far.</p>
+          <p class="dt-backtest__how">Pick any month to replay it below. The site and rate plan above apply to every column.</p>
+        </div>
+      </dt-chart-frame>
+      <div class="dt-figures">
+        @for (tile of screen.ledger.leadFigures; track tile.id) {
+          <dt-figure [value]="tile.value" [label]="tile.label" [detail]="tile.hint" [tone]="tile.tone"></dt-figure>
+        }
+      </div>
+      @if (screen.ledger.leadFigures.length > 0) {
+        <p class="dt-section__lede">{{ screen.ledger.hindsightLine }}</p>
+      }
+    </section>
+  }
+
   @if (controls$ | async; as controls) {
     <section class="dt-backtest__controls" aria-label="Site and rate plan">
+      <p class="dt-backtest__control-label dt-backtest__controls-title">Site and rate plan apply to every month</p>
       <div class="dt-backtest__control">
         <span class="dt-backtest__control-label" id="backtest-site-label">Site</span>
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dt-backtest__site">
@@ -49,28 +79,6 @@
     </section>
   }
 
-  @if (ledger$ | async; as screen) {
-    <section class="dt-backtest__ledger" aria-label="Year to date, month by month">
-      <dt-chart-frame index="P0" [title]="screen.ledger.title" [notice]="screen.ledger.summary" [simulated]="true">
-        <dt-year-ledger
-          [months]="screen.ledger.months"
-          [selected]="screen.selected"
-          [summerRange]="screen.ledger.summerRange"
-          [partialLabel]="screen.ledger.partialLabel"
-          (monthSelected)="onMonthSelected($event)"
-        ></dt-year-ledger>
-        @if (screen.ledger.note) {
-          <p class="dt-hint dt-backtest__ledger-note">{{ screen.ledger.note }}</p>
-        }
-        <div how-to-read>
-          <p class="dt-backtest__how">Each column is a month of 2026. The green bar is what DETOUR saved on the bill versus no storage, and the dark tick above it is what perfect hindsight saved, so the gap is what a forecast cannot see.</p>
-          <p class="dt-backtest__how">Summer rates (June to September) put a higher price on each kilowatt of peak demand, so a shaved kilowatt is worth more then. October is the month to date, so its demand charge is the peak so far.</p>
-          <p class="dt-backtest__how">Pick any month to replay it below. The site and rate plan above apply to every column.</p>
-        </div>
-      </dt-chart-frame>
-    </section>
-  }
-
   @if (viewModel$ | async; as viewModel) {
     @switch (viewModel.state.status) {
       @case ('loading') {
@@ -98,6 +106,9 @@
               }
             </p>
             <div class="dt-backtest__body" [class.dt-backtest__body--replaying]="viewModel.isReplaying" [attr.aria-busy]="viewModel.isReplaying">
+            <section class="dt-section" aria-labelledby="backtest-month-question">
+              <h2 class="dt-section__title" id="backtest-month-question">{{ (heading$ | async)?.monthQuestion }}</h2>
+              <p class="dt-section__lede">{{ model.answer }}</p>
             <section class="dt-backtest__verdict" aria-labelledby="backtest-capture-title">
               <div class="dt-backtest__gauge">
                 <div class="dt-backtest__gauge-head">
@@ -155,10 +166,7 @@
             <section class="dt-backtest__figures" [attr.aria-label]="model.monthName + ' result'">
               <div class="dt-figures">
                 @for (tile of model.leadTiles; track tile.id) {
-                  <dt-figure [value]="tile.value" [label]="tile.id === 'capture' ? '' : tile.label" [detail]="tile.hint" [tone]="tile.tone">
-                    @if (tile.id === 'capture') {
-                      <dt-term figure-term key="CAPTURE_RATE">Capture rate</dt-term>
-                    }
+                  <dt-figure [value]="tile.value" [label]="tile.label" [detail]="tile.hint" [tone]="tile.tone">
                     @if (tile.source; as source) {
                       <dt-source-chip
                         figure-source
@@ -192,86 +200,6 @@
                 <dt-term key="WATTSMART">Wattsmart</dt-term> reserve are explained under each word.
               </p>
             </section>
-
-            <section class="dt-section" aria-labelledby="backtest-compare-title">
-              <h2 class="dt-section__title" id="backtest-compare-title">{{ model.monthName }} value vs no storage</h2>
-              <p class="dt-section__lede">{{ model.valueNotice }}</p>
-              <p class="dt-hint">Capture rate = DETOUR bill savings ÷ perfect-hindsight bill savings. Total value = bill saved + carbon value − wear cost.</p>
-              <div class="dt-table-wrap dt-backtest__compare-table">
-                <table class="dt-table">
-                  <caption class="cdk-visually-hidden">{{ model.monthName }} savings by strategy: bill only and total value</caption>
-                  <thead>
-                    <tr>
-                      <th class="dt-table__cell dt-table__cell--head" scope="col">Strategy</th>
-                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Bill saved</th>
-                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Capture rate</th>
-                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Net CO2 emitted</th>
-                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Carbon value</th>
-                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Wear cost</th>
-                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Total value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (row of model.comparisonRows; track row.strategyId) {
-                      <tr class="dt-backtest__compare-row" [class.dt-backtest__compare-row--lead]="row.isLead">
-                        <th class="dt-table__cell dt-backtest__compare-name" scope="row">
-                          <span class="dt-backtest__compare-swatch" [style.background]="row.color" aria-hidden="true"></span>
-                          @if (row.isLead) {
-                            <strong>{{ row.strategyLabel }}</strong>
-                          } @else {
-                            {{ row.strategyLabel }}
-                          }
-                        </th>
-                        <td class="dt-table__cell dt-table__cell--num">{{ formatMoney(row.billSavings) }}</td>
-                        <td class="dt-table__cell dt-table__cell--num">{{ row.captureRate === null ? '—' : formatNumber(row.captureRate * 100) + '%' }}</td>
-                        <td class="dt-table__cell dt-table__cell--num">{{ formatNumber(row.netKgCo2) }} kg</td>
-                        <td class="dt-table__cell dt-table__cell--num">{{ formatMoney(row.carbonValue) }}</td>
-                        <td class="dt-table__cell dt-table__cell--num">{{ formatMoney(-row.wearCost) }}</td>
-                        <td class="dt-table__cell dt-table__cell--num dt-backtest__compare-total">{{ formatMoney(row.totalValue) }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-              <ul class="dt-backtest__strategies" [attr.aria-label]="model.monthName + ' savings by strategy'">
-                @for (row of model.comparisonRows; track row.strategyId) {
-                  <li class="dt-backtest__strategy" [class.dt-backtest__strategy--lead]="row.isLead">
-                    <p class="dt-backtest__strategy-name">
-                      <span class="dt-backtest__compare-swatch" [style.background]="row.color" aria-hidden="true"></span>
-                      <span>{{ row.strategyLabel }}</span>
-                      @if (row.isLead) {
-                        <span class="dt-tag dt-tag--clear">Ours</span>
-                      }
-                    </p>
-                    <dl class="dt-backtest__strategy-facts">
-                      <div class="dt-backtest__strategy-fact dt-backtest__strategy-fact--key">
-                        <dt class="dt-backtest__fact-term">Total value</dt>
-                        <dd class="dt-backtest__fact-value">{{ formatMoney(row.totalValue) }}</dd>
-                      </div>
-                      <div class="dt-backtest__strategy-fact dt-backtest__strategy-fact--key">
-                        <dt class="dt-backtest__fact-term">Bill saved</dt>
-                        <dd class="dt-backtest__fact-value">{{ formatMoney(row.billSavings) }}</dd>
-                      </div>
-                      <div class="dt-backtest__strategy-fact">
-                        <dt class="dt-backtest__fact-term">Capture rate</dt>
-                        <dd class="dt-backtest__fact-value">{{ row.captureRate === null ? '—' : formatNumber(row.captureRate * 100) + '%' }}</dd>
-                      </div>
-                      <div class="dt-backtest__strategy-fact">
-                        <dt class="dt-backtest__fact-term">Net CO2 emitted</dt>
-                        <dd class="dt-backtest__fact-value">{{ formatNumber(row.netKgCo2) }} kg</dd>
-                      </div>
-                      <div class="dt-backtest__strategy-fact">
-                        <dt class="dt-backtest__fact-term">Carbon value</dt>
-                        <dd class="dt-backtest__fact-value">{{ formatMoney(row.carbonValue) }}</dd>
-                      </div>
-                      <div class="dt-backtest__strategy-fact">
-                        <dt class="dt-backtest__fact-term">Wear cost</dt>
-                        <dd class="dt-backtest__fact-value">{{ formatMoney(-row.wearCost) }}</dd>
-                      </div>
-                    </dl>
-                  </li>
-                }
-              </ul>
             </section>
 
             <section class="dt-section" aria-labelledby="backtest-month-title">
@@ -375,8 +303,90 @@
               </div>
             </section>
 
+            <dt-under-the-hood summary="Where the dollars came from" description="Every strategy, every bill line, and what it cost the machines">
+            <section class="dt-section" aria-labelledby="backtest-compare-title">
+              <h3 class="dt-section__title" id="backtest-compare-title">{{ model.monthName }} value vs no storage</h3>
+              <p class="dt-section__lede">{{ model.valueNotice }}</p>
+              <p class="dt-hint">Capture rate = DETOUR bill savings ÷ perfect-hindsight bill savings. Total value = bill saved + carbon value − wear cost.</p>
+              <div class="dt-table-wrap dt-backtest__compare-table">
+                <table class="dt-table">
+                  <caption class="cdk-visually-hidden">{{ model.monthName }} savings by strategy: bill only and total value</caption>
+                  <thead>
+                    <tr>
+                      <th class="dt-table__cell dt-table__cell--head" scope="col">Strategy</th>
+                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Bill saved</th>
+                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Capture rate</th>
+                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Net CO2 emitted</th>
+                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Carbon value</th>
+                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Wear cost</th>
+                      <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Total value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of model.comparisonRows; track row.strategyId) {
+                      <tr class="dt-backtest__compare-row" [class.dt-backtest__compare-row--lead]="row.isLead">
+                        <th class="dt-table__cell dt-backtest__compare-name" scope="row">
+                          <span class="dt-backtest__compare-swatch" [style.background]="row.color" aria-hidden="true"></span>
+                          @if (row.isLead) {
+                            <strong>{{ row.strategyLabel }}</strong>
+                          } @else {
+                            {{ row.strategyLabel }}
+                          }
+                        </th>
+                        <td class="dt-table__cell dt-table__cell--num">{{ formatMoney(row.billSavings) }}</td>
+                        <td class="dt-table__cell dt-table__cell--num">{{ row.captureRate === null ? '—' : formatNumber(row.captureRate * 100) + '%' }}</td>
+                        <td class="dt-table__cell dt-table__cell--num">{{ formatNumber(row.netKgCo2) }} kg</td>
+                        <td class="dt-table__cell dt-table__cell--num">{{ formatMoney(row.carbonValue) }}</td>
+                        <td class="dt-table__cell dt-table__cell--num">{{ formatMoney(-row.wearCost) }}</td>
+                        <td class="dt-table__cell dt-table__cell--num dt-backtest__compare-total">{{ formatMoney(row.totalValue) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <ul class="dt-backtest__strategies" [attr.aria-label]="model.monthName + ' savings by strategy'">
+                @for (row of model.comparisonRows; track row.strategyId) {
+                  <li class="dt-backtest__strategy" [class.dt-backtest__strategy--lead]="row.isLead">
+                    <p class="dt-backtest__strategy-name">
+                      <span class="dt-backtest__compare-swatch" [style.background]="row.color" aria-hidden="true"></span>
+                      <span>{{ row.strategyLabel }}</span>
+                      @if (row.isLead) {
+                        <span class="dt-tag dt-tag--clear">Ours</span>
+                      }
+                    </p>
+                    <dl class="dt-backtest__strategy-facts">
+                      <div class="dt-backtest__strategy-fact dt-backtest__strategy-fact--key">
+                        <dt class="dt-backtest__fact-term">Total value</dt>
+                        <dd class="dt-backtest__fact-value">{{ formatMoney(row.totalValue) }}</dd>
+                      </div>
+                      <div class="dt-backtest__strategy-fact dt-backtest__strategy-fact--key">
+                        <dt class="dt-backtest__fact-term">Bill saved</dt>
+                        <dd class="dt-backtest__fact-value">{{ formatMoney(row.billSavings) }}</dd>
+                      </div>
+                      <div class="dt-backtest__strategy-fact">
+                        <dt class="dt-backtest__fact-term">Capture rate</dt>
+                        <dd class="dt-backtest__fact-value">{{ row.captureRate === null ? '—' : formatNumber(row.captureRate * 100) + '%' }}</dd>
+                      </div>
+                      <div class="dt-backtest__strategy-fact">
+                        <dt class="dt-backtest__fact-term">Net CO2 emitted</dt>
+                        <dd class="dt-backtest__fact-value">{{ formatNumber(row.netKgCo2) }} kg</dd>
+                      </div>
+                      <div class="dt-backtest__strategy-fact">
+                        <dt class="dt-backtest__fact-term">Carbon value</dt>
+                        <dd class="dt-backtest__fact-value">{{ formatMoney(row.carbonValue) }}</dd>
+                      </div>
+                      <div class="dt-backtest__strategy-fact">
+                        <dt class="dt-backtest__fact-term">Wear cost</dt>
+                        <dd class="dt-backtest__fact-value">{{ formatMoney(-row.wearCost) }}</dd>
+                      </div>
+                    </dl>
+                  </li>
+                }
+              </ul>
+            </section>
+
             <section class="dt-section" aria-labelledby="backtest-dollars-title">
-              <h2 class="dt-section__title" id="backtest-dollars-title">Where the dollars came from</h2>
+              <h3 class="dt-section__title" id="backtest-dollars-title">Where the dollars came from</h3>
               <dt-chart-frame index="P4" title="Savings by bill line" [notice]="model.componentNotice" [simulated]="true">
                 <p frame-notice class="dt-backtest__frame-source">
                   Rates from
@@ -397,7 +407,7 @@
             </section>
 
             <section class="dt-section" aria-labelledby="backtest-cycles-title">
-              <h2 class="dt-section__title" id="backtest-cycles-title">What it cost the machines</h2>
+              <h3 class="dt-section__title" id="backtest-cycles-title">What it cost the machines</h3>
               <dt-chart-frame index="P5" [title]="'Wear in ' + model.monthName" [notice]="model.cyclesNotice" [simulated]="true">
                 <div class="dt-backtest__cycles">
                   @for (row of model.cycleRows; track row.strategyId; let index = $index) {
@@ -449,6 +459,7 @@
                 </div>
               </dt-chart-frame>
             </section>
+            </dt-under-the-hood>
 
             <dt-under-the-hood description="Method, assumptions and every source">
               <div class="dt-backtest__method">
@@ -493,5 +504,13 @@
     }
   }
 
-  <dt-next-stop path="/start" fragment="architecture" label="Back to the start" title="See how DETOUR works, under the hood"></dt-next-stop>
+  <p class="dt-hint">How DETOUR works, under the hood: <a routerLink="/start" fragment="architecture">the architecture on Start here</a>.</p>
+  <dt-next-stop path="/traffic" sign="1" label="Back to tomorrow" title="Tomorrow's grid: when is it jammed?"></dt-next-stop>
 </div>
+
+<ng-template #pending>
+  <p class="dt-answer dt-backtest__answer-pending">
+    {{ (heading$ | async)?.monthLabel }} replayed day by day on a simulated site, against a
+    <dt-term key="SIMPLE_SHAVER">Simple shaver</dt-term> and <dt-term key="PERFECT_HINDSIGHT">Perfect hindsight</dt-term>.
+  </p>
+</ng-template>
