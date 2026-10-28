@@ -152,8 +152,10 @@ export class BacktestComponent {
   }
 
   public onSiteChange(siteId: string): void {
+    const scheduleId = SitesHelper.getArchetype(siteId)?.scheduleId ?? this._controls$.value.scheduleId;
+
     this._selectedDate$.next(null);
-    this._controls$.next({ ...this._controls$.value, siteId });
+    this._controls$.next({ ...this._controls$.value, siteId, scheduleId });
   }
 
   public onScheduleChange(scheduleId: TariffScheduleId): void {

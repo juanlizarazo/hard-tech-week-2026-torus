@@ -205,6 +205,54 @@ export const glossary = {
     long: 'Drawing 1 kW for one hour uses 1 kWh. Energy charges bill every kWh, at a higher price in on-peak hours.',
     whyItMatters: 'Moving a kWh to a cheaper hour saves cents; trimming a kW of peak saves dollars.'
   },
+  SNAPSHOT: {
+    term: 'Snapshot',
+    short: 'A frozen copy of all the public grid data DETOUR uses.',
+    long: 'Every day at 3 p.m. Mountain time DETOUR pulls PACE demand, fuel mix, prices and weather once and saves them as one snapshot. Every screen reads the same snapshot, so the numbers agree and the demo works without waiting on outside websites.',
+    whyItMatters: 'Two people looking at the app at the same time see exactly the same numbers.'
+  },
+  DATA_ROWS: {
+    term: 'Rows',
+    short: 'One row is one hour of one data series, for example one hour of PACE demand.',
+    long: 'A full 31-day month holds about 744 hourly rows (31 days x 24 hours). A smaller count means the month is not finished yet, or some hours were missing and were dropped.',
+    whyItMatters: 'Row counts are a quick check that no month has holes in its data.'
+  },
+  FILTERED_ROWS: {
+    term: 'Rows filtered out',
+    short: 'Hours of source data that were thrown away because they looked wrong.',
+    long: 'EIA data sometimes has gaps, repeats or impossible values (for example a negative demand). DETOUR drops those hours instead of letting them distort the forecast and the plan.',
+    whyItMatters: 'A small number here means the data was clean; a big one would be a warning.'
+  },
+  SERIES_ID: {
+    term: 'Series',
+    short: 'The exact name of the data set pulled from the source, so anyone can find it again.',
+    long: 'For EIA this is the grid operator code (PACE) plus the measure, such as D for demand or DF for the day-ahead forecast. For CAISO it is the report name and price node.',
+    whyItMatters: 'It makes every number traceable to a public source.'
+  },
+  EMISSIONS_FACTOR: {
+    term: 'Emissions factor',
+    short: 'How many pounds of CO2 a power plant emits for each megawatt-hour it generates.',
+    long: 'Coal emits roughly twice as much per MWh as gas, and wind, solar and hydro emit almost none. DETOUR uses these figures to turn the fuel mix into a carbon number. They are public estimates, not measurements at each plant.',
+    whyItMatters: 'It is the bridge between what the grid is burning and the CO2 the plan tries to avoid.'
+  },
+  LP_SIZE: {
+    term: 'Intervals, variables, constraints',
+    short: 'How big the planning problem is: 15-minute steps, the numbers the solver chooses, and the rules it must obey.',
+    long: 'Intervals are the 15-minute steps in the 48 hours planned. Variables are the choices the solver makes (how hard to charge or discharge each machine in each step). Constraints are the rules, such as never drain Pulse below the reserve or exceed a machine limit. The solver finds the cheapest plan that breaks no rule.',
+    whyItMatters: 'It shows the plan comes from solving a real optimization, in milliseconds, in your browser.'
+  },
+  LOW_AT_PEAK: {
+    term: 'Low at peak',
+    short: 'How often a forecast was lower than the real demand on the busiest hour of the day.',
+    long: 'Under-forecasting the daily peak is the costly mistake, because the grid and the bill are set by that peak.',
+    whyItMatters: 'A forecast can look accurate overall and still miss the one hour that matters.'
+  },
+  LATTICE: {
+    term: 'Lattice',
+    short: "Torus's control software that runs a station in real time.",
+    long: 'DETOUR plans a day ahead and hands Lattice the dispatch orders. Lattice runs the real-time control, and Wattsmart calls override the plan.',
+    whyItMatters: 'DETOUR is a planning layer above Lattice, not a replacement for it.'
+  },
   THREE_CLOCKS: {
     term: 'Three clocks',
     short: 'The bill, the grid price and the carbon each say a different hour is expensive.',

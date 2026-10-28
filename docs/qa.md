@@ -22,7 +22,7 @@ The Plan screen annualizes the peak from the selected 48-hour scenario: it asks 
 
 ## Why July? Did you cherry-pick it?
 
-July is only the opening view. The year ledger at the top of Prove replays every month of 2026 from the same frozen snapshot, site and rate plan. July is not the strongest month for every site, and the winter months still earn; the ledger shows each month's saving and capture rate side by side.
+July is only the opening view. The year ledger at the top of Prove replays every month of 2026 from the same frozen snapshot, site and rate plan. July is not the strongest month for every site (September is), and the winter months still earn; the ledger shows each month's saving and capture rate side by side.
 
 ## Why is October partial?
 
@@ -51,3 +51,29 @@ No. It is a labeled, simulated Torus Station. It demonstrates the planning layer
 ## What would you build next?
 
 Validate the assumptions with a real site interval-data export, add exact rider and facilities-charge treatment from a full tariff sheet, and connect the plan to a production controller only after Torus validates the operating constraints.
+
+## Why not ERCOT or Electricity Maps?
+
+The bounty card lists EIA, CAISO, ERCOT, Open-Meteo and Electricity Maps as suggestions, not requirements. I use EIA (EIA-930 region and fuel-type data, EIA-860 plant capacity), CAISO OASIS (EDAM day-ahead price for PACE) and Open-Meteo (the previous-runs day-ahead forecast at three Wasatch Front points). ERCOT is the Texas grid and the site is in PACE, Utah. Electricity Maps gives only average carbon intensity, its free tier effectively covers one zone, and WattTime's own documentation says shifting load on average intensity would not reduce emissions. DETOUR computes marginal CO2 from EIA-930 instead (a Siler-Evans style regression).
+
+## Did storage pay in every month? What about the negative cells?
+
+Perfect hindsight saved money in every site, month and rate plan, so the hardware pays. DETOUR's replay is the part that can lose. The three small ski-resort losses on Schedule 6 (March, April, May) were a replay bug: the replay seeded its charging cap from the previous month's bill, so a falling load let it charge up to last month's peak and set this month's. It now starts each month at zero and may not charge above this month's load peak so far. The losses shrank from up to $2,109 to under $150. The one remaining cement-plant loss (July, Schedule 6, about $84) is unconfirmed; the likely cause is the CO2 weight buying carbon on a flat-rate schedule, which the screen labels as "Storage cost money this month" with the cause.
+
+## Why is June weak and September strong?
+
+The demand charge is most of the saving. In September the airport's evening peak is tall and narrow, so a small amount of stored energy shaves a large kW. In June the peak is flatter, so the same energy shaves fewer kW, and the saving is mostly smaller energy-price differences.
+
+## What is Lattice?
+
+Torus's control software that runs a station in real time. DETOUR is a planning layer above it: it hands Lattice a day of dispatch orders and Lattice still runs the real-time control. Wattsmart calls override the plan.
+
+## What does seed 42 mean?
+
+Every site load you see is simulated; there is no real customer. I generate it from a documented archetype (airport, cement plant, ski resort) plus seeded random noise. Seed 42 is a fixed seed, so the numbers are reproducible: re-run it anywhere and you get the same $11,546. The grid data underneath is real.
+
+Why 42: convention, the Hitchhiker's Guide number everyone uses as a default seed. Any number works; fixing it is what matters.
+
+Why simulate: a real meter would be one anonymous customer I could not show you. Three labeled archetypes through the same engine is a stronger proof that the method holds, and every synthetic number is labeled.
+
+Mechanism, if asked: each day's load is hashed from "42|<site-id>|<date>" (FNV-1a) into a mulberry32 stream, so each day is independent of the others and of the replay's end date.

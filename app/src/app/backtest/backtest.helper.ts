@@ -204,7 +204,7 @@ export class BacktestHelper {
       {
         id: 'capture',
         label: 'Capture rate',
-        value: capture === null ? 'Not available' : `${BacktestHelper.formatNumber(capture * 100)}%`,
+        value: capture === null ? 'Not available' : BacktestHelper.isLoss(result) ? 'Cost money' : `${BacktestHelper.formatNumber(capture * 100)}%`,
         hint:
           capture === null
             ? `${oracleName} could not be solved for this site.`
@@ -274,6 +274,19 @@ export class BacktestHelper {
     }));
   }
 
+  public static isLoss(result: IBacktestResult): boolean {
+    return result.lead.savings.total < 0;
+  }
+
+  public static lossCause(result: IBacktestResult): string {
+    const lossLabel = BacktestHelper.formatMoney(-result.lead.savings.total);
+    const avoidedKg = -result.lead.traffic.netKgCo2Change;
+
+    return avoidedKg > 0.5
+      ? `The ${lossLabel} loss bought ${BacktestHelper.formatNumber(avoidedKg)} kg less CO2; lower the CO2 weight on the Plan to stop paying for it.`
+      : `The ${lossLabel} loss came from a new peak set against a forecast.`;
+  }
+
   public static captureGauge(result: IBacktestResult): IBacktestCaptureGauge {
     const capture = result.lead.captureRate;
     const ordered = [result.lead, result.shaver, result.oracle].filter(
@@ -297,7 +310,8 @@ export class BacktestHelper {
 
     return {
       isAvailable: capture !== null && result.oracle !== null,
-      valueLabel: capture === null ? 'Not available' : `${BacktestHelper.formatNumber(capture * 100)}%`,
+      valueLabel: capture === null ? 'Not available' : BacktestHelper.isLoss(result) ? 'Cost money' : `${BacktestHelper.formatNumber(capture * 100)}%`,
+      lossCause: BacktestHelper.isLoss(result) ? BacktestHelper.lossCause(result) : '',
       oracleSavingsLabel: result.oracle ? BacktestHelper.formatMoney(result.oracle.savings.total) : '',
       bars,
     };

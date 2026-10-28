@@ -1,6 +1,4 @@
-import { TimeHelper } from '../helpers/time.helper';
-import { IInterval, IPlanInterval, IPlanResult, ISiteLoadInterval } from '../models';
-import { SiteGeneratorHelper } from '../sites/site-generator.helper';
+import { IInterval, IPlanInterval, IPlanResult } from '../models';
 import { PlanEngineHelper } from '../plan/plan-engine.helper';
 import { ILpInput } from '../plan/plan-engine.interfaces';
 import { TariffHelper } from '../tariff/tariff.helper';
@@ -35,7 +33,7 @@ export class LpStrategyHelper {
   public static oracle(solver: ILpSolver): IBacktestStrategy {
     return {
       id: 'oracle',
-      label: 'Perfect-foresight oracle',
+      label: 'Perfect-hindsight oracle',
       description:
         'Solves the whole month at once knowing every interval in advance and minimizing only the bill, without carbon or wear costs. No real controller can do this; it is the ceiling on bill savings the others are measured against.',
       role: 'oracle',
@@ -85,9 +83,9 @@ export class LpStrategyHelper {
       spinSocKwh: input.initialSpinSocKwh,
       pulseNetKw: 0,
       billedPeakKw: 0,
-      billedLoadPeakKw: LpStrategyHelper.recentBilledLoadPeakKw(input),
+      billedLoadPeakKw: 0,
       facilitiesPeakKw: 0,
-      facilitiesLoadPeakKw: LpStrategyHelper.recentAverageDailyPeakKw(input),
+      facilitiesLoadPeakKw: 0,
     };
 
     for (const [startIndex, endIndex] of LpStrategyHelper.dayRanges(input.intervals)) {
@@ -121,48 +119,6 @@ export class LpStrategyHelper {
     }
 
     return replayed;
-  }
-
-  public static recentBilledLoadPeakKw(input: IBacktestInput): number {
-    const firstDate = input.intervals[0]?.localDate;
-    const isOnPeakBasis = input.schedule.demandBasis === 'on-peak';
-    let peakKw = 0;
-
-    if (!firstDate) {
-      return peakKw;
-    }
-
-    for (let daysBack = 1; daysBack <= backtestSettings.RECENT_LOAD_PEAK_DAYS; daysBack++) {
-      const date = TimeHelper.addDays(firstDate, -daysBack);
-      const intervals = TimeHelper.localDayIntervals(date);
-      const onPeakMask = TariffHelper.onPeakMask(input.schedule, intervals);
-      const loads = SiteGeneratorHelper.generateDay(input.site, date);
-
-      loads.forEach((load: ISiteLoadInterval, index: number) => {
-        if (!isOnPeakBasis || onPeakMask[index]) {
-          peakKw = Math.max(peakKw, load.kw);
-        }
-      });
-    }
-
-    return peakKw;
-  }
-
-  public static recentAverageDailyPeakKw(input: IBacktestInput): number {
-    const firstDate = input.intervals[0]?.localDate;
-
-    if (!firstDate) {
-      return 0;
-    }
-
-    let totalKw = 0;
-
-    for (let daysBack = 1; daysBack <= backtestSettings.RECENT_LOAD_PEAK_DAYS; daysBack++) {
-      const loads = SiteGeneratorHelper.generateDay(input.site, TimeHelper.addDays(firstDate, -daysBack));
-      totalKw += Math.max(...loads.map((load: ISiteLoadInterval) => load.kw));
-    }
-
-    return totalKw / backtestSettings.RECENT_LOAD_PEAK_DAYS;
   }
 
   public static async solveWithFallback(solver: ILpSolver, lpInput: ILpInput): Promise<IPlanInterval[]> {

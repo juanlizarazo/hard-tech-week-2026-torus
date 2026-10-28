@@ -122,6 +122,7 @@ export interface IBacktestCaptureGauge {
   isAvailable: boolean;
   valueLabel: string;
   oracleSavingsLabel: string;
+  lossCause: string;
   bars: IBacktestCaptureBar[];
 }
 

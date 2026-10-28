@@ -12,5 +12,6 @@ export class NextStopComponent {
   @Input({ required: true }) public path = '';
   @Input({ required: true }) public title = '';
   @Input() public sign = '';
+  @Input() public fragment: string | undefined;
   @Input() public label = 'Next stop';
 }

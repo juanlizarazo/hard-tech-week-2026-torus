@@ -27,8 +27,8 @@
       "siteId": "airport",
       "scheduleId": "schedule-8",
       "savedUsd": 10649,
-      "captureRate": 0.6869876609632409,
-      "demandShare": 0.8438127398080971,
+      "captureRate": 0.687000563181842,
+      "demandShare": 0.8437968925773803,
       "peakKw": 1189,
       "wattsmartKwh": 897
     },
@@ -36,9 +36,9 @@
       "month": "2026-01",
       "siteId": "airport",
       "scheduleId": "schedule-6",
-      "savedUsd": 8620,
-      "captureRate": 0.7685830225203095,
-      "demandShare": 0.7632247541131949,
+      "savedUsd": 8621,
+      "captureRate": 0.7686873451321911,
+      "demandShare": 0.7631211728583376,
       "peakKw": 1279,
       "wattsmartKwh": 1225
     },
@@ -46,9 +46,9 @@
       "month": "2026-01",
       "siteId": "ski-resort",
       "scheduleId": "schedule-8",
-      "savedUsd": 5404,
-      "captureRate": 0.7456315957213439,
-      "demandShare": 0.9799847901428284,
+      "savedUsd": 5406,
+      "captureRate": 0.7458564831741417,
+      "demandShare": 0.9796893093255297,
       "peakKw": 504,
       "wattsmartKwh": 300
     },
@@ -56,9 +56,9 @@
       "month": "2026-01",
       "siteId": "ski-resort",
       "scheduleId": "schedule-6",
-      "savedUsd": 829,
-      "captureRate": 0.3177017062439638,
-      "demandShare": 0.7732580582899053,
+      "savedUsd": 830,
+      "captureRate": 0.3180274716009259,
+      "demandShare": 0.7724659861896097,
       "peakKw": 884,
       "wattsmartKwh": 237
     },
@@ -67,48 +67,48 @@
       "siteId": "cement-plant",
       "scheduleId": "schedule-8",
       "savedUsd": 6439,
-      "captureRate": 0.2580966341234062,
-      "demandShare": 0.9737353783459749,
+      "captureRate": 0.2580810018145503,
+      "demandShare": 0.9737943587903751,
       "peakKw": 3461,
-      "wattsmartKwh": 1498
+      "wattsmartKwh": 1079
     },
     {
       "month": "2026-02",
       "siteId": "cement-plant",
       "scheduleId": "schedule-6",
-      "savedUsd": 2574,
-      "captureRate": 0.12891988854546219,
-      "demandShare": 0.7768804673782999,
+      "savedUsd": 2576,
+      "captureRate": 0.12898749441625584,
+      "demandShare": 0.7764732830947584,
       "peakKw": 3798,
-      "wattsmartKwh": 1116
+      "wattsmartKwh": 1000
     },
     {
       "month": "2026-02",
       "siteId": "airport",
       "scheduleId": "schedule-8",
-      "savedUsd": 9398,
-      "captureRate": 0.6404993205086439,
-      "demandShare": 0.885722099026589,
-      "peakKw": 1218,
-      "wattsmartKwh": 964
+      "savedUsd": 9236,
+      "captureRate": 0.6294563932844173,
+      "demandShare": 0.9030787637304634,
+      "peakKw": 1216,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-02",
       "siteId": "airport",
       "scheduleId": "schedule-6",
-      "savedUsd": 8064,
-      "captureRate": 0.7634017022331989,
-      "demandShare": 0.7635719954367344,
-      "peakKw": 1296,
-      "wattsmartKwh": 1098
+      "savedUsd": 2524,
+      "captureRate": 0.2389165989036111,
+      "demandShare": 0.7654822375250608,
+      "peakKw": 1626,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-02",
       "siteId": "ski-resort",
       "scheduleId": "schedule-8",
       "savedUsd": 4861,
-      "captureRate": 0.6998704196962061,
-      "demandShare": 0.9807424474639732,
+      "captureRate": 0.6998732992585127,
+      "demandShare": 0.9807384122921968,
       "peakKw": 508,
       "wattsmartKwh": 326
     },
@@ -117,8 +117,8 @@
       "siteId": "ski-resort",
       "scheduleId": "schedule-6",
       "savedUsd": 844,
-      "captureRate": 0.2799661539993032,
-      "demandShare": 0.7962001611909164,
+      "captureRate": 0.27997279047002804,
+      "demandShare": 0.7961812880745253,
       "peakKw": 883,
       "wattsmartKwh": 352
     },
@@ -126,49 +126,49 @@
       "month": "2026-03",
       "siteId": "cement-plant",
       "scheduleId": "schedule-8",
-      "savedUsd": 4153,
-      "captureRate": 0.16436916174513802,
-      "demandShare": 0.9521844239400535,
+      "savedUsd": 4150,
+      "captureRate": 0.16425240654240747,
+      "demandShare": 0.9528612632497127,
       "peakKw": 3711,
-      "wattsmartKwh": 2739
+      "wattsmartKwh": 476
     },
     {
       "month": "2026-03",
       "siteId": "cement-plant",
       "scheduleId": "schedule-6",
-      "savedUsd": 550,
-      "captureRate": 0.028154453431863253,
-      "demandShare": 0.8393561880512866,
-      "peakKw": 3941,
-      "wattsmartKwh": 2913
+      "savedUsd": 249,
+      "captureRate": 0.012753862436680002,
+      "demandShare": 0.9470451260639151,
+      "peakKw": 3958,
+      "wattsmartKwh": 476
     },
     {
       "month": "2026-03",
       "siteId": "airport",
       "scheduleId": "schedule-8",
-      "savedUsd": 10943,
-      "captureRate": 0.692775126704962,
-      "demandShare": 0.8279071042495739,
-      "peakKw": 1208,
-      "wattsmartKwh": 919
+      "savedUsd": 10274,
+      "captureRate": 0.6503747023082269,
+      "demandShare": 0.8411171470370374,
+      "peakKw": 1236,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-03",
       "siteId": "airport",
       "scheduleId": "schedule-6",
-      "savedUsd": 8525,
-      "captureRate": 0.7375623666044623,
-      "demandShare": 0.7630905405595619,
-      "peakKw": 1309,
-      "wattsmartKwh": 1225
+      "savedUsd": 3281,
+      "captureRate": 0.28387522093804907,
+      "demandShare": 0.7614881050341032,
+      "peakKw": 1621,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-03",
       "siteId": "ski-resort",
       "scheduleId": "schedule-8",
-      "savedUsd": 2276,
-      "captureRate": 0.3495985669469887,
-      "demandShare": 1.1160441202320268,
+      "savedUsd": 2483,
+      "captureRate": 0.38149352145738785,
+      "demandShare": 1.0227366996750173,
       "peakKw": 460,
       "wattsmartKwh": 300
     },
@@ -176,81 +176,81 @@
       "month": "2026-03",
       "siteId": "ski-resort",
       "scheduleId": "schedule-6",
-      "savedUsd": -1014,
-      "captureRate": -0.3441635765925614,
+      "savedUsd": -111,
+      "captureRate": -0.03771530154939086,
       "demandShare": 0,
-      "peakKw": 757,
+      "peakKw": 703,
       "wattsmartKwh": 300
     },
     {
       "month": "2026-04",
       "siteId": "cement-plant",
       "scheduleId": "schedule-8",
-      "savedUsd": 5084,
-      "captureRate": 0.19426686363806583,
-      "demandShare": 0.9654142792231932,
+      "savedUsd": 5066,
+      "captureRate": 0.1935977671819461,
+      "demandShare": 0.9687508635357001,
       "peakKw": 3606,
-      "wattsmartKwh": 1000
+      "wattsmartKwh": 1007
     },
     {
       "month": "2026-04",
       "siteId": "cement-plant",
       "scheduleId": "schedule-6",
-      "savedUsd": -105,
-      "captureRate": -0.005279290096261119,
-      "demandShare": 0,
-      "peakKw": 3984,
-      "wattsmartKwh": 952
+      "savedUsd": 2497,
+      "captureRate": 0.12564015984307558,
+      "demandShare": 0.7707231888237368,
+      "peakKw": 3834,
+      "wattsmartKwh": 97
     },
     {
       "month": "2026-04",
       "siteId": "airport",
       "scheduleId": "schedule-8",
-      "savedUsd": 9523,
-      "captureRate": 0.627110987308229,
-      "demandShare": 0.8358271333987892,
-      "peakKw": 1262,
-      "wattsmartKwh": 834
+      "savedUsd": 5323,
+      "captureRate": 0.3505518118354238,
+      "demandShare": 0.8350584601974723,
+      "peakKw": 1498,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-04",
       "siteId": "airport",
       "scheduleId": "schedule-6",
-      "savedUsd": 8160,
-      "captureRate": 0.7355269467770955,
-      "demandShare": 0.7627274431874584,
-      "peakKw": 1311,
-      "wattsmartKwh": 1175
+      "savedUsd": 2901,
+      "captureRate": 0.2614992987023289,
+      "demandShare": 0.7631885556704585,
+      "peakKw": 1624,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-04",
       "siteId": "ski-resort",
       "scheduleId": "schedule-8",
-      "savedUsd": 515,
-      "captureRate": 0.08734712980485522,
-      "demandShare": 2.3969326344399144,
+      "savedUsd": 1038,
+      "captureRate": 0.1760169301833425,
+      "demandShare": 1.1894605009633912,
       "peakKw": 272,
-      "wattsmartKwh": 300
+      "wattsmartKwh": 242
     },
     {
       "month": "2026-04",
       "siteId": "ski-resort",
       "scheduleId": "schedule-6",
-      "savedUsd": -1419,
-      "captureRate": -0.6949356677046002,
+      "savedUsd": -147,
+      "captureRate": -0.07209721324638192,
       "demandShare": 0,
-      "peakKw": 481,
-      "wattsmartKwh": 300
+      "peakKw": 407,
+      "wattsmartKwh": 242
     },
     {
       "month": "2026-05",
       "siteId": "cement-plant",
       "scheduleId": "schedule-8",
-      "savedUsd": 3902,
-      "captureRate": 0.14687173340972082,
-      "demandShare": 0.9546777930412318,
+      "savedUsd": 3899,
+      "captureRate": 0.146774241511147,
+      "demandShare": 0.9553119189587741,
       "peakKw": 3676,
-      "wattsmartKwh": 2175
+      "wattsmartKwh": 2109
     },
     {
       "month": "2026-05",
@@ -260,65 +260,65 @@
       "captureRate": 0.14172010686046582,
       "demandShare": 0.7753880647893362,
       "peakKw": 3813,
-      "wattsmartKwh": 2299
+      "wattsmartKwh": 1785
     },
     {
       "month": "2026-05",
       "siteId": "airport",
       "scheduleId": "schedule-8",
-      "savedUsd": 7932,
-      "captureRate": 0.5372352351091234,
-      "demandShare": 0.8517306288462096,
-      "peakKw": 1319,
-      "wattsmartKwh": 914
+      "savedUsd": 3567,
+      "captureRate": 0.24158994064443765,
+      "demandShare": 0.8150294527480353,
+      "peakKw": 1577,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-05",
       "siteId": "airport",
       "scheduleId": "schedule-6",
-      "savedUsd": 7783,
-      "captureRate": 0.7238652154421108,
-      "demandShare": 0.7640940308767692,
-      "peakKw": 1308,
-      "wattsmartKwh": 1234
+      "savedUsd": 1940,
+      "captureRate": 0.1804261406442708,
+      "demandShare": 0.7686034343215643,
+      "peakKw": 1656,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-05",
       "siteId": "ski-resort",
       "scheduleId": "schedule-8",
-      "savedUsd": 543,
-      "captureRate": 0.19682892967314197,
-      "demandShare": 2.2738724470063905,
-      "peakKw": 83,
-      "wattsmartKwh": 700
+      "savedUsd": 163,
+      "captureRate": 0.05901351728537821,
+      "demandShare": 0.7687960687960688,
+      "peakKw": 157,
+      "wattsmartKwh": 4
     },
     {
       "month": "2026-05",
       "siteId": "ski-resort",
       "scheduleId": "schedule-6",
-      "savedUsd": -2109,
-      "captureRate": -4.8684198374584415,
+      "savedUsd": -41,
+      "captureRate": -0.09410786848910233,
       "demandShare": 0,
-      "peakKw": 298,
-      "wattsmartKwh": 349
+      "peakKw": 180,
+      "wattsmartKwh": 4
     },
     {
       "month": "2026-06",
       "siteId": "cement-plant",
       "scheduleId": "schedule-8",
-      "savedUsd": 4618,
-      "captureRate": 0.16474467106819057,
-      "demandShare": 0.9935931440795585,
+      "savedUsd": 4637,
+      "captureRate": 0.16542063042216604,
+      "demandShare": 0.9895330182169473,
       "peakKw": 3628,
-      "wattsmartKwh": 2404
+      "wattsmartKwh": 2161
     },
     {
       "month": "2026-06",
       "siteId": "cement-plant",
       "scheduleId": "schedule-6",
-      "savedUsd": 4502,
-      "captureRate": 0.2068511162627869,
-      "demandShare": 0.7900897299218196,
+      "savedUsd": 4503,
+      "captureRate": 0.2068717903482343,
+      "demandShare": 0.7900107709561722,
       "peakKw": 3724,
       "wattsmartKwh": 1502
     },
@@ -326,58 +326,58 @@
       "month": "2026-06",
       "siteId": "airport",
       "scheduleId": "schedule-8",
-      "savedUsd": 6391,
-      "captureRate": 0.37575002836951993,
-      "demandShare": 0.8373777900179011,
-      "peakKw": 1753,
+      "savedUsd": 3586,
+      "captureRate": 0.21082169301063228,
+      "demandShare": 0.7631937840076528,
+      "peakKw": 1908,
       "wattsmartKwh": 800
     },
     {
       "month": "2026-06",
       "siteId": "airport",
       "scheduleId": "schedule-6",
-      "savedUsd": 6108,
-      "captureRate": 0.4665691479204064,
-      "demandShare": 0.780802182024168,
-      "peakKw": 1742,
+      "savedUsd": 2344,
+      "captureRate": 0.179075736164687,
+      "demandShare": 0.7880454023895546,
+      "peakKw": 1943,
       "wattsmartKwh": 800
     },
     {
       "month": "2026-06",
       "siteId": "ski-resort",
       "scheduleId": "schedule-8",
-      "savedUsd": 424,
-      "captureRate": 0.17505211235630402,
-      "demandShare": 0.8905421019123301,
+      "savedUsd": 426,
+      "captureRate": 0.1757538232926754,
+      "demandShare": 0.8869865426618756,
       "peakKw": 146,
-      "wattsmartKwh": 538
+      "wattsmartKwh": 431
     },
     {
       "month": "2026-06",
       "siteId": "ski-resort",
       "scheduleId": "schedule-6",
-      "savedUsd": 77,
-      "captureRate": 0.1727847673921361,
-      "demandShare": 0.9735573791845773,
-      "peakKw": 174,
-      "wattsmartKwh": 773
+      "savedUsd": 128,
+      "captureRate": 0.2875694897706556,
+      "demandShare": 0.8949675197620724,
+      "peakKw": 171,
+      "wattsmartKwh": 606
     },
     {
       "month": "2026-07",
       "siteId": "cement-plant",
       "scheduleId": "schedule-8",
-      "savedUsd": 5103,
-      "captureRate": 0.18876834069235868,
-      "demandShare": 0.9742990837337263,
+      "savedUsd": 5120,
+      "captureRate": 0.1893753354469031,
+      "demandShare": 0.9711762143706798,
       "peakKw": 3622,
-      "wattsmartKwh": 1335
+      "wattsmartKwh": 1162
     },
     {
       "month": "2026-07",
       "siteId": "cement-plant",
       "scheduleId": "schedule-6",
-      "savedUsd": -85,
-      "captureRate": -0.0037849602990091833,
+      "savedUsd": -84,
+      "captureRate": -0.0037572676463612526,
       "demandShare": 0,
       "peakKw": 3973,
       "wattsmartKwh": 1623
@@ -387,80 +387,80 @@
       "siteId": "airport",
       "scheduleId": "schedule-8",
       "savedUsd": 11546,
-      "captureRate": 0.7627763603476,
-      "demandShare": 0.8546955248958522,
+      "captureRate": 0.7627519168339175,
+      "demandShare": 0.8547229148784875,
       "peakKw": 1365,
-      "wattsmartKwh": 966
+      "wattsmartKwh": 946
     },
     {
       "month": "2026-07",
       "siteId": "airport",
       "scheduleId": "schedule-6",
-      "savedUsd": 10225,
-      "captureRate": 0.8930591511111577,
-      "demandShare": 0.7887259753621544,
-      "peakKw": 1395,
-      "wattsmartKwh": 1018
+      "savedUsd": 1291,
+      "captureRate": 0.11272285166280617,
+      "demandShare": 0.805904230590423,
+      "peakKw": 1880,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-07",
       "siteId": "ski-resort",
       "scheduleId": "schedule-8",
       "savedUsd": 384,
-      "captureRate": 0.17793271389749213,
-      "demandShare": 0.9035749596711246,
+      "captureRate": 0.17799752781211373,
+      "demandShare": 0.9032459425717851,
       "peakKw": 145,
-      "wattsmartKwh": 620
+      "wattsmartKwh": 475
     },
     {
       "month": "2026-07",
       "siteId": "ski-resort",
       "scheduleId": "schedule-6",
-      "savedUsd": 51,
-      "captureRate": 0.1235453184605727,
-      "demandShare": 1.0760211061168654,
-      "peakKw": 173,
-      "wattsmartKwh": 806
+      "savedUsd": 122,
+      "captureRate": 0.2941957602974552,
+      "demandShare": 0.9027492819039803,
+      "peakKw": 169,
+      "wattsmartKwh": 586
     },
     {
       "month": "2026-08",
       "siteId": "cement-plant",
       "scheduleId": "schedule-8",
-      "savedUsd": 7110,
-      "captureRate": 0.2586220692966312,
-      "demandShare": 0.9741069419441944,
-      "peakKw": 3411,
-      "wattsmartKwh": 2000
+      "savedUsd": 3271,
+      "captureRate": 0.11897218968916175,
+      "demandShare": 0.9864259618765192,
+      "peakKw": 3630,
+      "wattsmartKwh": 1151
     },
     {
       "month": "2026-08",
       "siteId": "cement-plant",
       "scheduleId": "schedule-6",
-      "savedUsd": 2925,
-      "captureRate": 0.1322744455514096,
-      "demandShare": 0.7975910452251684,
+      "savedUsd": 2926,
+      "captureRate": 0.13230700630548048,
+      "demandShare": 0.7973947580700291,
       "peakKw": 3790,
-      "wattsmartKwh": 1853
+      "wattsmartKwh": 1000
     },
     {
       "month": "2026-08",
       "siteId": "airport",
       "scheduleId": "schedule-8",
-      "savedUsd": 12430,
-      "captureRate": 0.7318846467722505,
-      "demandShare": 0.8608681520955618,
-      "peakKw": 1389,
-      "wattsmartKwh": 995
+      "savedUsd": 12576,
+      "captureRate": 0.740467602389591,
+      "demandShare": 0.859599947518458,
+      "peakKw": 1383,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-08",
       "siteId": "airport",
       "scheduleId": "schedule-6",
-      "savedUsd": 11589,
-      "captureRate": 0.8855580917127772,
-      "demandShare": 0.7862826364026242,
-      "peakKw": 1396,
-      "wattsmartKwh": 1085
+      "savedUsd": 4377,
+      "captureRate": 0.33448670325967095,
+      "demandShare": 0.7822347213623352,
+      "peakKw": 1788,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-08",
@@ -470,7 +470,7 @@
       "captureRate": 0.19685853369159367,
       "demandShare": 0.9088653032283797,
       "peakKw": 142,
-      "wattsmartKwh": 603
+      "wattsmartKwh": 601
     },
     {
       "month": "2026-08",
@@ -480,35 +480,35 @@
       "captureRate": 0.1238663608881476,
       "demandShare": 1.097412160740585,
       "peakKw": 175,
-      "wattsmartKwh": 690
+      "wattsmartKwh": 601
     },
     {
       "month": "2026-09",
       "siteId": "cement-plant",
       "scheduleId": "schedule-8",
-      "savedUsd": 5286,
-      "captureRate": 0.19535128682279412,
-      "demandShare": 0.9494306239014986,
+      "savedUsd": 5293,
+      "captureRate": 0.1956085220248402,
+      "demandShare": 0.9481820741152219,
       "peakKw": 3691,
-      "wattsmartKwh": 1059
+      "wattsmartKwh": 1015
     },
     {
       "month": "2026-09",
       "siteId": "cement-plant",
       "scheduleId": "schedule-6",
-      "savedUsd": 3032,
-      "captureRate": 0.14057466665986765,
-      "demandShare": 0.7985325396956258,
-      "peakKw": 3822,
-      "wattsmartKwh": 1000
+      "savedUsd": 796,
+      "captureRate": 0.0369157710919946,
+      "demandShare": 0.8843207675113645,
+      "peakKw": 3941,
+      "wattsmartKwh": 901
     },
     {
       "month": "2026-09",
       "siteId": "airport",
       "scheduleId": "schedule-8",
-      "savedUsd": 13001,
-      "captureRate": 0.7802972920090318,
-      "demandShare": 0.7749808085485418,
+      "savedUsd": 13000,
+      "captureRate": 0.7802828871632417,
+      "demandShare": 0.7749951155123636,
       "peakKw": 1418,
       "wattsmartKwh": 994
     },
@@ -516,71 +516,71 @@
       "month": "2026-09",
       "siteId": "airport",
       "scheduleId": "schedule-6",
-      "savedUsd": 11342,
-      "captureRate": 0.883608164053918,
-      "demandShare": 0.7862402793207427,
-      "peakKw": 1401,
-      "wattsmartKwh": 991
+      "savedUsd": 3642,
+      "captureRate": 0.28376771805063655,
+      "demandShare": 0.7840972111641289,
+      "peakKw": 1819,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-09",
       "siteId": "ski-resort",
       "scheduleId": "schedule-8",
       "savedUsd": 456,
-      "captureRate": 0.21660043018104638,
-      "demandShare": 0.8980227103336402,
+      "captureRate": 0.21656719323485701,
+      "demandShare": 0.8981605314507466,
       "peakKw": 141,
-      "wattsmartKwh": 576
+      "wattsmartKwh": 375
     },
     {
       "month": "2026-09",
       "siteId": "ski-resort",
       "scheduleId": "schedule-6",
-      "savedUsd": 136,
-      "captureRate": 0.25176549090841693,
-      "demandShare": 0.8854450415961127,
-      "peakKw": 175,
-      "wattsmartKwh": 766
+      "savedUsd": 161,
+      "captureRate": 0.2981779763118385,
+      "demandShare": 0.8698327842357183,
+      "peakKw": 173,
+      "wattsmartKwh": 544
     },
     {
       "month": "2026-10",
       "siteId": "cement-plant",
       "scheduleId": "schedule-8",
-      "savedUsd": 4546,
-      "captureRate": 0.17414635828053535,
-      "demandShare": 0.9786438433603228,
+      "savedUsd": 4540,
+      "captureRate": 0.17392610071325146,
+      "demandShare": 0.9798831841567412,
       "peakKw": 3679,
-      "wattsmartKwh": 2497
+      "wattsmartKwh": 2291
     },
     {
       "month": "2026-10",
       "siteId": "cement-plant",
       "scheduleId": "schedule-6",
-      "savedUsd": 3292,
-      "captureRate": 0.16061145164139282,
-      "demandShare": 0.7672651598007049,
+      "savedUsd": 3293,
+      "captureRate": 0.1606587821518109,
+      "demandShare": 0.7670391214157938,
       "peakKw": 3787,
-      "wattsmartKwh": 1743
+      "wattsmartKwh": 1322
     },
     {
       "month": "2026-10",
       "siteId": "airport",
       "scheduleId": "schedule-8",
-      "savedUsd": 9172,
-      "captureRate": 0.6082904839564371,
-      "demandShare": 0.8297031883564968,
-      "peakKw": 1264,
-      "wattsmartKwh": 870
+      "savedUsd": 9171,
+      "captureRate": 0.6082573230817594,
+      "demandShare": 0.8269996325497667,
+      "peakKw": 1266,
+      "wattsmartKwh": 845
     },
     {
       "month": "2026-10",
       "siteId": "airport",
       "scheduleId": "schedule-6",
-      "savedUsd": 6275,
-      "captureRate": 0.565229492662504,
-      "demandShare": 0.7700582141189557,
-      "peakKw": 1398,
-      "wattsmartKwh": 973
+      "savedUsd": 1311,
+      "captureRate": 0.11804937542109985,
+      "demandShare": 0.7962565906437656,
+      "peakKw": 1693,
+      "wattsmartKwh": 800
     },
     {
       "month": "2026-10",
@@ -590,17 +590,17 @@
       "captureRate": 0.02395925108167975,
       "demandShare": 1.064761054041983,
       "peakKw": 165,
-      "wattsmartKwh": 237
+      "wattsmartKwh": 227
     },
     {
       "month": "2026-10",
       "siteId": "ski-resort",
       "scheduleId": "schedule-6",
       "savedUsd": 121,
-      "captureRate": 0.2869189342403628,
-      "demandShare": 0.8604593726846135,
+      "captureRate": 0.28694255479969766,
+      "demandShare": 0.8603885413236746,
       "peakKw": 171,
-      "wattsmartKwh": 687
+      "wattsmartKwh": 607
     }
   ]
 }

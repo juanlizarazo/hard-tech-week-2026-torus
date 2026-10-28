@@ -1,0 +1,73 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.surface {
+  position: relative;
+  width: 100%;
+  max-height: 660px;
+}
+
+.surface__legend {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 42ch;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--dt-ink);
+  border-radius: var(--dt-radius-tag);
+  background: var(--dt-panel);
+  font-size: var(--dt-text-13);
+  line-height: 1.4;
+  color: var(--dt-ink);
+  pointer-events: none;
+}
+
+.surface__legend-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: var(--dt-text-15);
+    font-weight: 800;
+  }
+}
+
+.surface__legend-tower {
+  flex: none;
+  width: 10px;
+  height: 18px;
+  border: 1px solid var(--dt-ink);
+  border-top-width: 4px;
+  background: var(--dt-muted);
+}
+
+.surface--fill {
+  position: absolute;
+  inset: 0;
+  max-height: none;
+}
+
+.surface--fill .surface__legend {
+  top: 84px;
+  bottom: auto;
+}
+
+.surface__svg--fill {
+  position: absolute;
+  inset: 0 0 0 36%;
+}
+
+@media (max-width: 767.98px) {
+  .surface--fill,
+  .surface__svg--fill {
+    position: relative;
+    inset: auto;
+  }
+}

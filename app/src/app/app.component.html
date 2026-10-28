@@ -13,13 +13,14 @@
 
 <a class="dt-shell__skip" href="#main">Skip to content</a>
 
-<div class="dt-shell">
+<div class="dt-shell" [class.dt-shell--home]="isHome$ | async">
   <div class="dt-shell__progress">
     @if (isLoading$ | async) {
       <mat-progress-bar mode="indeterminate" aria-label="Loading"></mat-progress-bar>
     }
   </div>
 
+  @if (!(isHome$ | async)) {
   <header class="dt-shell__header">
     <div class="dt-shell__bar">
       <a class="dt-shell__brand" routerLink="/start" aria-label="DETOUR, start here">
@@ -63,6 +64,7 @@
       </ol>
     </nav>
   </header>
+  }
 
   <main class="dt-shell__main" id="main" tabindex="-1">
     <router-outlet />

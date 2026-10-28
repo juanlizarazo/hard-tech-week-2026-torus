@@ -78,4 +78,16 @@ describe('plan replay with a real-time cap', () => {
     });
     expect(result.state.facilitiesPeakKw).toBeLessThanOrEqual(1000 + epsilon);
   });
+
+  it('starts each month with no charging headroom beyond the load already seen this month', () => {
+    const loadKw = [200, 180, 150, 150, 120, 100, 100, 100];
+    const planned = loadKw.map(() => ({ ...plannedInterval(700), pulseChargeKw: 500 }));
+    const result = PlanReplayHelper.replayDay(replayInput(loadKw, planned, 1000, 0));
+    let loadPeakSoFarKw = 0;
+
+    result.intervals.forEach((interval: IPlanInterval, index: number) => {
+      loadPeakSoFarKw = Math.max(loadPeakSoFarKw, loadKw[index]);
+      expect(interval.gridKw).toBeLessThanOrEqual(loadPeakSoFarKw + epsilon);
+    });
+  });
 });

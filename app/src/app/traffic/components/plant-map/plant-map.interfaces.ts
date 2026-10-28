@@ -158,8 +158,19 @@ export interface IHourlyMix {
   endDate: string;
 }
 
+export interface IPlantGeo {
+  id: string;
+  lon: number;
+  lat: number;
+  capacityMw: number;
+  fuelKey: string;
+  title: string;
+}
+
 export interface IPlantMapData {
   height: number;
+  geoPlants: IPlantGeo[];
+  geoStates: IStateOutline[];
   statePaths: IStatePath[];
   stateLabelMarks: IStateLabelMark[];
   plantMarks: IPlantMark[];
