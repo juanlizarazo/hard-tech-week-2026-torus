@@ -2,9 +2,31 @@
 
 **A day-ahead rush-hour planner for hybrid storage on Utah's grid.**
 
-**Live:** https://hard-tech-week-2026-torus.web.app
+## Live at [detourgrid.com](https://detourgrid.com)
 
-Built solo for the Torus bounty (Option 1: Rush Hour for Electrons) at the Hard Tech Hackathon, Hard Tech Week 2026, Salt Lake City.
+Also at https://hard-tech-week-2026-torus.web.app
+
+> Built solo by [Juan Lizarazo](https://juanlizarazo.com) for the **Torus bounty (Option 1: Rush Hour for Electrons)** at the Hard Tech Hackathon, Hard Tech Week 2026, Salt Lake City.
+
+> "Build software that knows when the grid is jammed and stays out of traffic."
+> — the bounty
+
+DETOUR reads tomorrow's real Utah grid, plans a Torus Station around it, then replays the whole year to show what that plan would have earned.
+
+![DETOUR start screen: $16.84 per kW vs 3.1¢ per kWh over a map of PACE power plants](docs/screenshots/start.png)
+
+## Results
+
+On a simulated 2 MW regional airport on Rocky Mountain Power Schedule 8, replayed day by day against real 2026 PACE data:
+
+| | |
+|---|---|
+| **Saved Jan 1 to Oct 26, 2026** | **$88,928** vs no storage, 57% of the perfect-hindsight ceiling |
+| Best month | September, $13,000 |
+| July | $11,546, 76% of perfect hindsight, 85% of it from the demand charge, 946 kWh held for Wattsmart |
+| Tomorrow's plan | 192 fifteen-minute steps, 1,346 variables, 1,240 constraints, solved in the browser in about 50 ms |
+
+The site load and Torus asset parameters are simulated (seed 42, reproducible anywhere). The grid data, prices and tariffs are real. Perfect hindsight is the same planner told the whole month in advance; no real controller can match it, so it is the 100% mark.
 
 ## The problem
 
@@ -20,7 +42,32 @@ On top of that, a Wattsmart demand-response call can drain the battery right bef
 
 1. **Traffic report.** Reads tomorrow's PACE grid conditions: load forecast, day-ahead prices, marginal CO2 by hour.
 2. **Plan.** Solves an LP in 15-minute steps that decides when the site's flywheel and battery charge and discharge. It cuts the customer's bill, avoids dirty hours and keeps a reserve for Wattsmart.
-3. **Proof.** Backtests a month against a naive peak-shaver and a perfect-hindsight optimum, and reports how much of the possible savings it captured.
+3. **Proof.** Replays every month of 2026 against no storage, a naive peak-shaver and a perfect-hindsight optimum, and reports how much of the possible savings it captured.
+
+| 1 Forecast | 2 Decide | Record |
+|---|---|---|
+| ![Forecast: when is the grid jammed tomorrow](docs/screenshots/forecast.png) | ![Decide: what should the Torus Station do tomorrow](docs/screenshots/decide.png) | ![Record: has DETOUR paid off in 2026](docs/screenshots/record.png) |
+
+## How the plan is decided
+
+One linear program over the next 48 hours in 15-minute steps, built as LP text and solved with HiGHS WebAssembly on the device. It minimizes:
+
+| Term | What it prices |
+|------|----------------|
+| Demand charge | The month's billed peak kW (on-peak only on Schedule 8, any hour on Schedule 6), floored at the peak already set this month |
+| Facilities charge | The month's peak kW in any hour |
+| Energy charge | Rocky Mountain Power's retail energy rates by hour |
+| Carbon | Marginal CO2 per kWh times the CO2 weight dial |
+| Wear | A per-kWh throughput cost for each machine: Spin about a third of Pulse |
+
+Subject to each machine's power ratings and charge windows, charging losses, Spin's idle losses, Pulse ramp limits, ending the 48 hours no emptier than it started, and a **Wattsmart reserve**: a Pulse-only minimum charge held through rush hour for a possible grid call.
+
+Two design choices carry the result:
+
+- **Peak first.** One kW of summer on-peak demand costs $16.84 a month; moving one kWh saves about 3.1¢. Cutting a kW is worth moving about 550 kWh, so the plan protects the peak and lets energy arbitrage fill in around it.
+- **Two machines, two jobs.** Spin takes short spikes at low wear, which leaves Pulse free to hold the reserve and carry the longer blocks.
+
+The EDAM day-ahead price is a planning signal only. The site is billed on the published retail tariff, because that is what the customer actually pays.
 
 ## Demo flow
 
@@ -32,11 +79,33 @@ On top of that, a Wattsmart demand-response call can drain the battery right bef
 
 Every screen ends with a "Next stop" link, so the demo walks Start → 1 Forecast → 2 Decide → Record → back to tomorrow.
 
-## Rehearsal materials
+## Bounty checklist
+
+| From the bounty card | Where it is |
+|---|---|
+| Knows when the grid is jammed | 1 Forecast finds tomorrow's PACE rush hour from load, price and marginal CO2 |
+| Stays out of traffic | 2 Decide plans the station's charge and discharge around it |
+| A traffic report for tomorrow's grid | 1 Forecast, refreshed daily at 3 p.m. after the day-ahead market posts |
+| A navigation app for electricity | Start → Forecast → Decide, with a "Next stop" on every screen |
+| Scheduling around clean power | Marginal CO2 is in the objective; dispatch orders are approved and queued for Lattice |
+| Free and open-source data only | EIA-930, EIA-860, CAISO OASIS, Open-Meteo, published RMP tariffs |
+| Simulated data is fine if labeled | Every simulated figure carries a "Simulated · seed 42" badge |
+| Execution | Live site, daily Cloud Function with validate-then-pin, LP solving in the browser, year-long replay |
+
+## Hackathon shortcuts
+
+| In the demo | In production |
+|---|---|
+| Simulated site load (airport, cement plant, ski resort archetypes) | The customer's real 15-minute interval data |
+| Assumed Nova Spin and Nova Pulse parameters | Torus-validated operating limits |
+| Approve stamps orders "queued for Lattice", no device connected | Orders handed to Lattice's real-time controller |
+| Published demand, facilities and energy rates, riders left out | The full tariff sheet, riders included |
+| Snapshot pinned for judging | The daily refresh it already runs, unpinned |
+
+## Docs
 
 - [One-page demo script](docs/demo-script.md)
 - [Judge Q&A answer sheet](docs/qa.md)
-- [PR E persona review and rubric re-audit](docs/pr-e-audit.md)
 
 ## Architecture
 
