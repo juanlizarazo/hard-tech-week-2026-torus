@@ -1,40 +1,57 @@
 <div class="dt-page">
   <section class="start__hero" aria-labelledby="start-headline">
-    <h1 class="start__headline" id="start-headline">The grid has a rush hour. DETOUR plans a <dt-term key="TORUS_STATION">Torus Station</dt-term> around it.</h1>
-    <dl class="start__saves">
-      <div class="start__save start__save--peak">
-        <dt class="start__save-number">{{ hook.demandRateLabel }}</dt>
-        <dd class="start__save-text">
-          <span>
-            <strong>saved every month</strong> for each kW you cut from your busiest 15 minutes, the
-            <dt-term key="ON_PEAK_DEMAND">on-peak demand</dt-term> the bill is built on.
-          </span>
-          <svg class="start__save-bar" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-            <rect width="100" height="10"></rect>
-          </svg>
-          <span class="start__save-scale">One kW of peak, for one month</span>
-        </dd>
-      </div>
-      <div class="start__save start__save--shift">
-        <dt class="start__save-number">{{ hook.spreadLabel }}</dt>
-        <dd class="start__save-text">
-          <span><strong>saved once</strong> for each kWh you move from a costly hour to a cheaper one.</span>
-          <svg class="start__save-bar" [attr.viewBox]="'0 0 ' + hook.roundedKwh / 10 + ' 10'" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-            <defs>
-              <pattern id="start-ticks" width="1" height="10" patternUnits="userSpaceOnUse">
-                <rect width="0.72" height="10"></rect>
-              </pattern>
-            </defs>
-            <rect [attr.width]="hook.roundedKwh / 10" height="10" fill="url(#start-ticks)"></rect>
-          </svg>
-          <span class="start__save-scale">{{ hook.roundedKwh | number: '1.0-0' }} kWh moved, one tick per 10 kWh. The same length.</span>
-        </dd>
-      </div>
-    </dl>
-    <p class="start__hook">
-      One kW off the peak saves as much as shifting about <strong class="dt-num">{{ hook.roundedKwh | number: '1.0-0' }} kWh</strong>,
-      so DETOUR goes after the peak. <span class="start__hook-note">Summer rates, Schedule 8.</span>
-    </p>
+    <div class="start__lead">
+      <h1 class="start__headline" id="start-headline">The grid has a rush hour. DETOUR plans a <dt-term key="TORUS_STATION">Torus Station</dt-term> around it.</h1>
+      <button type="button" class="start__how" [attr.aria-controls]="architectureId" (click)="openArchitecture()">
+        <mat-icon aria-hidden="true">account_tree</mat-icon>
+        <span>How DETOUR works</span>
+        <mat-icon aria-hidden="true">south</mat-icon>
+      </button>
+    </div>
+    <figure class="start__instrument" aria-labelledby="start-instrument-title">
+      <figcaption class="start__instrument-head">
+        <span class="dt-tag dt-tag--ink">Bill math</span>
+        <span class="start__instrument-title" id="start-instrument-title">Where the money is: {{ hook.demandRateLabel }} vs {{ hook.spreadLabel }}</span>
+      </figcaption>
+      <dl class="start__saves">
+        <div class="start__save start__save--peak">
+          <dt class="start__save-number">{{ hook.demandRateLabel }}</dt>
+          <dd class="start__save-text">
+            <span class="start__save-words">
+              <strong>saved every month</strong> for each kW you cut from your busiest 15 minutes, the
+              <dt-term key="ON_PEAK_DEMAND">on-peak demand</dt-term> the bill is built on.
+            </span>
+            <span class="start__save-gauge">
+              <svg class="start__save-bar" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <rect width="100" height="10"></rect>
+              </svg>
+              <span class="start__save-scale">One kW of peak, for one month</span>
+            </span>
+          </dd>
+        </div>
+        <div class="start__save start__save--shift">
+          <dt class="start__save-number">{{ hook.spreadLabel }}</dt>
+          <dd class="start__save-text">
+            <span class="start__save-words"><strong>saved once</strong> for each kWh you move from a costly hour to a cheaper one.</span>
+            <span class="start__save-gauge">
+              <svg class="start__save-bar" [attr.viewBox]="'0 0 ' + hook.roundedKwh / 10 + ' 10'" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <defs>
+                  <pattern id="start-ticks" width="1" height="10" patternUnits="userSpaceOnUse">
+                    <rect width="0.72" height="10"></rect>
+                  </pattern>
+                </defs>
+                <rect [attr.width]="hook.roundedKwh / 10" height="10" fill="url(#start-ticks)"></rect>
+              </svg>
+              <span class="start__save-scale">{{ hook.roundedKwh | number: '1.0-0' }} kWh moved, one tick per 10 kWh. The same length.</span>
+            </span>
+          </dd>
+        </div>
+      </dl>
+      <p class="start__hook">
+        One kW off the peak saves as much as shifting about <strong class="start__hook-number">{{ hook.roundedKwh | number: '1.0-0' }} kWh</strong>,
+        so DETOUR goes after the peak. <span class="start__hook-note">Summer rates, Schedule 8.</span>
+      </p>
+    </figure>
   </section>
 
   @if (state$ | async; as state) {
@@ -67,7 +84,7 @@
                   A simulated airport on Schedule 8. Each lane darkens where that clock says power is costly.
                   Rush hour is the four hours in a row with the most load in PACE's day-ahead forecast.
                 </p>
-                <span class="start__simulated-tag">SIMULATED — seed 42</span>
+                <span class="dt-tag dt-tag--sim start__simulated-tag">Simulated — seed 42</span>
               </div>
               <p class="start__rush">
                 <span class="start__rush-swatch" aria-hidden="true"></span>
@@ -96,17 +113,21 @@
   }
 
   <section class="start__route" aria-labelledby="start-route-title">
-    <h2 class="dt-section__title" id="start-route-title">Three stops: forecast, decision, proof</h2>
+    <h2 class="dt-section__title" id="start-route-title">Three stops: Forecast, Decide, Prove</h2>
     <ol class="start__steps">
       @for (step of steps$ | async; track step.path) {
-        <li class="start__step">
-          <span class="start__step-sign" aria-hidden="true">{{ step.step }}</span>
+        <li class="start__step" [class.start__step--primary]="step.isPrimary">
+          <p class="start__step-head">
+            <span class="dt-tag dt-tag--ink start__step-code">{{ step.code }}</span>
+            <span class="start__step-stage">{{ step.stage }}</span>
+            <span class="start__step-dot" aria-hidden="true">·</span>
+            <span class="start__step-name">{{ step.title }}</span>
+          </p>
           <div class="start__step-body">
-            <h3 class="start__step-title">{{ step.title }}</h3>
-            <p class="start__step-question">{{ step.question }}</p>
+            <h3 class="start__step-title">{{ step.question }}</h3>
             <p class="start__step-description">{{ step.description }}</p>
             @if (step.step === '1' && (state$ | async)?.preview; as preview) {
-              <p class="start__step-live">Rush hour {{ (day$ | async)?.word }}: <strong class="dt-num">{{ preview.rushLabel }}</strong></p>
+              <p class="start__step-live">Rush hour {{ (day$ | async)?.word }}: <strong class="dt-mono">{{ preview.rushLabel }}</strong></p>
             }
             <a class="start__step-link" [class.start__step-link--primary]="step.isPrimary" [routerLink]="step.path">
               <span>{{ step.linkLabel }}</span>
@@ -152,9 +173,11 @@
     </dl>
   </section>
 
-  <dt-under-the-hood summary="How DETOUR works" description="From public data to the plan on your screen">
-    <dt-architecture></dt-architecture>
-  </dt-under-the-hood>
+  <div class="start__architecture" [id]="architectureId">
+    <dt-under-the-hood summary="How DETOUR works" description="From public data to the plan on your screen">
+      <dt-architecture></dt-architecture>
+    </dt-under-the-hood>
+  </div>
 
-  <dt-next-stop path="/traffic" sign="1" [title]="(day$ | async)?.possessive + ' grid: when is it jammed?'"></dt-next-stop>
+  <dt-next-stop path="/traffic" sign="1" label="Next stop · Forecast" [title]="(day$ | async)?.possessive + ' grid: when is it jammed?'"></dt-next-stop>
 </div>

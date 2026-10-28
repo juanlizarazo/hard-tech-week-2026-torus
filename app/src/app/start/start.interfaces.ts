@@ -23,6 +23,8 @@ export interface IStartViewState {
 export interface IStartStep {
   path: string;
   step: string;
+  code: string;
+  stage: string;
   title: string;
   question: string;
   description: string;

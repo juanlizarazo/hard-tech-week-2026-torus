@@ -15,9 +15,9 @@
   flex-direction: column;
   width: min(440px, 100vw);
   background: var(--dt-panel);
-  border-left: 1px solid var(--dt-line);
+  border-left: 1px solid var(--dt-ink);
   box-shadow: -8px 0 24px color-mix(in srgb, var(--dt-ink) 12%, transparent);
-  animation: dt-side-panel-in 220ms ease-out;
+  animation: dt-side-panel-in var(--dt-motion-2) var(--dt-ease);
 }
 
 .dt-side-panel__head {
@@ -26,7 +26,8 @@
   justify-content: space-between;
   gap: 12px;
   padding: 20px 20px 12px;
-  border-bottom: 1px solid var(--dt-line);
+  border-bottom: 1px solid var(--dt-ink);
+  box-shadow: inset 4px 0 0 var(--dt-ink);
 }
 
 .dt-side-panel__title {
@@ -44,11 +45,15 @@
   width: 36px;
   height: 36px;
   flex: none;
-  border: 1px solid var(--dt-line);
-  border-radius: 8px;
+  border: 1px solid var(--dt-line-strong);
+  border-radius: var(--dt-radius-control);
   background: var(--dt-panel);
   color: var(--dt-ink);
   cursor: pointer;
+
+  &:hover {
+    border-color: var(--dt-ink);
+  }
 }
 
 .dt-side-panel__body {
@@ -98,8 +103,8 @@
     width: 100%;
     max-height: 85vh;
     border-left: 0;
-    border-top: 1px solid var(--dt-line);
-    border-radius: 16px 16px 0 0;
+    border-top: 1px solid var(--dt-ink);
+    border-radius: var(--dt-radius-frame) var(--dt-radius-frame) 0 0;
     animation-name: dt-side-panel-up;
   }
 }

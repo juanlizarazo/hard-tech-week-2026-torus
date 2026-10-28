@@ -1,0 +1,20 @@
+<div class="signal-stack" role="group" [attr.aria-label]="'Three clocks at ' + hourLabel">
+  @for (row of views; track row.key) {
+    <div class="signal-stack__row">
+      <span class="signal-stack__label">{{ row.label }}</span>
+      <div class="signal-stack__plot">
+        @if (rushStart !== null && rushEnd !== null) {
+          <span class="signal-stack__rush" aria-hidden="true" [style.left.%]="rushLeftPercent" [style.width.%]="rushWidthPercent"></span>
+        }
+        <svg class="signal-stack__svg" [attr.viewBox]="'0 0 ' + width + ' ' + height" preserveAspectRatio="none" aria-hidden="true">
+          <path class="signal-stack__area" [attr.d]="row.areaPath" [attr.fill]="row.color"></path>
+          <path class="signal-stack__line" [attr.d]="row.linePath" [attr.stroke]="row.color"></path>
+        </svg>
+        <span class="signal-stack__cursor" aria-hidden="true" [style.transform]="'translateX(' + cursorPercent + 'cqw)'">
+          <span class="signal-stack__cursor-line"></span>
+        </span>
+      </div>
+      <span class="signal-stack__value">{{ row.valueText }}</span>
+    </div>
+  }
+</div>

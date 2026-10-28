@@ -6,10 +6,16 @@
 
 .dispatch-chart__spin-bar {
   fill: var(--dt-theme--chart-spin);
+  transition:
+    y var(--dt-motion-3) var(--dt-ease),
+    height var(--dt-motion-3) var(--dt-ease);
 }
 
 .dispatch-chart__pulse-bar {
   fill: var(--dt-theme--chart-pulse);
+  transition:
+    y var(--dt-motion-3) var(--dt-ease),
+    height var(--dt-motion-3) var(--dt-ease);
 }
 
 .dispatch-chart__panel-text {
@@ -38,9 +44,11 @@
   stroke: var(--dt-theme--primary);
   stroke-width: 1.5;
   stroke-dasharray: 6 4;
+  transition: transform var(--dt-motion-3) var(--dt-ease);
 }
 
 .dispatch-chart__reserve-text {
+  transition: transform var(--dt-motion-3) var(--dt-ease);
   fill: var(--dt-theme--primary);
   font-size: 11px;
   font-weight: 600;
@@ -52,6 +60,7 @@
   stroke-width: 2;
   stroke-linejoin: round;
   stroke-linecap: round;
+  transition: d var(--dt-motion-3) var(--dt-ease);
 }
 
 .dispatch-chart__spin-soc {
@@ -60,6 +69,7 @@
   stroke-width: 1.25;
   stroke-linejoin: round;
   stroke-opacity: 0.85;
+  transition: d var(--dt-motion-3) var(--dt-ease);
 }
 
 .dispatch-chart__soc-legend {

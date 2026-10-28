@@ -1155,6 +1155,11 @@
   resolved "https://registry.yarnpkg.com/@firebase/webchannel-wrapper/-/webchannel-wrapper-1.0.3.tgz#a73bab8eb491d7b8b7be2f0e6c310647835afe83"
   integrity sha512-2xCRM9q9FlzGZCdgDMJwc0gyUkWFtkosy7Xxr6sFgQwn+wMNIWd7xIvYNauU1r64B5L5rsGKy/n9TKJ0aAFeqQ==
 
+"@fontsource/overpass-mono@5.2.8":
+  version "5.2.8"
+  resolved "https://registry.yarnpkg.com/@fontsource/overpass-mono/-/overpass-mono-5.2.8.tgz#7651ddac1ed6c8e16c25512d5a3374733cd9bbec"
+  integrity sha512-/5r/Km770Ndg+QAS+Qgl9PURqK4K+rGVmlqq1O6EwtmOQKsPBkwD/Cvohmq8tDqwzcRdp0gJi+zIpgSxXaKY1Q==
+
 "@fontsource/overpass@5.3.0":
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/@fontsource/overpass/-/overpass-5.3.0.tgz#8da20123088b644b028a6d05735ef62fd77c60f4"

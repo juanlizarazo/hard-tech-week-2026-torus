@@ -1,6 +1,6 @@
 <div class="dt-page">
   <header class="dt-page__head">
-    <p class="dt-page__step">Step 2 of 3</p>
+    <p class="dt-page__step"><span class="cdk-visually-hidden">Step 2 of 3: </span><span class="dt-page__step-number" aria-hidden="true">02</span><span class="dt-page__step-name">Decide</span></p>
     <h1 class="dt-question">What should the <dt-term key="TORUS_STATION">Torus Station</dt-term> do {{ headingDay(solve$ | async, (day$ | async)?.word) }}?</h1>
     @if (solve$ | async; as solve) {
       @if (solve.viewModel; as viewModel) {
@@ -167,18 +167,42 @@
           <!-- results -->
           <div class="plan__results">
             @if (solve$ | async; as solve) {
-              <p class="plan__status" aria-live="polite">
-                @if (solve.status === 'solving') {
-                  <mat-icon class="plan__status-icon plan__status-icon--pending" aria-hidden="true">autorenew</mat-icon>
-                  <span>Solving in your browser…</span>
-                } @else if (solve.viewModel) {
-                  <mat-icon class="plan__status-icon" aria-hidden="true">bolt</mat-icon>
-                  <span>
-                    {{ solve.viewModel.solveLabel }} in your browser with <dt-term key="HIGHS">HiGHS</dt-term>.
-                    {{ solve.viewModel.dateLabel }} and the next day, {{ solve.viewModel.result.intervals.length }} fifteen-minute steps.
+              @let rail = railState(solve);
+              @let sheet = sheet$ | async;
+              <!-- solver rail -->
+              <div class="plan__rail" [class]="'plan__rail--' + rail">
+                <span class="plan__lamp" aria-hidden="true"></span>
+                <span class="plan__rail-state dt-mono" aria-live="polite">
+                  @switch (rail) {
+                    @case ('solving') { Solving }
+                    @case ('solved') { Solved }
+                    @case ('infeasible') { Infeasible }
+                    @default { Failed }
+                  }
+                </span>
+                <p class="plan__status">
+                  @if (rail === 'solving') {
+                    <span>Solving in your browser…</span>
+                  } @else if (rail === 'infeasible') {
+                    <span><dt-term key="HIGHS">HiGHS</dt-term> found no feasible plan for these settings in your browser.</span>
+                  } @else if (rail === 'failed') {
+                    <span>The solver did not return a plan for these settings.</span>
+                  } @else if (solve.viewModel) {
+                    <span>
+                      {{ solve.viewModel.solveLabel }} in your browser with <dt-term key="HIGHS">HiGHS</dt-term>.
+                      {{ solve.viewModel.dateLabel }} and the next day, {{ solve.viewModel.result.intervals.length }} fifteen-minute steps.
+                    </span>
+                  }
+                </p>
+                @if (solve.viewModel; as railModel) {
+                  <span class="plan__rail-stats dt-mono">
+                    <span class="plan__rail-stat">{{ railModel.result.lpStats.intervalCount | number }} int</span>
+                    <span class="plan__rail-stat">{{ railModel.result.lpStats.variableCount | number }} var</span>
+                    <span class="plan__rail-stat">{{ railModel.result.lpStats.constraintCount | number }} con</span>
+                    <span class="plan__rail-stat">{{ railModel.result.lpStats.solveMs | number: '1.0-0' }} ms</span>
                   </span>
                 }
-              </p>
+              </div>
 
               @if (solve.status === 'error') {
                 <dt-alert-banner [message]="solve.errorMessage"></dt-alert-banner>
@@ -186,7 +210,90 @@
 
               @if (solve.isStale) {
                 <p class="plan__stale" role="status">Showing the last successful plan; the current settings did not solve.</p>
+              } @else if (rail === 'infeasible' && sheet) {
+                <p class="plan__stale" role="status">No feasible plan at these settings. The dispatch orders below are the last plan that solved.</p>
               }
+
+              <!-- dispatch orders run sheet -->
+              <section class="plan__orders" aria-labelledby="plan-orders-title">
+                <header class="plan__orders-head">
+                  <span class="dt-tag dt-tag--ink">D0</span>
+                  <h2 class="plan__orders-title" id="plan-orders-title">
+                    @if (!sheet || sheet.isTargetDay) {
+                      {{ (day$ | async)?.possessive ?? "Tomorrow's" }} dispatch orders
+                    } @else {
+                      Dispatch orders for {{ sheet.dateLabel }}
+                    }
+                  </h2>
+                  <span class="dt-tag dt-tag--sim">Simulated · seed {{ sheet?.input?.seed ?? 42 }}</span>
+                </header>
+                @if (sheet) {
+                  <p class="plan__orders-meta dt-mono">
+                    {{ sheet.input.siteName }} · {{ sheet.input.scheduleLabel }} · {{ sheet.input.date }} · local time (America/Denver)
+                  </p>
+                  @if (sheet.orders.length > 0) {
+                    <ol class="plan__orders-list" [class.plan__orders-list--live]="sheet.revision > 1">
+                      @for (order of sheet.orders; track orderKey(order)) {
+                        <li class="plan__order" [class]="'plan__order--' + order.action">
+                          <span class="plan__order-number dt-mono">{{ order.number }}</span>
+                          <span class="plan__order-time dt-mono">
+                            @for (range of order.timeRange.split(' + '); track range) {
+                              <span class="plan__order-range">{{ range }}</span>
+                            }
+                          </span>
+                          <span class="plan__order-action dt-mono">{{ order.actionLabel }}</span>
+                          <span class="plan__order-asset dt-tag" [class]="'plan__order-asset--' + order.asset">{{ order.assetLabel }}</span>
+                          <span class="plan__order-amount dt-mono">{{ order.amount }}</span>
+                          <span class="plan__order-why">{{ order.why }}</span>
+                        </li>
+                      }
+                    </ol>
+                  } @else {
+                    <p class="dt-hint">The station sits idle on this day at these settings: no orders to send.</p>
+                  }
+                  <div class="plan__orders-actions">
+                    @if (isApproved(sheet)) {
+                      <p class="plan__approved" role="status">
+                        <mat-icon class="plan__approved-icon" aria-hidden="true">task_alt</mat-icon>
+                        <span class="plan__approved-stamp dt-mono">Approved {{ approval?.approvedAtLabel }} · queued for Lattice</span>
+                        <span class="dt-tag dt-tag--sim">Simulated</span>
+                      </p>
+                    } @else {
+                      @if (approval) {
+                        <p class="plan__changed dt-mono" role="status">Plan changed since approval at {{ approval.approvedAtLabel }}</p>
+                      }
+                      <button mat-flat-button type="button" [disabled]="!canApprove(solve, sheet)" (click)="onApprove(sheet)">
+                        <div class="btn-content">
+                          <mat-icon aria-hidden="true">check</mat-icon>
+                          <span>Approve plan</span>
+                        </div>
+                      </button>
+                    }
+                    <button mat-stroked-button type="button" (click)="onDownloadCsv(sheet)">
+                      <div class="btn-content">
+                        <mat-icon aria-hidden="true">download</mat-icon>
+                        <span>Download schedule (CSV)</span>
+                      </div>
+                    </button>
+                  </div>
+                  <p class="dt-hint plan__orders-note">No device is connected; Lattice runs the real-time control and Wattsmart calls override this plan.</p>
+                } @else {
+                  <div class="dt-state plan__orders-empty" role="status">
+                    @if (rail === 'solving') {
+                      <mat-spinner diameter="20"></mat-spinner>
+                      <span>Writing the dispatch orders once the first plan solves…</span>
+                    } @else {
+                      <mat-icon aria-hidden="true">block</mat-icon>
+                      <span>
+                        No plan has solved yet, so there are no orders.
+                        @if (rail === 'infeasible') {
+                          Lower the Wattsmart reserve to get a feasible plan.
+                        }
+                      </span>
+                    }
+                  </div>
+                }
+              </section>
 
               <section class="plan__try" aria-labelledby="plan-try-title">
                 <h2 class="plan__try-title" id="plan-try-title">Try this</h2>
@@ -216,8 +323,8 @@
                 }
                 <div class="plan__body" [class.plan__body--solving]="solve.status === 'solving'">
                   <div class="dt-figures plan__figures">
-                    @for (tile of viewModel.tiles; track tile.id) {
-                      <dt-figure [value]="tile.value" [label]="tile.label" [detail]="tile.detail" [tone]="tile.tone">
+                    @for (tile of viewModel.tiles; track tile.id + tile.value) {
+                      <dt-figure class="plan__figure" [class.plan__figure--changed]="!!deltas[tile.id]" [value]="tile.value" [label]="tile.label" [detail]="tile.detail" [tone]="tile.tone">
                         @if (deltas[tile.id]; as delta) {
                           <span figure-delta class="plan__delta" role="status">{{ delta.text }}</span>
                         }
@@ -231,7 +338,7 @@
                     <p class="dt-hint plan__lp-stats">{{ viewModel.lpStatsLine }}</p>
                   }
 
-                  <dt-chart-frame title="Three clocks over the 48 hours" [notice]="viewModel.notices.clocks" [simulated]="true">
+                  <dt-chart-frame index="D1" title="Three clocks over the 48 hours" [notice]="viewModel.notices.clocks" [simulated]="true">
                     <dt-three-clocks
                       [intervals]="viewModel.result.intervals"
                       [rushHourWindows]="viewModel.result.metrics?.rushHourWindows ?? []"
@@ -253,7 +360,7 @@
                     </div>
                   </dt-chart-frame>
 
-                  <dt-chart-frame title="Site load and grid draw" [notice]="viewModel.notices.load" [simulated]="true">
+                  <dt-chart-frame index="D2" title="Site load and grid draw" [notice]="viewModel.notices.load" [simulated]="true">
                     <dt-load-chart
                       [intervals]="viewModel.result.intervals"
                       [rushHourWindows]="viewModel.result.metrics?.rushHourWindows ?? []"
@@ -271,7 +378,7 @@
                     </div>
                   </dt-chart-frame>
 
-                  <dt-chart-frame title="Who does what: Spin and Pulse" [notice]="viewModel.notices.dispatch" [simulated]="true">
+                  <dt-chart-frame index="D3" title="Who does what: Spin and Pulse" [notice]="viewModel.notices.dispatch" [simulated]="true">
                     <dt-dispatch-chart
                       [intervals]="viewModel.result.intervals"
                       [rushHourWindows]="viewModel.result.metrics?.rushHourWindows ?? []"
@@ -368,7 +475,7 @@
                 </div>
               }
             }
-            <dt-next-stop path="/backtest" sign="3" title="July's proof: would it have paid off?"></dt-next-stop>
+            <dt-next-stop path="/backtest" sign="3" label="Next stop · Prove" title="July's proof: would it have paid off?"></dt-next-stop>
           </div>
         </div>
       }

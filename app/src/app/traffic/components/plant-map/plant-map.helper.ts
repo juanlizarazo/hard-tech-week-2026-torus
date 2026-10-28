@@ -1,9 +1,10 @@
 import { IRushHourWindow } from '@app/core/models';
 import { TrafficHelper } from '../../traffic.helper';
-import { cityLabels, mapFuels, plantMapLayout, plantMapSettings, sitePin, stateLabels } from './plant-map.constants';
+import { cityLabels, mapFuels, paceNode, plantMapLayout, plantMapSettings, sitePin, stateLabels } from './plant-map.constants';
 import {
   ICityMark,
   IFuelCapacity,
+  INodeMark,
   IHourlyMix,
   IPacePlant,
   IPacePlantsFile,
@@ -13,7 +14,9 @@ import {
   IPlantMark,
   IPoint,
   IRushTrack,
-  IStatePath
+  IStatePath,
+  IStreamGroup,
+  IStreamStyle
 } from './plant-map.interfaces';
 
 export class PlantMapHelper {
@@ -60,15 +63,20 @@ export class PlantMapHelper {
     const onMap = plantsFile.plants.filter((plant) => PlantMapHelper.isOnMap(plant.lon, plant.lat));
     const siteLocation = PlantMapHelper.project(sitePin.lon, sitePin.lat);
     const siteLabel = PlantMapHelper.project(sitePin.labelLon, sitePin.labelLat);
+    const plantMarks = PlantMapHelper.plantMarks(onMap);
+    const nodeMark = PlantMapHelper.nodeMark();
 
     return {
       height: PlantMapHelper.height(),
       statePaths: PlantMapHelper.statePaths(statesFile),
       stateLabelMarks: stateLabels.map((state) => ({ label: state.label, ...PlantMapHelper.project(state.lon, state.lat) })),
-      plantMarks: PlantMapHelper.plantMarks(onMap),
+      plantMarks,
       cityMarks: PlantMapHelper.cityMarks(),
       weatherMarks: weatherPoints.map((point) => ({ id: point.id, label: point.label, ...PlantMapHelper.project(point.lon, point.lat) })),
       siteMark: { label: sitePin.label, note: sitePin.note, ...siteLocation, labelX: siteLabel.x, labelY: siteLabel.y },
+      nodeMark,
+      streamGroups: PlantMapHelper.streamGroups(plantMarks, nodeMark),
+      siteStreamPath: PlantMapHelper.curve({ x: nodeMark.busX1, y: nodeMark.y }, siteLocation, -1),
       capacities: PlantMapHelper.capacities(plantsFile.plants),
       offMapPlants: plantsFile.plants
         .filter((plant) => !PlantMapHelper.isOnMap(plant.lon, plant.lat))
@@ -123,6 +131,65 @@ export class PlantMapHelper {
           title: `${plant.name}, ${plant.state}: ${PlantMapHelper.fuelLabel(plant.fuelKey).toLowerCase()}, ${Math.round(plant.capacityMw).toLocaleString()} MW`
         };
       });
+  }
+
+  public static nodeMark(): INodeMark {
+    const point = PlantMapHelper.project(paceNode.lon, paceNode.lat);
+
+    return {
+      label: paceNode.label,
+      note: paceNode.note,
+      ...point,
+      busX1: point.x - plantMapLayout.BUS_HALF_WIDTH,
+      busX2: point.x + plantMapLayout.BUS_HALF_WIDTH
+    };
+  }
+
+  public static streamGroups(plants: IPlantMark[], node: INodeMark): IStreamGroup[] {
+    const firstTapX = node.x - ((mapFuels.length - 1) * plantMapLayout.BUS_TAP_SPACING) / 2;
+
+    return mapFuels.map((fuel, fuelIndex) => {
+      const tap = { x: PlantMapHelper.round(firstTapX + fuelIndex * plantMapLayout.BUS_TAP_SPACING), y: node.y };
+      const path = plants
+        .filter((plant) => plant.fuelKey === fuel.key)
+        .map((plant) => PlantMapHelper.curve(plant, tap, 1))
+        .join('');
+
+      return { fuelKey: fuel.key, color: fuel.color, path };
+    });
+  }
+
+  public static curve(from: IPoint, to: IPoint, side: number): string {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const bend = plantMapLayout.STREAM_BEND * side;
+    const controlX = PlantMapHelper.round((from.x + to.x) / 2 - dy * bend);
+    const controlY = PlantMapHelper.round((from.y + to.y) / 2 + dx * bend);
+
+    return `M${from.x} ${from.y}Q${controlX} ${controlY} ${to.x} ${to.y}`;
+  }
+
+  public static streamStyle(relative: number, boost: number): IStreamStyle {
+    const level = Math.min(Math.max(relative, 0), 1);
+    const dash = PlantMapHelper.round(plantMapLayout.STREAM_MIN_DASH + plantMapLayout.STREAM_DASH_RANGE * level);
+
+    return {
+      width: PlantMapHelper.round((plantMapLayout.STREAM_MIN_WIDTH + plantMapLayout.STREAM_WIDTH_RANGE * level) * boost),
+      dashArray: `${dash} ${PlantMapHelper.round(plantMapLayout.STREAM_PERIOD - dash)}`,
+      opacity: PlantMapHelper.round(plantMapLayout.STREAM_MIN_OPACITY + plantMapLayout.STREAM_OPACITY_RANGE * level)
+    };
+  }
+
+  public static siteStreamStyle(siteKwByHour: number[], hour: number): IStreamStyle {
+    const peakKw = Math.max(...siteKwByHour, 1);
+    const level = siteKwByHour.length > 0 ? (siteKwByHour[hour] ?? 0) / peakKw : 0.5;
+    const dash = PlantMapHelper.round(3 + 4 * level);
+
+    return {
+      width: PlantMapHelper.round(plantMapLayout.SITE_MIN_WIDTH + plantMapLayout.SITE_WIDTH_RANGE * level),
+      dashArray: `${dash} ${PlantMapHelper.round(plantMapLayout.STREAM_PERIOD - dash)}`,
+      opacity: 1
+    };
   }
 
   public static radius(capacityMw: number): number {
@@ -253,7 +320,7 @@ export class PlantMapHelper {
     return `Coal and gas carry ${fossilAtRush}% of PACE's power across the ${rushLabel} and ${fossilAtPeak}% at ${peakLabel}: over the last ${mix.dayCount} days the mix barely changes into the rush.`;
   }
 
-  public static hourView(data: IPlantMapData, hour: number, rush: IRushTrack): IPlantMapHourView {
+  public static hourView(data: IPlantMapData, hour: number, rush: IRushTrack, siteKwByHour: number[] = []): IPlantMapHourView {
     const shares = data.mix.sharesByHour[hour];
     const rows = mapFuels
       .map((fuel) => ({
@@ -262,10 +329,17 @@ export class PlantMapHelper {
         opacity: PlantMapHelper.opacity(shares[fuel.key] ?? 0, data.maxShare)
       }))
       .sort((first, second) => second.sharePercent - first.sharePercent);
+    const isRush = hour >= rush.startLocalHour && hour < rush.endLocalHour;
     const opacityByFuel: Record<string, number> = {};
+    const streamByFuel: Record<string, IStreamStyle> = {};
 
     for (const row of rows) {
+      const isFossil = plantMapSettings.FOSSIL_FUEL_KEYS.includes(row.fuel.key);
       opacityByFuel[row.fuel.key] = row.opacity;
+      streamByFuel[row.fuel.key] = PlantMapHelper.streamStyle(
+        (shares[row.fuel.key] ?? 0) / data.maxShare,
+        isRush && isFossil ? plantMapLayout.RUSH_FOSSIL_BOOST : 1
+      );
     }
 
     const hourLabel = TrafficHelper.hourLabel(hour);
@@ -279,9 +353,12 @@ export class PlantMapHelper {
     return {
       hour,
       hourLabel,
-      isRush: hour >= rush.startLocalHour && hour < rush.endLocalHour,
+      isRush,
       rows,
       opacityByFuel,
+      streamByFuel,
+      siteStream: PlantMapHelper.siteStreamStyle(siteKwByHour, hour),
+      siteKw: siteKwByHour.length > 0 ? Math.round(siteKwByHour[hour] ?? 0) : null,
       fossilPercent,
       summary: `${hourLabel}: coal and gas ${fossilPercent}%, ${leaders}`
     };

@@ -82,13 +82,16 @@
 
 .dt-hour-chart__tick-text {
   fill: var(--dt-viz-muted);
-  font-size: 12px;
+  font-family: var(--dt-mono);
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 
 .dt-hour-chart__axis-title {
   fill: var(--dt-viz-ink-secondary);
-  font-size: 12px;
+  font-family: var(--dt-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
 }
 
 .dt-hour-chart__line {
@@ -96,6 +99,20 @@
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.dt-hour-chart__cursor {
+  transition: transform var(--dt-motion-2) var(--dt-ease);
+  pointer-events: none;
+}
+
+.dt-hour-chart__cursor-line {
+  stroke: var(--dt-viz-ink);
+  stroke-width: 1.5;
+}
+
+.dt-hour-chart__cursor-head {
+  fill: var(--dt-viz-ink);
 }
 
 .dt-hour-chart__crosshair {
@@ -119,8 +136,8 @@
   max-width: 280px;
   padding: 8px 10px;
   background: var(--dt-viz-surface);
-  border: 1px solid var(--dt-viz-axis);
-  border-radius: 8px;
+  border: 1px solid var(--dt-viz-ink);
+  border-radius: var(--dt-radius-control);
   box-shadow: 0 4px 14px color-mix(in srgb, var(--dt-viz-ink) 14%, transparent);
   font-size: 12px;
   pointer-events: none;
@@ -149,6 +166,7 @@
 }
 
 .dt-hour-chart__tooltip-value {
+  font-family: var(--dt-mono);
   color: var(--dt-viz-ink);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
@@ -162,6 +180,10 @@
 }
 
 .dt-hour-chart__table-summary {
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
   padding: 4px 0;
 }

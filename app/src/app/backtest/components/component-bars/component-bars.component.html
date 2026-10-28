@@ -53,7 +53,7 @@
       </div>
     } @else {
       <div class="dt-component-bars__groups" role="img" [attr.aria-label]="ariaSummary">
-        @for (view of views; track view.group.id) {
+        @for (view of views; track view.group.id; let groupIndex = $index) {
           <div class="dt-component-bars__group">
             <span class="dt-component-bars__label">{{ view.group.label }}</span>
             <div class="dt-component-bars__plot" [ngClass]="{ 'dt-component-bars__plot--signed': hasNegative }">
@@ -61,12 +61,14 @@
                 @if (hasNegative) {
                   <span class="dt-component-bars__zero" [style.left.%]="zeroPercent"></span>
                 }
-                @for (row of view.rows; track row.bar.strategyId) {
+                @for (row of view.rows; track row.bar.strategyId; let rowIndex = $index) {
                   <div class="dt-component-bars__row">
                     <span
                       class="dt-component-bars__bar"
-                      [style.left.%]="row.startPercent"
-                      [style.width.%]="row.lengthPercent"
+                      [ngClass]="{ 'dt-component-bars__bar--neg': row.isNegative }"
+                      [style.--dt-bar-x]="row.offsetPercent + '%'"
+                      [style.--dt-bar-scale]="row.scale"
+                      [style.animation-delay.ms]="groupIndex * 90 + rowIndex * 50"
                       [style.background]="row.bar.color"
                     ></span>
                     <span

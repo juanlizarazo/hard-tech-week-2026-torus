@@ -40,6 +40,8 @@
               "@fontsource/overpass/latin-400.css",
               "@fontsource/overpass/latin-600.css",
               "@fontsource/overpass/latin-800.css",
+              "@fontsource/overpass-mono/latin-400.css",
+              "@fontsource/overpass-mono/latin-600.css",
               "material-icons/iconfont/filled.css",
               "material-icons/iconfont/outlined.css",
               "src/styles.scss"

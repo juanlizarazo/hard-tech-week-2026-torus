@@ -1,4 +1,4 @@
-import { ICityLabel, IMapFuel, ISitePin, IStateLabel } from './plant-map.interfaces';
+import { ICityLabel, IMapFuel, IPaceNode, ISitePin, IStateLabel } from './plant-map.interfaces';
 
 export const plantMapLayout = {
   WIDTH: 600,
@@ -10,7 +10,20 @@ export const plantMapLayout = {
   MIN_RADIUS: 2.5,
   RADIUS_PER_ROOT_MW: 0.62,
   MIN_OPACITY: 0.14,
-  PLAY_STEP_MS: 700
+  PLAY_STEP_MS: 700,
+  BUS_HALF_WIDTH: 30,
+  BUS_TAP_SPACING: 10,
+  STREAM_BEND: 0.16,
+  STREAM_PERIOD: 12,
+  STREAM_MIN_DASH: 1.5,
+  STREAM_DASH_RANGE: 7,
+  STREAM_MIN_WIDTH: 0.45,
+  STREAM_WIDTH_RANGE: 2.4,
+  STREAM_MIN_OPACITY: 0.22,
+  STREAM_OPACITY_RANGE: 0.6,
+  RUSH_FOSSIL_BOOST: 1.35,
+  SITE_MIN_WIDTH: 1.5,
+  SITE_WIDTH_RANGE: 5
 };
 
 export const plantMapSettings = {
@@ -21,7 +34,8 @@ export const plantMapSettings = {
   PACE_STATE_CODES: ['UT', 'WY', 'ID'],
   FOSSIL_FUEL_KEYS: ['COL', 'NG'],
   EIA_930_URL: 'https://www.eia.gov/electricity/gridmonitor/dashboard/electric_overview/balancing_authority/PACE',
-  HONESTY_NOTE: 'EIA reports fuel totals for PACE, not plant-by-plant output by hour.'
+  HONESTY_NOTE: 'EIA reports fuel totals for PACE, not plant-by-plant output by hour.',
+  SCHEMATIC_NOTE: 'Schematic: shares of PACE generation, not physical wire paths.'
 };
 
 export const mapFuels: IMapFuel[] = [
@@ -47,6 +61,13 @@ export const sitePin: ISitePin = {
   lat: 40.79,
   labelLon: -113.3,
   labelLat: 39.95
+};
+
+export const paceNode: IPaceNode = {
+  label: 'PACE grid',
+  note: 'schematic node',
+  lon: -112.75,
+  lat: 41.3
 };
 
 export const stateLabels: IStateLabel[] = [

@@ -7,13 +7,13 @@
 .load-chart__grid-area {
   fill: var(--dt-clear-mark);
   fill-opacity: 0.16;
-  transition: d 300ms ease-out;
+  transition: d var(--dt-motion-3) var(--dt-ease);
 }
 
 .load-chart__grid-line {
   fill: none;
   stroke: var(--dt-clear-mark);
-  transition: d 300ms ease-out;
+  transition: d var(--dt-motion-3) var(--dt-ease);
   stroke-width: 2;
   stroke-linejoin: round;
 }
@@ -30,9 +30,11 @@
   stroke: var(--dt-theme--primary);
   stroke-width: 1.5;
   stroke-dasharray: 6 4;
+  transition: transform var(--dt-motion-3) var(--dt-ease);
 }
 
 .load-chart__demand-text {
+  transition: transform var(--dt-motion-3) var(--dt-ease);
   fill: var(--dt-theme--primary);
   font-size: 11px;
   font-weight: 600;
@@ -54,7 +56,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .load-chart__grid-area,
-  .load-chart__grid-line {
+  .load-chart__grid-line,
+  .load-chart__demand-line,
+  .load-chart__demand-text {
     transition: none;
   }
 }

@@ -29,8 +29,8 @@
   gap: 4px;
   max-width: min(320px, calc(100vw - 32px));
   padding: 10px 12px;
-  border: 1px solid var(--dt-line);
-  border-radius: 8px;
+  border: 1px solid var(--dt-ink);
+  border-radius: var(--dt-radius-control);
   background: var(--dt-panel);
   box-shadow: 0 6px 18px color-mix(in srgb, var(--dt-ink) 14%, transparent);
   font-family: var(--dt-font);

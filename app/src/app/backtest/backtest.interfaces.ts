@@ -1,4 +1,4 @@
-import { IBacktestResult, IBacktestStrategyResult } from '@app/core/backtest';
+import { BacktestStrategyRole, IBacktestResult, IBacktestStrategyResult } from '@app/core/backtest';
 import { IProvenance, TariffScheduleId } from '@app/core/models';
 import { IHourChartBand, IHourChartHighlight, IHourChartSeries } from '@app/shared/components/hour-chart/hour-chart.interfaces';
 import { BacktestTileTone, BacktestViewStatus } from './backtest.types';
@@ -95,6 +95,7 @@ export interface IBacktestDayCharts {
 
 export interface IBacktestComparisonRow {
   strategyId: string;
+  role: BacktestStrategyRole;
   strategyLabel: string;
   color: string;
   isLead: boolean;
@@ -106,8 +107,38 @@ export interface IBacktestComparisonRow {
   totalValue: number;
 }
 
+export interface IBacktestCaptureBar {
+  strategyId: string;
+  label: string;
+  role: BacktestStrategyRole;
+  isLead: boolean;
+  fraction: number;
+  captureLabel: string;
+  savingsLabel: string;
+}
+
+export interface IBacktestCaptureGauge {
+  isAvailable: boolean;
+  valueLabel: string;
+  oracleSavingsLabel: string;
+  bars: IBacktestCaptureBar[];
+}
+
+export interface IBacktestSelectedDay {
+  localDate: string;
+  dateLabel: string;
+  isOffPeakDay: boolean;
+  offPeakReason: string;
+  isPeakDay: boolean;
+  baselinePeakLabel: string;
+  leadPeakLabel: string;
+  shavedLabel: string;
+}
+
 export interface IBacktestViewModel {
   answer: string;
+  capture: IBacktestCaptureGauge;
+  selectedDay: IBacktestSelectedDay | null;
   leadTiles: IBacktestTile[];
   secondaryTiles: IBacktestTile[];
   comparisonRows: IBacktestComparisonRow[];

@@ -23,7 +23,12 @@
   <header class="dt-shell__header">
     <div class="dt-shell__bar">
       <a class="dt-shell__brand" routerLink="/start" aria-label="DETOUR, start here">
-        <span class="dt-shell__plate">DETOUR</span>
+        <span class="dt-shell__plate">
+          <svg class="dt-shell__plate-mark" viewBox="0 0 14 14" aria-hidden="true">
+            <path d="M1 12V6h7V2.5L13 7l-5 4.5V8H3.5v4z" fill="var(--dt-panel)"></path>
+          </svg>
+          DETOUR
+        </span>
         <span class="dt-shell__tagline">Rush-hour planner for a Torus Station</span>
       </a>
       <div class="dt-shell__badges">

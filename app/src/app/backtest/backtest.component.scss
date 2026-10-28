@@ -77,7 +77,7 @@
 .dt-backtest__cycle-swatch {
   width: 12px;
   height: 12px;
-  border-radius: 3px;
+  border-radius: var(--dt-radius-tag);
   flex: none;
 }
 
@@ -98,16 +98,13 @@
   height: 10px;
   background: var(--dt-paper);
   border: 1px solid var(--dt-line);
-  border-radius: 999px;
+  border-radius: var(--dt-radius-tag);
   overflow: hidden;
 }
 
 .dt-backtest__cycle-fill {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  border-radius: 999px;
+  inset: 0;
 }
 
 .dt-backtest__cycle-fill--pulse {
@@ -120,6 +117,7 @@
 
 .dt-backtest__cycle-text {
   grid-column: 2;
+  font-family: var(--dt-mono);
   font-size: var(--dt-text-13);
   color: var(--dt-muted);
   font-variant-numeric: tabular-nums;
@@ -167,4 +165,484 @@
   margin: 6px 0 0;
   font-size: var(--dt-text-13);
   color: var(--dt-muted);
+}
+
+.dt-grow {
+  transform: scaleX(var(--dt-grow-scale, 1));
+  transform-origin: left center;
+  transition: transform var(--dt-motion-3) var(--dt-ease);
+  animation: dt-grow var(--dt-motion-4) var(--dt-ease) backwards;
+}
+
+@keyframes dt-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.dt-backtest__gauge {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--dt-ink);
+  border-radius: var(--dt-radius-frame);
+  background: var(--dt-panel);
+  min-width: 0;
+}
+
+.dt-backtest__gauge-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--dt-line);
+}
+
+.dt-backtest__gauge-title {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: var(--dt-text-17);
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.dt-backtest__gauge-body {
+  display: grid;
+  grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
+  gap: 24px 40px;
+  align-items: center;
+  padding: 24px 20px 20px;
+}
+
+.dt-backtest__gauge-value {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+
+.dt-backtest__gauge-number {
+  font-family: var(--dt-mono);
+  font-size: clamp(3.5rem, 8vw, 5.5rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--dt-clear);
+}
+
+.dt-backtest__gauge-caption {
+  font-size: var(--dt-text-15);
+  line-height: 1.4;
+  color: var(--dt-ink);
+}
+
+.dt-backtest__gauge-plot {
+  --dt-gauge-label: 9.5rem;
+  --dt-gauge-read: 5.5rem;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 26px;
+  min-width: 0;
+}
+
+.dt-backtest__gauge-scale {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--dt-gauge-label) + 12px);
+  right: calc(var(--dt-gauge-read) + 12px);
+  pointer-events: none;
+}
+
+.dt-backtest__gauge-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
+  color: var(--dt-muted);
+  line-height: 1;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    bottom: 0;
+    left: 50%;
+    border-left: 1px dashed var(--dt-line);
+  }
+}
+
+.dt-backtest__gauge-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--dt-gauge-label) minmax(0, 1fr) var(--dt-gauge-read);
+  align-items: center;
+  gap: 12px;
+}
+
+.dt-backtest__gauge-label {
+  font-size: var(--dt-text-13);
+  font-weight: 600;
+  color: var(--dt-muted);
+}
+
+.dt-backtest__gauge-track {
+  position: relative;
+  height: 14px;
+  border: 1px solid var(--dt-line-strong);
+  border-radius: var(--dt-radius-tag);
+  overflow: hidden;
+}
+
+.dt-backtest__gauge-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--dt-muted);
+}
+
+.dt-backtest__gauge-read {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 8px;
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-13);
+  white-space: nowrap;
+}
+
+.dt-backtest__gauge-money {
+  color: var(--dt-muted);
+  font-size: var(--dt-text-11);
+}
+
+.dt-backtest__gauge-row--lead {
+  .dt-backtest__gauge-label {
+    color: var(--dt-clear);
+    font-weight: 800;
+    font-size: var(--dt-text-15);
+  }
+
+  .dt-backtest__gauge-track {
+    height: 28px;
+    border-color: var(--dt-clear);
+  }
+
+  .dt-backtest__gauge-fill {
+    background: var(--dt-clear-mark);
+  }
+
+  .dt-backtest__gauge-pct {
+    font-size: var(--dt-text-17);
+    color: var(--dt-clear);
+  }
+}
+
+.dt-backtest__gauge-row--oracle .dt-backtest__gauge-fill {
+  background: repeating-linear-gradient(90deg, var(--dt-ink) 0 2px, transparent 2px 6px);
+}
+
+.dt-backtest__gauge-foot {
+  margin: 0;
+  padding: 10px 20px 12px;
+  border-top: 1px solid var(--dt-line-soft);
+  font-size: var(--dt-text-13);
+  color: var(--dt-muted);
+}
+
+.dt-backtest__compare-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: var(--dt-radius-tag);
+}
+
+.dt-backtest__compare-name {
+  white-space: nowrap;
+}
+
+.dt-backtest__compare-row--lead {
+  background: var(--dt-clear-wash);
+
+  .dt-table__cell {
+    border-bottom-color: var(--dt-clear);
+    font-weight: 700;
+  }
+
+  .dt-backtest__compare-name {
+    box-shadow: inset 4px 0 0 var(--dt-clear);
+    font-size: var(--dt-text-15);
+  }
+
+  .dt-backtest__compare-total {
+    color: var(--dt-clear);
+    font-size: var(--dt-text-15);
+  }
+}
+
+.dt-backtest__compare-total {
+  font-weight: 700;
+}
+
+.dt-backtest__strategies {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dt-backtest__strategy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--dt-line);
+  border-radius: var(--dt-radius-frame);
+  background: var(--dt-panel);
+}
+
+.dt-backtest__strategy--lead {
+  border-color: var(--dt-clear);
+  box-shadow: inset 4px 0 0 var(--dt-clear);
+  background: var(--dt-clear-wash);
+}
+
+.dt-backtest__strategy-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  font-size: var(--dt-text-15);
+  font-weight: 800;
+}
+
+.dt-backtest__strategy-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+  margin: 0;
+}
+
+.dt-backtest__strategy-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  .dt-backtest__fact-term {
+    font-family: var(--dt-mono);
+    font-size: var(--dt-text-11);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dt-muted);
+  }
+
+  .dt-backtest__fact-value {
+    margin: 0;
+    font-family: var(--dt-mono);
+    font-size: var(--dt-text-13);
+  }
+}
+
+.dt-backtest__strategy-fact--key .dt-backtest__fact-value {
+  font-size: var(--dt-text-17);
+  font-weight: 700;
+}
+
+.dt-backtest__pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 17rem;
+  gap: 16px;
+  align-items: start;
+}
+
+.dt-backtest__daycard {
+  position: sticky;
+  top: 16px;
+  border: 1px solid var(--dt-ink);
+  border-radius: var(--dt-radius-frame);
+  background: var(--dt-panel);
+}
+
+.dt-backtest__daycard-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  animation: dt-rise var(--dt-motion-2) var(--dt-ease) both;
+}
+
+.dt-backtest__daycard-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+}
+
+.dt-backtest__daycard-title {
+  margin: 0;
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-27);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.dt-backtest__daycard-off {
+  margin: 0;
+  font-size: var(--dt-text-15);
+  color: var(--dt-muted);
+}
+
+.dt-backtest__daycard-facts {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  border-top: 1px solid var(--dt-ink);
+}
+
+.dt-backtest__daycard-fact {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--dt-line-soft);
+
+  .dt-backtest__fact-term {
+    font-size: var(--dt-text-13);
+    color: var(--dt-muted);
+  }
+
+  .dt-backtest__fact-value {
+    margin: 0;
+    font-family: var(--dt-mono);
+    font-size: var(--dt-text-17);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+}
+
+.dt-backtest__daycard-fact--lead .dt-backtest__fact-value {
+  color: var(--dt-clear);
+}
+
+.dt-backtest__daycard-fact--shaved {
+  border-bottom-color: var(--dt-ink);
+
+  .dt-backtest__fact-value {
+    font-size: var(--dt-text-21);
+  }
+}
+
+.dt-backtest__daycard-notice {
+  margin: 0;
+  font-size: var(--dt-text-13);
+  line-height: 1.45;
+  color: var(--dt-ink);
+}
+
+.dt-backtest__daycard-link {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  color: var(--dt-ink);
+  font-size: var(--dt-text-13);
+  font-weight: 700;
+  text-underline-offset: 4px;
+
+  .mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.dt-backtest__closeup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.dt-backtest__closeup-title {
+  margin: 0;
+  font-size: var(--dt-text-21);
+  font-weight: 800;
+  scroll-margin-top: 16px;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+@media (max-width: 959.98px) {
+  .dt-backtest__gauge-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dt-backtest__pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dt-backtest__daycard {
+    position: static;
+  }
+}
+
+@media (max-width: 599.98px) {
+  .dt-backtest__compare-table {
+    display: none;
+  }
+
+  .dt-backtest__strategies {
+    display: flex;
+  }
+
+  .dt-backtest__gauge-head,
+  .dt-backtest__gauge-body,
+  .dt-backtest__gauge-foot {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .dt-backtest__gauge-plot {
+    --dt-gauge-label: 0px;
+    --dt-gauge-read: 0px;
+  }
+
+  .dt-backtest__gauge-scale {
+    left: 0;
+    right: 0;
+  }
+
+  .dt-backtest__gauge-tick::after {
+    display: none;
+  }
+
+  .dt-backtest__gauge-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'label read' 'track track';
+    gap: 4px 8px;
+  }
+
+  .dt-backtest__gauge-label {
+    grid-area: label;
+  }
+
+  .dt-backtest__gauge-read {
+    grid-area: read;
+  }
+
+  .dt-backtest__gauge-track {
+    grid-area: track;
+  }
 }

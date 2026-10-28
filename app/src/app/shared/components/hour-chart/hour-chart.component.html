@@ -84,6 +84,13 @@
           ></path>
         }
 
+        @if (cursorX !== null) {
+          <g class="dt-hour-chart__cursor" [style.transform]="'translateX(' + cursorX + 'px)'" aria-hidden="true">
+            <line class="dt-hour-chart__cursor-line" x1="0" x2="0" [attr.y1]="plotTop" [attr.y2]="plotBottom"></line>
+            <path class="dt-hour-chart__cursor-head" [attr.d]="'M-5 ' + (plotTop - 1) + 'h10l-5 6z'"></path>
+          </g>
+        }
+
         @if (hoverIndex !== null) {
           <line class="dt-hour-chart__crosshair" [attr.x1]="hoverX" [attr.x2]="hoverX" [attr.y1]="plotTop" [attr.y2]="plotBottom"></line>
           @for (marker of hoverMarkers; track $index) {

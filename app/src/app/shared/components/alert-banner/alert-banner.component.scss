@@ -3,13 +3,15 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-control);
   border: 1px solid var(--dt-theme--error);
+  box-shadow: inset 4px 0 0 var(--dt-theme--error);
   background: var(--dt-theme--error-bg);
   color: var(--dt-theme--error-dark);
 }
 
 .alert-banner--info {
+  box-shadow: inset 4px 0 0 var(--dt-ink);
   border-color: var(--dt-theme--border);
   background: #fff;
   color: var(--dt-theme--primary);

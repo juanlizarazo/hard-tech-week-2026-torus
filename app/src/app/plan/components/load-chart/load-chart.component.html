@@ -86,13 +86,15 @@
           class="load-chart__demand-line"
           [attr.x1]="margins.left"
           [attr.x2]="plotRight"
-          [attr.y1]="demandY"
-          [attr.y2]="demandY"
+          y1="0"
+          y2="0"
+          [style.transform]="'translateY(' + demandY + 'px)'"
         ></line>
         <text
           class="load-chart__demand-text chart__halo-text"
           [attr.x]="plotRight - 4"
-          [attr.y]="demandY - 6"
+          y="-6"
+          [style.transform]="'translateY(' + demandY + 'px)'"
           text-anchor="end"
         >
           {{ demandLabel || 'Billed demand' }}

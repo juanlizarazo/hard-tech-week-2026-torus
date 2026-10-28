@@ -1,30 +1,37 @@
 @if (viewModel$ | async; as viewModel) {
-  <dt-chart-frame title="Where the power comes from" [notice]="viewModel.state.data?.notice ?? ''">
+  <dt-chart-frame index="F1" [title]="'Where ' + dayPossessive.toLowerCase() + ' power comes from'">
     <p frame-notice class="dt-hint">SIMULATED site pin · seed 42. PACE plants and fuel totals are real public data.</p>
     @switch (viewModel.state.status) {
       @case ('loading') {
-        <div class="dt-state" role="status">
+        <div class="dt-state plant-map__loading" role="status">
           <mat-spinner diameter="20"></mat-spinner>
           <span>Placing PACE's power plants…</span>
         </div>
+        <ng-container [ngTemplateOutlet]="stack"></ng-container>
       }
       @case ('error') {
         <dt-alert-banner [message]="viewModel.state.errorMessage"></dt-alert-banner>
+        <ng-container [ngTemplateOutlet]="stack"></ng-container>
       }
       @case ('empty') {
         <p class="dt-state">The fuel mix for the last two weeks isn't in this snapshot yet, so the map has nothing to light up.</p>
+        <ng-container [ngTemplateOutlet]="stack"></ng-container>
       }
       @case ('ready') {
         @if (viewModel.state.data; as data) {
           @if (viewModel.hourView; as hourView) {
-            <div class="plant-map">
+            <div class="plant-map" [class.plant-map--still]="isFlowPaused" [class.plant-map--rush]="hourView.isRush">
               <div class="plant-map__map">
                 <svg
                   class="plant-map__svg"
                   [attr.viewBox]="'0 0 ' + width + ' ' + data.height"
                   role="img"
                   [attr.aria-label]="
-                    'Map of ' + data.plantCount + ' power plants in the PACE area across Utah, Wyoming and Idaho. ' + hourView.summary + '.'
+                    'Schematic map of ' +
+                    data.plantCount +
+                    ' power plants in the PACE area across Utah, Wyoming and Idaho, with streams from each plant into one PACE grid node and on to the simulated airport. ' +
+                    hourView.summary +
+                    '.'
                   "
                 >
                   <defs>
@@ -42,6 +49,19 @@
                       {{ stateLabel.label }}
                     </text>
                   }
+                  <g class="plant-map__streams" aria-hidden="true">
+                    @for (group of data.streamGroups; track group.fuelKey) {
+                      @let stream = hourView.streamByFuel[group.fuelKey];
+                      <path
+                        class="plant-map__stream"
+                        [attr.d]="group.path"
+                        [attr.stroke]="group.color"
+                        [style.stroke-width]="stream.width"
+                        [style.stroke-opacity]="stream.opacity"
+                        [style.stroke-dasharray]="stream.dashArray"
+                      ></path>
+                    }
+                  </g>
                   <g class="plant-map__plants">
                     @for (plant of data.plantMarks; track plant.id) {
                       <circle
@@ -65,7 +85,7 @@
                         [attr.x2]="city.leaderX"
                         [attr.y2]="city.signY + 9"
                       ></line>
-                      <rect class="plant-map__sign" [attr.x]="city.signX" [attr.y]="city.signY" [attr.width]="city.signWidth" height="18" rx="3"></rect>
+                      <rect class="plant-map__sign" [attr.x]="city.signX" [attr.y]="city.signY" [attr.width]="city.signWidth" height="18" rx="2"></rect>
                       <text class="plant-map__sign-text" [attr.x]="city.signX + city.signWidth / 2" [attr.y]="city.signY + 13" text-anchor="middle">
                         {{ city.label }}
                       </text>
@@ -83,9 +103,32 @@
                       <title>{{ point.label }} weather forecast point (Open-Meteo)</title>
                     </rect>
                   }
+                  <path
+                    class="plant-map__site-stream"
+                    [attr.d]="data.siteStreamPath"
+                    [style.stroke-width]="hourView.siteStream.width"
+                    [style.stroke-dasharray]="hourView.siteStream.dashArray"
+                    aria-hidden="true"
+                  ></path>
+                  <g class="plant-map__node" aria-hidden="true">
+                    <rect
+                      class="plant-map__bus-halo"
+                      [attr.x]="data.nodeMark.busX1 - 4"
+                      [attr.y]="data.nodeMark.y - 6"
+                      [attr.width]="data.nodeMark.busX2 - data.nodeMark.busX1 + 8"
+                      height="12"
+                      rx="2"
+                    ></rect>
+                    <line class="plant-map__bus" [attr.x1]="data.nodeMark.busX1" [attr.x2]="data.nodeMark.busX2" [attr.y1]="data.nodeMark.y" [attr.y2]="data.nodeMark.y"></line>
+                    <text class="plant-map__node-label" [attr.x]="data.nodeMark.x" [attr.y]="data.nodeMark.y - 22" text-anchor="middle">{{ data.nodeMark.label }}</text>
+                    <text class="plant-map__node-note" [attr.x]="data.nodeMark.x" [attr.y]="data.nodeMark.y - 10" text-anchor="middle">{{ data.nodeMark.note }}</text>
+                  </g>
                   <g class="plant-map__site">
                     <line class="plant-map__leader" [attr.x1]="data.siteMark.x" [attr.y1]="data.siteMark.y" [attr.x2]="data.siteMark.labelX" [attr.y2]="data.siteMark.labelY - 14"></line>
-                    <circle class="plant-map__pin" [attr.cx]="data.siteMark.x" [attr.cy]="data.siteMark.y" r="5"></circle>
+                    @if (hourView.isRush) {
+                      <circle class="plant-map__site-ring" [attr.cx]="data.siteMark.x" [attr.cy]="data.siteMark.y" r="14" aria-hidden="true"></circle>
+                    }
+                    <circle class="plant-map__pin" [attr.cx]="data.siteMark.x" [attr.cy]="data.siteMark.y" r="5.5"></circle>
                     <circle class="plant-map__pin-dot" [attr.cx]="data.siteMark.x" [attr.cy]="data.siteMark.y" r="1.8"></circle>
                     <text class="plant-map__site-label" [attr.x]="data.siteMark.labelX" [attr.y]="data.siteMark.labelY - 2" text-anchor="middle">
                       {{ data.siteMark.label }}
@@ -95,85 +138,107 @@
                     </text>
                   </g>
                 </svg>
+                <p class="plant-map__schematic">
+                  <span class="dt-tag">Schematic</span>
+                  <span>{{ schematicNote }}</span>
+                </p>
               </div>
 
-              <div class="plant-map__side">
-                <p class="plant-map__hour">
-                  <span class="plant-map__hour-label">{{ hourView.hourLabel }}</span>
-                  @if (hourView.isRush) {
-                    <span class="plant-map__rush-tag">Rush hour</span>
-                  }
-                </p>
-                <p class="plant-map__fossil">
-                  Coal and gas make <strong>{{ hourView.fossilPercent }}%</strong> of PACE's power in this hour.
-                </p>
+              <div class="plant-map__console">
+                @if (data.notice; as notice) {
+                  <p class="plant-map__notice"><span class="plant-map__notice-label">What to notice</span>{{ notice }}</p>
+                }
+
+                <div class="plant-map__readout">
+                  <p class="plant-map__hour">
+                    <span class="plant-map__hour-label">{{ hourView.hourLabel }}</span>
+                    @if (hourView.isRush) {
+                      <span class="dt-tag dt-tag--rush">Rush hour</span>
+                    }
+                  </p>
+                  <p class="plant-map__fossil">
+                    Coal and gas make <strong class="dt-mono">{{ hourView.fossilPercent }}%</strong> of PACE's power in this hour.
+                    @if (hourView.siteKw !== null) {
+                      The simulated airport draws <strong class="dt-mono">{{ hourView.siteKw | number: '1.0-0' }} kW</strong>.
+                    }
+                  </p>
+                </div>
+
+                <div class="plant-map__scrubber">
+                  <button
+                    type="button"
+                    class="plant-map__play"
+                    [attr.aria-label]="isPlaying ? 'Pause the day' : 'Play the day hour by hour'"
+                    [attr.aria-pressed]="isPlaying"
+                    (click)="onTogglePlay(hourView.hour)"
+                  >
+                    <svg class="plant-map__play-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      @if (isPlaying) {
+                        <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"></path>
+                      } @else {
+                        <path d="M8 5v14l11-7z"></path>
+                      }
+                    </svg>
+                  </button>
+                  <div class="plant-map__track-wrap">
+                    <svg
+                      class="plant-map__rush-band"
+                      aria-hidden="true"
+                      preserveAspectRatio="none"
+                      [style.--band-left]="viewModel.rushTrack.leftPercent"
+                      [style.--band-width]="viewModel.rushTrack.widthPercent"
+                    >
+                      <rect width="100%" height="100%" fill="url(#dt-rush-stripes)"></rect>
+                    </svg>
+                    <input
+                      class="plant-map__range"
+                      type="range"
+                      min="0"
+                      max="23"
+                      step="1"
+                      [value]="hourView.hour"
+                      aria-label="Hour of day"
+                      [attr.aria-valuetext]="valueText(hourView.hour, hourView.summary)"
+                      (input)="onHourInput($event)"
+                    />
+                    <div class="plant-map__ticks" aria-hidden="true">
+                      @for (tick of tickHours; track tick) {
+                        <span class="plant-map__tick" [style.--tick]="(tick / 23) * 100">{{ tickLabel(tick) }}</span>
+                      }
+                    </div>
+                  </div>
+                  <button type="button" class="plant-map__flow-toggle" [attr.aria-pressed]="!isFlowPaused" (click)="onToggleFlow()">
+                    Flow<span class="plant-map__flow-text" aria-hidden="true">&nbsp;{{ isFlowPaused ? 'off' : 'on' }}</span>
+                  </button>
+                </div>
+
+                <ng-container [ngTemplateOutlet]="stack"></ng-container>
+
                 <ul class="plant-map__shares" aria-label="Share of PACE generation by fuel in this hour">
                   @for (row of hourView.rows; track row.fuel.key) {
                     <li class="plant-map__share">
                       <span class="plant-map__swatch" [style.background]="row.fuel.color"></span>
                       <span class="plant-map__share-label">{{ row.fuel.label }}</span>
                       <span class="plant-map__bar" aria-hidden="true">
-                        <span class="plant-map__bar-fill" [style.width.%]="row.sharePercent" [style.background]="row.fuel.color"></span>
+                        <span class="plant-map__bar-fill" [style.transform]="'scaleX(' + row.sharePercent / 100 + ')'" [style.background]="row.fuel.color"></span>
                       </span>
                       <span class="plant-map__share-value">{{ row.sharePercent }}%</span>
                     </li>
                   }
                 </ul>
                 <p class="plant-map__key">
+                  <span class="plant-map__key-item"><span class="plant-map__key-stream" aria-hidden="true"></span>Stream width and dash density: that fuel's share now</span>
                   <span class="plant-map__key-item"><span class="plant-map__key-circles" aria-hidden="true"></span>Circle size: plant capacity</span>
                   <span class="plant-map__key-item"><span class="plant-map__key-fade" aria-hidden="true"></span>Brightness: that fuel's share now</span>
+                  <span class="plant-map__key-item"><span class="plant-map__key-site" aria-hidden="true"></span>Dark stream: the simulated airport's draw</span>
                   @if (data.weatherMarks.length > 0) {
                     <span class="plant-map__key-item"><span class="plant-map__key-diamond" aria-hidden="true"></span>Weather forecast point</span>
                   }
                 </p>
                 <p class="dt-hint">
-                  Average of {{ data.mix.dayCount }} days of EIA hourly fuel totals, {{ data.mix.startDate }} to {{ data.mix.endDate }}.
+                  The fuel mix is an average day: {{ data.mix.dayCount }} days of EIA hourly fuel totals, {{ data.mix.startDate }} to {{ data.mix.endDate }}.
+                  The signal rows above and the airport's simulated draw (seed 42) are for the planned day{{ siteDateLabel ? ', ' + siteDateLabel : '' }}.
                 </p>
-              </div>
-            </div>
-
-            <div class="plant-map__scrubber">
-              <button
-                type="button"
-                class="plant-map__play"
-                [attr.aria-label]="isPlaying ? 'Pause the day' : 'Play the day hour by hour'"
-                [attr.aria-pressed]="isPlaying"
-                (click)="onTogglePlay(hourView.hour)"
-              >
-                <svg class="plant-map__play-icon" viewBox="0 0 24 24" aria-hidden="true">
-                  @if (isPlaying) {
-                    <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"></path>
-                  } @else {
-                    <path d="M8 5v14l11-7z"></path>
-                  }
-                </svg>
-              </button>
-              <div class="plant-map__track-wrap">
-                <svg
-                  class="plant-map__rush-band"
-                  aria-hidden="true"
-                  preserveAspectRatio="none"
-                  [style.--band-left]="viewModel.rushTrack.leftPercent"
-                  [style.--band-width]="viewModel.rushTrack.widthPercent"
-                >
-                  <rect width="100%" height="100%" fill="url(#dt-rush-stripes)"></rect>
-                </svg>
-                <input
-                  class="plant-map__range"
-                  type="range"
-                  min="0"
-                  max="23"
-                  step="1"
-                  [value]="hourView.hour"
-                  aria-label="Hour of day"
-                  [attr.aria-valuetext]="hourView.summary"
-                  (input)="onHourInput($event)"
-                />
-                <div class="plant-map__ticks" aria-hidden="true">
-                  @for (tick of tickHours; track tick) {
-                    <span class="plant-map__tick" [style.--tick]="tick / 23 * 100">{{ tickLabel(tick) }}</span>
-                  }
-                </div>
               </div>
             </div>
           }
@@ -187,12 +252,14 @@
         Plants that burn two fuels, like Jim Bridger, show one circle per fuel.
       </p>
       <ul class="dt-list">
-        <li>Drag the hour slider, or press Play, to step through an average day. Each fuel's circles brighten with that fuel's share of PACE generation in that hour.</li>
+        <li>Drag the hour slider, use the arrow keys, or press Play, to step through the day. Each fuel's circles brighten, and its streams thicken, with that fuel's share of PACE generation in that hour.</li>
+        <li>Streams run from every plant into one PACE grid node, then on to the simulated airport. They are a schematic of shares, not real transmission lines: EIA reports fuel totals, not plant-by-plant flows. "Flow off" stops the animation.</li>
+        <li>The dark stream from the node to the airport widens with the airport's simulated draw in that hour (seed 42).</li>
         <li>Brown circles are coal (dark) and gas (light). Yellow is solar, blue is wind, teal is hydro, grey is everything else.</li>
         <li>Orange stripes on the slider: PACE's rush hour.</li>
         <li>Green signs are Wasatch Front cities. Diamonds are the three weather points our load forecast reads. The pin is the simulated airport, at an illustrative location.</li>
       </ul>
-      <p class="dt-hint"><strong>Honesty note:</strong> {{ honestyNote }} The brightness of a fuel is the same for all of its plants.</p>
+      <p class="dt-hint"><strong>Honesty note:</strong> {{ honestyNote }} The brightness and stream width of a fuel are the same for all of its plants. {{ schematicNote }}</p>
       @if (viewModel.state.data; as data) {
         <ul class="dt-list">
           @for (capacity of data.capacities; track capacity.fuel.key) {

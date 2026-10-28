@@ -11,9 +11,9 @@
   min-width: 0;
   max-width: 100%;
   margin: 0;
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--dt-line);
+  padding: 3px 10px 2px;
+  border-radius: var(--dt-radius-tag);
+  border: 1px solid var(--dt-pulse);
   background: var(--dt-panel);
   color: var(--dt-ink);
   font: inherit;
@@ -24,7 +24,7 @@
   cursor: help;
 
   &:hover {
-    border-color: var(--dt-muted);
+    background: color-mix(in srgb, var(--dt-pulse) 6%, var(--dt-panel));
   }
 }
 
@@ -44,6 +44,10 @@
 
 .simulated-badge__part {
   white-space: nowrap;
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .simulated-badge__part--real {
@@ -63,8 +67,8 @@
   gap: 6px;
   max-width: min(320px, calc(100vw - 32px));
   padding: 10px 12px;
-  border: 1px solid var(--dt-line);
-  border-radius: 8px;
+  border: 1px solid var(--dt-ink);
+  border-radius: var(--dt-radius-control);
   background: var(--dt-panel);
   box-shadow: 0 6px 18px color-mix(in srgb, var(--dt-ink) 14%, transparent);
   font-family: var(--dt-font);

@@ -1,7 +1,10 @@
-<figure class="dt-chart-frame">
+<figure class="dt-chart-frame" [class.dt-chart-frame--indexed]="!!index">
   <figcaption class="dt-chart-frame__head">
     <div class="dt-chart-frame__titles">
       <div class="dt-chart-frame__title-row">
+        @if (index) {
+          <span class="dt-chart-frame__index" aria-hidden="true">{{ index }}</span>
+        }
         <h3 class="dt-chart-frame__title">{{ title }}</h3>
         @if (hasHowToRead) {
           <button type="button" class="dt-chart-frame__info" [attr.aria-label]="'How to read ' + title" (click)="onOpenHowToRead()">
