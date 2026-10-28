@@ -200,7 +200,7 @@
                   </span>
                 }
                 @if (sheet && !isApproved(sheet)) {
-                  <button mat-stroked-button type="button" class="plan__rail-approve" [disabled]="!canApprove(solve, sheet)" (click)="onApprove(sheet)">
+                  <button mat-flat-button type="button" class="plan__rail-approve" [disabled]="!canApprove(solve, sheet)" (click)="onApprove(sheet)">
                     <div class="btn-content">
                       <mat-icon aria-hidden="true">task_alt</mat-icon>
                       <span>Approve</span>
