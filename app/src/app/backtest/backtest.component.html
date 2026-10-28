@@ -455,13 +455,13 @@
                 <h3 class="dt-subheading">How the month was replayed</h3>
                 <ul class="dt-list">
                   <li>The simulated site ({{ result.summary.siteName }}, seed {{ result.summary.seed }}) runs every 15 minutes of {{ model.monthLabel }} on {{ result.summary.scheduleName }}.</li>
-                  <li>No storage is the bill with the Torus Station switched off.</li>
-                  <li>The {{ model.shaverName.toLowerCase() }} discharges whenever load passes {{ formatNumber(result.summary.naiveTargetKw) }} kW and recharges below it. It reads no prices or forecasts.</li>
+                  <li><strong>No storage</strong> is the bill with the Torus Station switched off.</li>
+                  <li>The <dt-term key="SIMPLE_SHAVER">{{ model.shaverName.toLowerCase() }}</dt-term> discharges whenever load passes {{ formatNumber(result.summary.naiveTargetKw) }} kW and recharges below it. It reads no prices or forecasts.</li>
                   <li>{{ model.leadName }} re-solves the <dt-term key="LP">LP</dt-term> each afternoon for the next day on a load forecast: for each 15 minutes, the highest load on the same weekday over the last four weeks. Prices and carbon are known a day ahead.</li>
-                  <li>It then runs that plan against the real load with a live cap. When the site would pass the plan's peak or the month's peak so far, Pulse ramps up within its limits and Spin covers the rest, without touching the Wattsmart reserve. If stored energy runs short, the planned discharge is cut. State of charge carries from day to day.</li>
+                  <li>It then runs that plan against the real load with a live cap. When the site would pass the plan's peak or the month's peak so far, Pulse ramps up within its limits and Spin covers the rest, without touching the Wattsmart reserve. If stored energy runs short, the planned discharge is cut. <dt-term key="SOC">State of charge</dt-term> (how full each machine is) carries from day to day.</li>
                   <li>{{ model.leadName }} with a perfect load forecast is the same planner told each day's real load in advance, with no live cap. It shows what forecast error costs.</li>
-                  <li>{{ model.oracleName }} solves the whole month at once with the real loads. No real controller can match it; it is the ceiling for the capture rate.</li>
-                  <li>Bills use base rates only. Riders are excluded.</li>
+                  <li><dt-term key="PERFECT_HINDSIGHT">{{ model.oracleName }}</dt-term> solves the whole month at once with the real loads. No real controller can match it; it is the ceiling for the capture rate.</li>
+                  <li>Bills use base rates only. <dt-term key="RIDERS">Riders</dt-term> are excluded.</li>
                 </ul>
               </div>
               <div class="dt-table-wrap">

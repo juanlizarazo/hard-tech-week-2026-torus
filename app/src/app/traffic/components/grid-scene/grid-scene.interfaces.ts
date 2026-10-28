@@ -42,6 +42,12 @@ export interface ISceneParticle {
   size: number;
 }
 
+export interface ISceneDot {
+  position: [number, number, number];
+  color: [number, number, number, number];
+  size: number;
+}
+
 export interface ISceneLabel {
   text: string;
   lon: number;

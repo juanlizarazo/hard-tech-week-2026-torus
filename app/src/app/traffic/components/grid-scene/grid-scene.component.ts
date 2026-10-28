@@ -5,7 +5,7 @@ import { PlantMapHelper } from '../plant-map/plant-map.helper';
 import { IPlantMapData, IPlantMapHourView } from '../plant-map/plant-map.interfaces';
 import { gridSceneSettings } from './grid-scene.constants';
 import { GridSceneHelper } from './grid-scene.helper';
-import { ISceneColumnGroup, ISceneLabel, ISceneParticle, IScenePalette, ISceneViewState } from './grid-scene.interfaces';
+import { ISceneColumnGroup, ISceneDot, ISceneLabel, ISceneParticle, IScenePalette, ISceneViewState } from './grid-scene.interfaces';
 
 interface IDeckModules {
   core: typeof import('@deck.gl/core');
@@ -38,6 +38,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
   private _columnGroups: ISceneColumnGroup[] = [];
   private _labels: ISceneLabel[] = [];
   private _particles: ISceneParticle[] = [];
+  private _dots: ISceneDot[] = [];
   private _staticLayers: Layer[] = [];
   private _isStaticDirty = true;
   private _isDataDirty = true;
@@ -187,16 +188,17 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       this._phases.set(fuelKey, (this._phases.get(fuelKey) ?? 0) + delta * GridSceneHelper.speed(relative));
     }
 
+    const dots: ISceneDot[] = [];
+
     for (const particle of this._particles) {
       const relative = particle.kind === 'site' ? GridSceneHelper.siteLevel(view) : GridSceneHelper.relative(view, particle.fuelKey);
       const t = (((this._phases.get(particle.fuelKey) ?? 0) + particle.offset) % 1 + 1) % 1;
-      const fade = Math.sqrt(Math.sin(Math.PI * t));
       const color = particle.kind === 'site' ? (view.isRush ? this._palette.rush : this._palette.ink) : GridSceneHelper.fuelColor(particle.fuelKey);
 
-      particle.position = GridSceneHelper.curvePoint(particle, t);
-      particle.size = 1.4 + 2.2 * relative;
-      particle.color = [color[0], color[1], color[2], Math.round((90 + 165 * relative) * fade)];
+      dots.push(...GridSceneHelper.trail(particle, t, this._clock, relative, color));
     }
+
+    this._dots = dots;
   }
 
   private _viewState(modules: IDeckModules, time: number): ISceneViewState {
@@ -345,19 +347,29 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
   private _buildLiveLayers(modules: IDeckModules): Layer[] {
     const { ScatterplotLayer } = modules.layers;
     const frame = Math.round(this._clock * 1000);
-    const particles = new ScatterplotLayer<ISceneParticle>({
-      id: 'scene-particles',
-      data: this._particles,
+    const halos = new ScatterplotLayer<ISceneDot>({
+      id: 'scene-halos',
+      data: this._dots,
       radiusUnits: 'pixels',
-      getPosition: (particle) => particle.position,
-      getRadius: (particle) => particle.size,
-      getFillColor: (particle) => particle.color,
+      getPosition: (dot) => dot.position,
+      getRadius: (dot) => dot.size * gridSceneSettings.HALO_SCALE,
+      getFillColor: (dot) => [dot.color[0], dot.color[1], dot.color[2], Math.round(dot.color[3] * 0.18)],
+      updateTriggers: { getPosition: frame, getRadius: frame, getFillColor: frame },
+      parameters: { depthWriteEnabled: false }
+    });
+    const particles = new ScatterplotLayer<ISceneDot>({
+      id: 'scene-particles',
+      data: this._dots,
+      radiusUnits: 'pixels',
+      getPosition: (dot) => dot.position,
+      getRadius: (dot) => dot.size,
+      getFillColor: (dot) => dot.color,
       updateTriggers: { getPosition: frame, getRadius: frame, getFillColor: frame },
       parameters: { depthWriteEnabled: false }
     });
 
     if (!this.hourView.isRush) {
-      return [particles];
+      return [halos, particles];
     }
 
     const rings = [0, 0.5].map((shift) => {
@@ -378,6 +390,6 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       });
     });
 
-    return [particles, ...rings];
+    return [halos, particles, ...rings];
   }
 }

@@ -27,7 +27,14 @@ export const firebaseConfig = {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes, withViewTransitions({ skipInitialTransition: true })),
+    provideRouter(routes, withViewTransitions({
+        skipInitialTransition: true,
+        onViewTransitionCreated: ({ transition, to }) => {
+          if (!to.fragment) {
+            void transition.updateCallbackDone.then(() => window.scrollTo(0, 0));
+          }
+        }
+      })),
     { provide: TitleStrategy, useExisting: DayTitleStrategyService },
     provideAnimationsAsync(),
     provideHttpClient(),

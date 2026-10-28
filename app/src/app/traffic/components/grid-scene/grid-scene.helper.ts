@@ -1,7 +1,7 @@
 import { cityLabels, mapFuels, paceNode, plantMapLayout, sitePin, stateLabels } from '../plant-map/plant-map.constants';
 import { IPlantMapData, IPlantMapHourView, IStateOutline } from '../plant-map/plant-map.interfaces';
 import { fallbackScenePalette, gridSceneSettings } from './grid-scene.constants';
-import { ISceneColumnGroup, ISceneLabel, ISceneParticle, IScenePoint, IScenePalette, SceneColor } from './grid-scene.interfaces';
+import { ISceneColumnGroup, ISceneDot, ISceneLabel, ISceneParticle, IScenePoint, IScenePalette, SceneColor } from './grid-scene.interfaces';
 
 export class GridSceneHelper {
   private static _webgl2: boolean | null = null;
@@ -157,12 +157,42 @@ export class GridSceneHelper {
     return result;
   }
 
-  public static curvePoint(particle: ISceneParticle, t: number): [number, number, number] {
+  public static curvePoint(particle: ISceneParticle, t: number, clock = 0, relative = 0): [number, number, number] {
     const inverse = 1 - t;
     const lon = inverse * inverse * particle.from.lon + 2 * inverse * t * particle.control.lon + t * t * particle.to.lon;
     const lat = inverse * inverse * particle.from.lat + 2 * inverse * t * particle.control.lat + t * t * particle.to.lat;
+    const xScale = Math.cos((particle.from.lat * Math.PI) / 180);
+    const dx = (particle.to.lon - particle.from.lon) * xScale;
+    const dy = particle.to.lat - particle.from.lat;
+    const length = Math.hypot(dx, dy) || 1;
+    const amplitude = length * gridSceneSettings.WAVE_AMPLITUDE * (0.35 + 0.65 * relative) * Math.sin(Math.PI * t);
+    const wave = amplitude * Math.sin(2 * Math.PI * (gridSceneSettings.WAVE_CYCLES * t - gridSceneSettings.WAVE_SPEED * clock) + particle.offset * 6.283);
 
-    return [lon, lat, Math.sin(Math.PI * t) * particle.lift];
+    return [lon - ((dy / length) * wave) / xScale, lat + (dx / length) * wave, Math.sin(Math.PI * t) * particle.lift];
+  }
+
+  public static trail(particle: ISceneParticle, t: number, clock: number, relative: number, color: SceneColor): ISceneDot[] {
+    const { TRAIL_SAMPLES, TRAIL_STEP } = gridSceneSettings;
+    const dots: ISceneDot[] = [];
+
+    for (let index = 0; index < TRAIL_SAMPLES; index += 1) {
+      const along = t - index * TRAIL_STEP;
+
+      if (along <= 0) {
+        break;
+      }
+
+      const taper = 1 - index / TRAIL_SAMPLES;
+      const fade = Math.sqrt(Math.sin(Math.PI * along));
+
+      dots.push({
+        position: GridSceneHelper.curvePoint(particle, along, clock, relative),
+        color: [color[0], color[1], color[2], Math.round((70 + 185 * relative) * fade * taper * taper)],
+        size: (1.2 + 2.6 * relative) * (0.35 + 0.65 * taper)
+      });
+    }
+
+    return dots;
   }
 
   public static labels(palette: IScenePalette): ISceneLabel[] {

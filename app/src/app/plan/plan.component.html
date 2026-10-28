@@ -208,7 +208,7 @@
                 </p>
                 @if (solve.viewModel; as railModel) {
                   <span class="plan__rail-stats dt-mono">
-                    <span class="plan__rail-stat">{{ railModel.result.lpStats.intervalCount | number }} intervals</span>
+                    <span class="plan__rail-stat">{{ railModel.result.lpStats.intervalCount | number }} <dt-term key="LP_SIZE">intervals</dt-term></span>
                     <span class="plan__rail-stat">{{ railModel.result.lpStats.variableCount | number }} variables</span>
                     <span class="plan__rail-stat">{{ railModel.result.lpStats.constraintCount | number }} constraints</span>
                     <span class="plan__rail-stat">{{ railModel.result.lpStats.solveMs | number: '1.0-0' }} ms</span>
@@ -347,7 +347,7 @@
                     }
                   </div>
                   @if (viewModel.lpStatsLine) {
-                    <p class="dt-hint plan__lp-stats">{{ viewModel.lpStatsLine }}</p>
+                    <p class="dt-hint plan__lp-stats">{{ viewModel.lpStatsLine }} <dt-term key="LP_SIZE">What do these mean?</dt-term></p>
                   }
 
                   <dt-chart-frame index="D1" title="Three clocks over the 48 hours" [notice]="viewModel.notices.clocks" [simulated]="true">
@@ -450,7 +450,7 @@
                     <dt-lp-text [lpText]="viewModel.result.lpText" [solveMs]="viewModel.result.solveMs"></dt-lp-text>
 
                     <div class="plan__assets">
-                      <h3 class="dt-subheading">The Torus Station for this site</h3>
+                      <h3 class="dt-subheading">The <dt-term key="TORUS_STATION">Torus Station</dt-term> for this site</h3>
                       <p class="dt-hint">Values marked Torus spec are from public Torus material; all other values are DETOUR assumptions.</p>
                       <div class="plan__assets-grid">
                         <div class="dt-table-wrap">

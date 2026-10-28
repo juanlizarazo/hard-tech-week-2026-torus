@@ -219,9 +219,9 @@
                               <thead>
                                 <tr>
                                   <th class="dt-table__cell dt-table__cell--head" scope="col">Forecast</th>
-                                  <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">MAPE</th>
-                                  <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Bias</th>
-                                  <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Low at peak</th>
+                                  <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col"><dt-term key="MAPE">MAPE</dt-term></th>
+                                  <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col"><dt-term key="BIAS">Bias</dt-term></th>
+                                  <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col"><dt-term key="LOW_AT_PEAK">Low at peak</dt-term></th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -309,7 +309,7 @@
                       <thead>
                         <tr>
                           <th class="dt-table__cell dt-table__cell--head" scope="col">Fuel</th>
-                          <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Factor (assumption)</th>
+                          <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col"><dt-term key="EMISSIONS_FACTOR">Factor</dt-term> (assumption)</th>
                           <th class="dt-table__cell dt-table__cell--head" scope="col">Source</th>
                         </tr>
                       </thead>
@@ -335,12 +335,12 @@
                 </div>
 
                 <div class="traffic__hood-block">
-                  <h3 class="dt-subheading">This snapshot</h3>
+                  <h3 class="dt-subheading">This <dt-term key="SNAPSHOT">snapshot</dt-term></h3>
                   <div class="dt-figures dt-figures--secondary">
                     <dt-figure size="small" [value]="manifest.targetDate" label="Planned day" [detail]="manifest.timezone"></dt-figure>
                     <dt-figure size="small" [value]="manifest.gridMonths.length + ' months'" label="Grid history" [detail]="manifest.gridRange.start + ' to ' + manifest.gridRange.end"></dt-figure>
                     <dt-figure size="small" [value]="manifest.priceMonths.length + ' months'" label="Price history" [detail]="manifest.priceRange.start + ' to ' + manifest.priceRange.end"></dt-figure>
-                    <dt-figure size="small" [value]="manifest.dayAheadForecastSource" label="PACE forecast source" [detail]="manifest.filteredRows + ' rows filtered out'"></dt-figure>
+                    <dt-figure size="small" [value]="manifest.dayAheadForecastSource" label="PACE forecast source" [detail]="manifest.filteredRows + ' rows filtered out (hours of source data dropped as invalid)'"></dt-figure>
                   </div>
                 </div>
 
@@ -351,7 +351,7 @@
                       <thead>
                         <tr>
                           <th class="dt-table__cell dt-table__cell--head" scope="col">Source</th>
-                          <th class="dt-table__cell dt-table__cell--head" scope="col">Series</th>
+                          <th class="dt-table__cell dt-table__cell--head" scope="col"><dt-term key="SERIES_ID">Series</dt-term></th>
                           <th class="dt-table__cell dt-table__cell--head" scope="col">Note</th>
                         </tr>
                       </thead>
@@ -371,14 +371,15 @@
                 </div>
 
                 <div class="traffic__hood-block">
-                  <h3 class="dt-subheading">Rows by month</h3>
+                  <h3 class="dt-subheading"><dt-term key="DATA_ROWS">Rows</dt-term> by month</h3>
+                  <p class="dt-hint">One row is one hour of data. A full month is about 720 to 744 rows; the current month is shorter because it is not over.</p>
                   <div class="dt-table-wrap traffic__rows">
                     <table class="dt-table">
                       <thead>
                         <tr>
                           <th class="dt-table__cell dt-table__cell--head" scope="col">Series</th>
                           <th class="dt-table__cell dt-table__cell--head" scope="col">Month</th>
-                          <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col">Rows</th>
+                          <th class="dt-table__cell dt-table__cell--head dt-table__cell--num" scope="col"><dt-term key="DATA_ROWS">Rows</dt-term></th>
                         </tr>
                       </thead>
                       <tbody>
