@@ -17,7 +17,7 @@
 
   @if (ledger$ | async; as screen) {
     <section class="dt-backtest__ledger" aria-label="Year to date, month by month">
-      <dt-chart-frame index="P0" [title]="screen.ledger.title" [notice]="screen.ledger.summary" [simulated]="true">
+      <dt-chart-frame index="P0" [title]="screen.ledger.title" [simulated]="true">
         <dt-year-ledger
           [months]="screen.ledger.months"
           [selected]="screen.selected"
