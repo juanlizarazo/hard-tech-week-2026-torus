@@ -222,6 +222,10 @@ export class PlanComponent {
     this._update(PlanDeltaHelper.chipChanges(chip, this.maxReserveKwh));
   }
 
+  public onResetDials(): void {
+    this._update(PlanHelper.defaultControls());
+  }
+
   public railState(solve: IPlanSolveState): PlanSolverRailState {
     if (solve.status === 'solving') {
       return 'solving';

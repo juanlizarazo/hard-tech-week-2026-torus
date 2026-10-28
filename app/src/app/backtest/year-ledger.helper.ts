@@ -63,7 +63,7 @@ export class YearLedgerHelper {
       summary:
         totals.length === 0
           ? 'The year summary is not available yet; pick a month to replay it.'
-          : `${BacktestHelper.formatMoney(savedTotal)} saved across ${months.length} months, ${BacktestHelper.formatNumber((savedTotal / ceilingTotal) * 100)}% of perfect foresight. Best month ${labelOf(ranked[0])}, weakest ${labelOf(ranked[ranked.length - 1])}.`,
+          : `${BacktestHelper.formatMoney(savedTotal)} saved across ${months.length} months, ${BacktestHelper.formatNumber((savedTotal / ceilingTotal) * 100)}% of perfect hindsight. Best month ${labelOf(ranked[0])}, weakest ${labelOf(ranked[ranked.length - 1])}.`,
       summerRange: summerIndexes.length > 0 ? [summerIndexes[0], summerIndexes[summerIndexes.length - 1]] : null,
       partialLabel: partial ? `${partial.shortLabel} 1–${Number(calendar.throughDate.slice(8, 10))}, to date` : '',
       note: year && year.snapshotId !== calendar.snapshotId ? `Year summary from snapshot ${year.snapshotId}.` : '',

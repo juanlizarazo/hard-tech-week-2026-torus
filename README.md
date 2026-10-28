@@ -18,14 +18,14 @@ On top of that, a Wattsmart demand-response call can drain the battery right bef
 
 1. **Traffic report.** Reads tomorrow's PACE grid conditions: load forecast, day-ahead prices, marginal CO2 by hour.
 2. **Plan.** Solves an LP in 15-minute steps that decides when the site's flywheel and battery charge and discharge. It cuts the customer's bill, avoids dirty hours and keeps a reserve for Wattsmart.
-3. **Proof.** Backtests a month against a naive peak-shaver and a perfect-foresight optimum, and reports how much of the possible savings it captured.
+3. **Proof.** Backtests a month against a naive peak-shaver and a perfect-hindsight optimum, and reports how much of the possible savings it captured.
 
 ## Demo flow
 
 1. **Start here** (`/start`). "$16.84 vs 3.1¢": one kW of summer on-peak demand costs as much as shifting about 550 kWh. Below it, the three-clocks strip shows the planning day's bill, price and carbon by hour, with rush hour in orange stripes. Hover any dotted word for a definition.
 2. **1 Forecast · tomorrow's grid** (`/traffic`). Opens on a flow map at the rush hour: every PACE plant streams into one schematic grid node and on to the simulated airport, with load, price and CO2 on one hour cursor (Play, drag or arrow keys; "Flow" pauses the animation). Below it: when the grid is jammed, whether price and carbon agree, how our forecast scores against PACE's own, and why marginal and average CO2 rank the hours differently. Open an ⓘ for a how-to-read panel.
 3. **2 Decide · tomorrow's plan** (`/plan`). Pick a site, then use a "Try this" chip or move the CO2 weight and Wattsmart reserve dials, or switch Schedule 8/6. The LP re-solves in the browser in milliseconds and each figure shows its change from the last solve. The solver rail turns the latest solve into tomorrow's dispatch orders; Approve stamps them "queued for Lattice" (simulated, no device connected) and Download schedule exports the 15-minute CSV. The LP text is under "Under the hood".
-4. **3 Prove · July's proof** (`/backtest`). Leads with the capture-rate verdict, then July replayed day by day: DETOUR against no storage, a simple shaver and perfect hindsight, with the capture rate.
+4. **3 Prove · the proof** (`/backtest`). Leads with the capture-rate verdict, then July replayed day by day: DETOUR against no storage, a simple shaver and perfect hindsight, with the capture rate.
 5. **Architecture** (back on `/start`, "How DETOUR works"). The pipeline below, drawn in the app.
 
 Every screen ends with a "Next stop" link, so the demo walks Start → 1 Forecast → 2 Decide → 3 Prove → back to Start.
@@ -55,13 +55,13 @@ flowchart LR
     RIDGE["Ridge forecast"]
     SITE["Site generator, seed 42"]
     LP["LP text + HiGHS WASM"]
-    REPLAY["July replay, real-time cap"]
+    REPLAY["Month replay, real-time cap"]
   end
-  subgraph Screens["Four screens"]
+  subgraph Screens["Start and three steps"]
     START["Start"]
-    GRID["① Grid"]
-    PLAN["② Plan"]
-    PROOF["③ July's proof"]
+    GRID["1 Forecast"]
+    PLAN["2 Decide"]
+    PROOF["3 Prove"]
   end
   EIA930 --> FN
   OASIS --> FN

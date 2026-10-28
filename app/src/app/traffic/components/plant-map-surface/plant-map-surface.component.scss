@@ -1,0 +1,29 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.surface {
+  position: relative;
+  width: 100%;
+  max-height: 660px;
+}
+
+.surface--fill {
+  position: absolute;
+  inset: 0;
+  max-height: none;
+}
+
+.surface__svg--fill {
+  position: absolute;
+  inset: 0 0 0 36%;
+}
+
+@media (max-width: 767.98px) {
+  .surface--fill,
+  .surface__svg--fill {
+    position: relative;
+    inset: auto;
+  }
+}

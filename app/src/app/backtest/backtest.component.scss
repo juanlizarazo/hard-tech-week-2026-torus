@@ -224,7 +224,7 @@
 .dt-backtest__gauge-number {
   font-family: var(--dt-mono);
   font-size: clamp(3.5rem, 8vw, 5.5rem);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 0.95;
   letter-spacing: -0.04em;
   color: var(--dt-clear);
@@ -371,7 +371,7 @@
 
   .dt-table__cell {
     border-bottom-color: var(--dt-clear);
-    font-weight: 700;
+    font-weight: 800;
   }
 
   .dt-backtest__compare-name {
@@ -386,7 +386,7 @@
 }
 
 .dt-backtest__compare-total {
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .dt-backtest__strategies {
@@ -453,7 +453,7 @@
 
 .dt-backtest__strategy-fact--key .dt-backtest__fact-value {
   font-size: var(--dt-text-17);
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .dt-backtest__pair {
@@ -490,7 +490,7 @@
   margin: 0;
   font-family: var(--dt-mono);
   font-size: var(--dt-text-27);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
@@ -525,7 +525,7 @@
     margin: 0;
     font-family: var(--dt-mono);
     font-size: var(--dt-text-17);
-    font-weight: 700;
+    font-weight: 800;
     white-space: nowrap;
   }
 }
@@ -556,7 +556,7 @@
   gap: 6px;
   color: var(--dt-ink);
   font-size: var(--dt-text-13);
-  font-weight: 700;
+  font-weight: 800;
   text-underline-offset: 4px;
 
   .mat-icon {

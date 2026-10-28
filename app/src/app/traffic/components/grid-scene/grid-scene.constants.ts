@@ -1,0 +1,48 @@
+import { IScenePalette } from './grid-scene.interfaces';
+
+export const gridSceneSettings = {
+  PITCH: 50,
+  BEARING: -15,
+  DRIFT_DEGREES: 4,
+  DRIFT_PERIOD_S: 60,
+  CHART_ZOOM_TRIM: 0.6,
+  HOME_ZOOM_TRIM: 0.05,
+  HOME_LEFT_PADDING: 0.3,
+  PADDING_PX: 16,
+  LABELED_CITIES: ['Salt Lake City', 'St. George'],
+  MIN_RADIUS_M: 4500,
+  RADIUS_PER_ROOT_MW_M: 330,
+  RADIUS_CLASSES_M: [4500, 7000, 10500, 15000],
+  RADIUS_CLASS_LIMITS_M: [5500, 8500, 12500],
+  MIN_ELEVATION_M: 4000,
+  ELEVATION_RANGE_M: 66000,
+  MIN_ALPHA: 70,
+  COAL_RESOLUTION: 6,
+  GAS_RESOLUTION: 4,
+  ROUND_RESOLUTION: 20,
+  TRANSITION_MS: 500,
+  TAP_SPACING_DEG: 0.05,
+  CURVE_BEND: 0.16,
+  PARTICLE_CYCLES_PER_S: 0.07,
+  PARTICLE_MIN_SPEED: 0.15,
+  PARTICLE_LIFT_FRACTION: 0.12,
+  PARTICLE_MAX_LIFT_M: 38000,
+  SITE_LIFT_M: 9000,
+  RING_PERIOD_S: 2.4,
+  RING_MIN_RADIUS_M: 14000,
+  RING_RADIUS_RANGE_M: 42000,
+  MAX_FRAME_S: 0.1,
+  MOBILE_MIN_WIDTH_PX: 768,
+  FONT_FAMILY: 'Overpass, Helvetica Neue, Arial, sans-serif'
+};
+
+export const fallbackScenePalette: IScenePalette = {
+  ink: [23, 32, 43],
+  paper: [238, 241, 240],
+  panel: [255, 255, 255],
+  line: [210, 217, 219],
+  lineStrong: [154, 166, 174],
+  muted: [86, 98, 110],
+  rush: [242, 133, 0],
+  clear: [14, 107, 78]
+};

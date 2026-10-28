@@ -68,6 +68,15 @@ export class PlantMapHelper {
 
     return {
       height: PlantMapHelper.height(),
+      geoPlants: onMap.map((plant) => ({
+        id: plant.id,
+        lon: plant.lon,
+        lat: plant.lat,
+        capacityMw: plant.capacityMw,
+        fuelKey: plant.fuelKey,
+        title: `${plant.name}, ${plant.state}: ${PlantMapHelper.fuelLabel(plant.fuelKey).toLowerCase()}, ${Math.round(plant.capacityMw).toLocaleString()} MW`
+      })),
+      geoStates: statesFile.states.filter((state) => plantMapSettings.PACE_STATE_CODES.includes(state.code)),
       statePaths: PlantMapHelper.statePaths(statesFile),
       stateLabelMarks: stateLabels.map((state) => ({ label: state.label, ...PlantMapHelper.project(state.lon, state.lat) })),
       plantMarks,
@@ -362,6 +371,10 @@ export class PlantMapHelper {
       fossilPercent,
       summary: `${hourLabel}: coal and gas ${fossilPercent}%, ${leaders}`
     };
+  }
+
+  public static ariaLabel(data: IPlantMapData, hourView: IPlantMapHourView): string {
+    return `Schematic map of ${data.plantCount} power plants in the PACE area across Utah, Wyoming and Idaho, with streams from each plant into one PACE grid node and on to the simulated airport. ${hourView.summary}.`;
   }
 
   public static rushTrack(rush: IRushHourWindow | null): IRushTrack {

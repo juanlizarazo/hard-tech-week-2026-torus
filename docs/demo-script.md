@@ -1,14 +1,14 @@
 # DETOUR demo script
 
-Target length: 4 minutes 35 seconds. Keep the app on the pinned snapshot and use the airport / Schedule 8 defaults unless a judge asks for another site.
+Target length: about 4 minutes 40 seconds, estimated from word count; not yet re-timed with a stopwatch. First person throughout: this is a solo build. Keep the app on the pinned snapshot and use the airport / Schedule 8 defaults unless a judge asks for another site.
 
 ## 0:00–0:30 — The hook
 
 Open Start here. Say:
 
-> The grid has a rush hour, and a Torus Station has to answer three clocks at once. One kilowatt of summer on-peak demand costs $16.84 every month; shifting one kilowatt-hour between energy prices is only about 3.1 cents. So DETOUR protects the peak first, then uses Spin and Pulse to make the trade safely.
+> The grid has a rush hour. One kilowatt of summer peak demand costs $16.84 every month; shifting one kilowatt-hour between energy prices is only about 3.1 cents. One kilowatt off the peak is worth about 550 kilowatt-hours moved, so I go after the peak first, then use Spin and Pulse to make the trade safely.
 
-Point to the three-clocks strip. Explain that the orange stripes are the four busiest forecast hours, not a literal road map.
+Let the map and the three launch tiles finish loading while you say it. Explain that the glowing columns are real PACE plants at their real locations and the streams are shares of power, not a literal road map. Every site number is simulated, seed 42.
 
 ## 0:30–1:20 — Tomorrow's grid (1 Forecast)
 
@@ -24,7 +24,11 @@ Point out the rush-hour band, the price trough and evening ramp, then the carbon
 
 > Carbon barely moves compared with price, so it is a tie-breaker here, not the main signal. Marginal CO2 is the extra emissions from one more megawatt-hour, which is the relevant number for shifting load.
 
-Open one chart's information panel and one dotted term. If asked about forecast quality, show the forecast comparison figures and explain that DETOUR is scored against PACE's own day-ahead forecast.
+Show the forecast comparison figures and say:
+
+> I beat PACE's own day-ahead forecast by the margin shown here, so the plan starts from a better forecast than the utility's own.
+
+Then add one line on carbon: marginal and average CO2 rank tomorrow's hours differently, and marginal is the one a shift actually changes.
 
 ## 1:20–3:10 — Tomorrow's plan (2 Decide)
 
@@ -34,7 +38,7 @@ Open 2 Decide. Say:
 
 Point to the result figures and load chart:
 
-> The dark line is the site without storage; the green area is grid draw with the station. Spin catches short spikes because it is high-power and durable. Pulse carries the longer energy blocks and stays above the reserve floor.
+> The dark line is the site without storage; the green area is grid draw with the station. Spin takes the spikes at about a third of the wear, so Pulse can hold the reserve and carry the longer energy blocks.
 
 Move the CO2 weight. Say:
 
@@ -48,7 +52,11 @@ Point at the dispatch orders in the solver rail and press Approve plan. Say:
 
 > This is what DETOUR hands Lattice for tomorrow. Approve, and Lattice runs it; Wattsmart calls still override it.
 
-Switch Schedule 6 / 8 if time allows. Open Under the hood and show the LP stats line, then the generated LP text for ten seconds.
+Switch the rate plan between Schedule 6 and Schedule 8 and say:
+
+> On Schedule 6 demand counts in any hour, so the station has to shave every spike; on Schedule 8 it only has to protect the on-peak window. Same engine, different plan.
+
+Skip Under the hood unless a judge asks.
 
 ## 3:10–4:15 — The proof, month by month (3 Prove)
 
@@ -56,9 +64,13 @@ Open 3 Prove. Say:
 
 > This is the honest backtest: a simple shaver, DETOUR planning one day ahead, and perfect hindsight as the ceiling. The capture rate is how much of that ceiling DETOUR reaches.
 
+Read the lead sentence on the screen aloud:
+
+> $11,546 saved on a simulated 2 MW Schedule 8 site, 85% of it from demand, 76% of the perfect-hindsight optimum, and 946 kWh held for Wattsmart.
+
 Point to the year ledger at the top, then the calendar and the peak note:
 
-> Here is every month this year, not just the best one. July is not even the peak; DETOUR still captures about two-thirds of perfect hindsight in winter. October is the month to date.
+> Same engine, every month: best is September at $13,000 and 78%, weakest is June at about 21%, and here's why: summer shoulder months have a smaller demand charge to shave. Winter runs 63 to 69%, so about two-thirds. October is the month to date.
 
 Then click July in the ledger and say:
 
@@ -70,4 +82,4 @@ Return to Start here and open How DETOUR works. Say:
 
 > DETOUR is a planning layer above a Torus Station's real-time controller: public grid data becomes a forecast, the forecast becomes a constrained dispatch, and the month-by-month replay proves what the strategy earned. Every simulated number is labeled; every public input has a source.
 
-Timing note: the ledger line adds about five seconds (about 40 spoken words); the total is estimated from word count, not yet re-timed with a stopwatch.
+Timing note: the lead sentence, ledger line and Schedule 6/8 beat are required; the info-panel and dotted-term demo on Forecast was cut to make room. The total is estimated from word count, not yet re-timed with a stopwatch.

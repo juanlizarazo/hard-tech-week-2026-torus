@@ -259,6 +259,13 @@
   color: var(--dt-muted);
 }
 
+.dt-shell--home {
+  .dt-shell__main {
+    max-width: none;
+    padding: 0;
+  }
+}
+
 @media (max-width: 959.98px) {
   .dt-shell__step-description {
     display: none;
@@ -329,6 +336,10 @@
 
   .dt-shell__main {
     padding: 28px 16px 48px;
+  }
+
+  .dt-shell--home .dt-shell__main {
+    padding: 0;
   }
 
   .dt-shell__footer {

@@ -1,4 +1,5 @@
 import { IPlanInterval, IRushHourWindow } from '@app/core/models';
+import { IPlantMapData, IPlantMapHourView } from '../traffic/components/plant-map/plant-map.interfaces';
 import { StartViewStatus } from './start.types';
 
 export interface IStartPreview {
@@ -20,14 +21,17 @@ export interface IStartViewState {
   errorMessage: string;
 }
 
-export interface IStartStep {
+export interface IStartTile {
   path: string;
-  step: string;
   code: string;
   stage: string;
-  title: string;
-  question: string;
-  description: string;
-  linkLabel: string;
-  isPrimary: boolean;
+  figure: string;
+  unit: string;
+  caption: string;
+  isMuted: boolean;
+}
+
+export interface IStartScene {
+  data: IPlantMapData | null;
+  hourView: IPlantMapHourView | null;
 }

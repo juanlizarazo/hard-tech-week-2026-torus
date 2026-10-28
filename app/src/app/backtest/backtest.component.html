@@ -111,7 +111,9 @@
                   <p class="dt-backtest__gauge-value">
                     <span class="dt-backtest__gauge-number">{{ model.capture.valueLabel }}</span>
                     <span class="dt-backtest__gauge-caption">
-                      @if (model.capture.isAvailable) {
+                      @if (model.capture.lossCause) {
+                        Storage cost money this month. {{ model.capture.lossCause }}
+                      } @else if (model.capture.isAvailable) {
                         of the {{ model.capture.oracleSavingsLabel }} that {{ model.oracleName.toLowerCase() }} saved, planning only one day ahead on forecasts.
                       } @else {
                         {{ model.oracleName }} could not be solved for this site.
@@ -491,5 +493,5 @@
     }
   }
 
-  <dt-next-stop path="/start" label="Back to the start" title="See how DETOUR works, under the hood"></dt-next-stop>
+  <dt-next-stop path="/start" fragment="architecture" label="Back to the start" title="See how DETOUR works, under the hood"></dt-next-stop>
 </div>

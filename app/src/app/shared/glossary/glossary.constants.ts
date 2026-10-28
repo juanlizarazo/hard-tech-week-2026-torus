@@ -205,6 +205,12 @@ export const glossary = {
     long: 'Drawing 1 kW for one hour uses 1 kWh. Energy charges bill every kWh, at a higher price in on-peak hours.',
     whyItMatters: 'Moving a kWh to a cheaper hour saves cents; trimming a kW of peak saves dollars.'
   },
+  LATTICE: {
+    term: 'Lattice',
+    short: "Torus's control software that runs a station in real time.",
+    long: 'DETOUR plans a day ahead and hands Lattice the dispatch orders. Lattice runs the real-time control, and Wattsmart calls override the plan.',
+    whyItMatters: 'DETOUR is a planning layer above Lattice, not a replacement for it.'
+  },
   THREE_CLOCKS: {
     term: 'Three clocks',
     short: 'The bill, the grid price and the carbon each say a different hour is expensive.',

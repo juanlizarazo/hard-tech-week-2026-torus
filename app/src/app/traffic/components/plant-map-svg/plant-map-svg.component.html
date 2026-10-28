@@ -1,0 +1,112 @@
+<div class="plant-map-svg" [class.plant-map--still]="paused" [class.plant-map-svg--fill]="fill">
+  <svg
+    class="plant-map__svg"
+    [attr.viewBox]="'0 0 ' + width + ' ' + data.height"
+    role="img"
+    [attr.aria-label]="ariaLabel"
+  >
+    <defs>
+      <clipPath id="plant-map-clip">
+        <rect x="0" y="0" [attr.width]="width" [attr.height]="data.height"></rect>
+      </clipPath>
+    </defs>
+    <g clip-path="url(#plant-map-clip)">
+      @for (state of data.statePaths; track state.code) {
+        <path class="plant-map__state" [class.plant-map__state--pace]="state.isPace" [attr.d]="state.path"></path>
+      }
+    </g>
+    @for (stateLabel of data.stateLabelMarks; track stateLabel.label) {
+      <text class="plant-map__state-label" [attr.x]="stateLabel.x" [attr.y]="stateLabel.y" text-anchor="middle">
+        {{ stateLabel.label }}
+      </text>
+    }
+    <g class="plant-map__streams" aria-hidden="true">
+      @for (group of data.streamGroups; track group.fuelKey) {
+        @let stream = hourView.streamByFuel[group.fuelKey];
+        <path
+          class="plant-map__stream"
+          [attr.d]="group.path"
+          [attr.stroke]="group.color"
+          [style.stroke-width]="stream.width"
+          [style.stroke-opacity]="stream.opacity"
+          [style.stroke-dasharray]="stream.dashArray"
+        ></path>
+      }
+    </g>
+    <g class="plant-map__plants">
+      @for (plant of data.plantMarks; track plant.id) {
+        <circle
+          class="plant-map__plant"
+          [attr.cx]="plant.x"
+          [attr.cy]="plant.y"
+          [attr.r]="plant.radius"
+          [attr.fill]="plant.color"
+          [attr.fill-opacity]="hourView.opacityByFuel[plant.fuelKey]"
+        >
+          <title>{{ plant.title }}</title>
+        </circle>
+      }
+    </g>
+    @for (city of data.cityMarks; track city.label) {
+      <g class="plant-map__city">
+        <line
+          class="plant-map__leader"
+          [attr.x1]="city.x"
+          [attr.y1]="city.y"
+          [attr.x2]="city.leaderX"
+          [attr.y2]="city.signY + 9"
+        ></line>
+        <rect class="plant-map__sign" [attr.x]="city.signX" [attr.y]="city.signY" [attr.width]="city.signWidth" height="18" rx="2"></rect>
+        <text class="plant-map__sign-text" [attr.x]="city.signX + city.signWidth / 2" [attr.y]="city.signY + 13" text-anchor="middle">
+          {{ city.label }}
+        </text>
+      </g>
+    }
+    @for (point of data.weatherMarks; track point.id) {
+      <rect
+        class="plant-map__weather"
+        [attr.x]="point.x - 3.5"
+        [attr.y]="point.y - 3.5"
+        width="7"
+        height="7"
+        [attr.transform]="'rotate(45 ' + point.x + ' ' + point.y + ')'"
+      >
+        <title>{{ point.label }} weather forecast point (Open-Meteo)</title>
+      </rect>
+    }
+    <path
+      class="plant-map__site-stream"
+      [attr.d]="data.siteStreamPath"
+      [style.stroke-width]="hourView.siteStream.width"
+      [style.stroke-dasharray]="hourView.siteStream.dashArray"
+      aria-hidden="true"
+    ></path>
+    <g class="plant-map__node" aria-hidden="true">
+      <rect
+        class="plant-map__bus-halo"
+        [attr.x]="data.nodeMark.busX1 - 4"
+        [attr.y]="data.nodeMark.y - 6"
+        [attr.width]="data.nodeMark.busX2 - data.nodeMark.busX1 + 8"
+        height="12"
+        rx="2"
+      ></rect>
+      <line class="plant-map__bus" [attr.x1]="data.nodeMark.busX1" [attr.x2]="data.nodeMark.busX2" [attr.y1]="data.nodeMark.y" [attr.y2]="data.nodeMark.y"></line>
+      <text class="plant-map__node-label" [attr.x]="data.nodeMark.x" [attr.y]="data.nodeMark.y - 22" text-anchor="middle">{{ data.nodeMark.label }}</text>
+      <text class="plant-map__node-note" [attr.x]="data.nodeMark.x" [attr.y]="data.nodeMark.y - 10" text-anchor="middle">{{ data.nodeMark.note }}</text>
+    </g>
+    <g class="plant-map__site">
+      <line class="plant-map__leader" [attr.x1]="data.siteMark.x" [attr.y1]="data.siteMark.y" [attr.x2]="data.siteMark.labelX" [attr.y2]="data.siteMark.labelY - 14"></line>
+      @if (hourView.isRush) {
+        <circle class="plant-map__site-ring" [attr.cx]="data.siteMark.x" [attr.cy]="data.siteMark.y" r="14" aria-hidden="true"></circle>
+      }
+      <circle class="plant-map__pin" [attr.cx]="data.siteMark.x" [attr.cy]="data.siteMark.y" r="5.5"></circle>
+      <circle class="plant-map__pin-dot" [attr.cx]="data.siteMark.x" [attr.cy]="data.siteMark.y" r="1.8"></circle>
+      <text class="plant-map__site-label" [attr.x]="data.siteMark.labelX" [attr.y]="data.siteMark.labelY - 2" text-anchor="middle">
+        {{ data.siteMark.label }}
+      </text>
+      <text class="plant-map__site-note" [attr.x]="data.siteMark.labelX" [attr.y]="data.siteMark.labelY + 12" text-anchor="middle">
+        {{ data.siteMark.note }}
+      </text>
+    </g>
+  </svg>
+</div>

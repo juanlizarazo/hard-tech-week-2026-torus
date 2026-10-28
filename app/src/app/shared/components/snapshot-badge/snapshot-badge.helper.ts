@@ -31,7 +31,7 @@ export class SnapshotBadgeHelper {
     const isLate = SnapshotBadgeHelper.isLate(manifest.targetDate, now);
     const detail = [
       `Planning day ${manifest.targetDate} (snapshot ${manifest.id}, pulled ${SnapshotBadgeHelper._timestampFormatter.format(pulledAt)} Mountain).`,
-      status.isPinned ? 'This snapshot is held fixed for the demo.' : '',
+      status.isPinned ? 'This snapshot is held fixed for judging.' : '',
       status.lastRun ? `Last refresh: ${status.lastRun.status}. ${status.lastRun.message}` : ''
     ]
       .filter(Boolean)

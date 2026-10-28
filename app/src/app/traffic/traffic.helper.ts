@@ -225,7 +225,7 @@ export class TrafficHelper {
         windowLoad !== null && dayLoad !== null && dayLoad > 0
           ? `, when its own forecast averages ${Math.round(windowLoad).toLocaleString('en-US')} MW, ${Math.round(((windowLoad - dayLoad) / dayLoad) * 100)}% above the day's mean`
           : '';
-      sentences.push(`PACE's rush hour on ${report.targetDateLabel} is ${windowLabel}${loadPart ? `${loadPart}.` : ''}`);
+      sentences.push(`PACE's rush hour on ${report.targetDateLabel} is ${windowLabel}${loadPart}.`);
     }
 
     const clash = TrafficHelper._clockClash(report, window.startLocalHour, window.endLocalHour);

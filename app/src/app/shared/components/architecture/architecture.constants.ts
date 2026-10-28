@@ -23,7 +23,7 @@ export const architectureStages: IArchitectureStage[] = [
     id: 'store',
     title: 'Stored',
     tone: 'store',
-    items: [{ title: 'Firestore snapshot', detail: 'Frozen for the demo|Pull time on every screen' }]
+    items: [{ title: 'Firestore snapshot', detail: 'Frozen for judging|Pull time on every screen' }]
   },
   {
     id: 'browser',
@@ -40,13 +40,13 @@ export const architectureStages: IArchitectureStage[] = [
   },
   {
     id: 'screens',
-    title: 'Four screens',
+    title: 'Start and three steps',
     tone: 'screen',
     items: [
       { title: 'Start here', detail: 'Three clocks' },
-      { title: '① Grid', detail: 'When is it jammed?' },
-      { title: '② Plan', detail: 'What should it do?' },
-      { title: '③ The proof', detail: 'Would it have paid off?' }
+      { title: '1 Forecast', detail: 'When is it jammed?' },
+      { title: '2 Decide', detail: 'What should it do?' },
+      { title: '3 Prove', detail: 'Would it have paid off?' }
     ]
   }
 ];

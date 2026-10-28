@@ -60,7 +60,7 @@
               </section>
 
               <section class="dt-section" aria-labelledby="traffic-clocks-title">
-                <h2 class="dt-section__title" id="traffic-clocks-title">Three clocks for {{ report.targetDateLabel }}</h2>
+                <h2 class="dt-section__title" id="traffic-clocks-title">Three signals for {{ report.targetDateLabel }}</h2>
                 <p class="dt-section__lede">
                   Grid stress (load and <dt-term key="NET_LOAD">net load</dt-term>), price and carbon for <dt-term key="PACE">PACE</dt-term>, hour by hour. Orange stripes mark the
                   <dt-term key="RUSH_HOUR">rush hour</dt-term> on every chart; the dark marker is the hour picked on the map above.
@@ -119,7 +119,7 @@
                       [valueFormat]="priceFormat"
                     ></dt-hour-chart>
                   } @else {
-                    <p class="dt-state">Wholesale prices for this day are not posted yet. They usually arrive around 2 p.m. Mountain time.</p>
+                    <p class="dt-state">Wholesale prices for this day are not posted yet. CAISO posts them around 2 p.m. Mountain time; DETOUR refreshes at 3 p.m.</p>
                   }
                   <div how-to-read>
                     <p class="dt-hint">Across: hours of the planned day. Up: dollars per megawatt-hour.</p>

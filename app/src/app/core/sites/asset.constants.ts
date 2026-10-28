@@ -28,7 +28,7 @@ const buildAssumption = (id: string, label: string, note: string): IProvenance =
 });
 
 const sizingNote = 'Unit size chosen for this simulated site; within the Wattsmart 30 kW-1.2 MW band per system.';
-const cycleLifeNote = 'From research doc; unverified';
+const cycleLifeNote = 'Assumption: vendor spec class';
 const spinDegradationNote =
   'Assumed Spin replacement $590/kWh of rated energy, divided by 25,000 cycles x 1.0 usable = $0.0236/kWh. About 1/3 of Pulse.';
 const pulseDegradationNote =

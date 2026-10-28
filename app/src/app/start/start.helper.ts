@@ -1,3 +1,4 @@
+import { IBacktestYear } from '@app/core/backtest';
 import { IMarginalEmissionsSeries, IPlanInterval, IRushHourWindow, ISiteArchetype, IStationAssets } from '@app/core/models';
 import { PlanEngineHelper, placeholderMefSeries } from '@app/core/plan';
 import { SitesHelper } from '@app/core/sites';
@@ -5,8 +6,8 @@ import { TariffHelper } from '@app/core/tariff';
 import { TimeLabelHelper } from '@app/shared/helpers/time-label.helper';
 import { IPlanningDay } from '@app/shared/helpers/day-relation.interfaces';
 import { PlanHelper } from '../plan/plan.helper';
-import { startSettings } from './start.constants';
-import { IStartPreview } from './start.interfaces';
+import { startSettings, startTileSpecs } from './start.constants';
+import { IStartPreview, IStartTile } from './start.interfaces';
 
 export class StartHelper {
   public static preview(
@@ -53,17 +54,67 @@ export class StartHelper {
     };
   }
 
-  public static seasonBridge(day: IPlanningDay): string {
-    if (!day.targetDate) {
-      return '';
+  public static countUp(label: string, progress: number): string {
+    const match = /^([^0-9]*)([0-9]+(?:\.[0-9]+)?)(.*)$/.exec(label);
+
+    if (!match) {
+      return label;
     }
 
-    const season = PlanHelper.seasonOf(day.targetDate);
-    const rates = PlanHelper.hookNumbers(season);
-    const [year, month] = day.targetDate.split('-').map(Number);
-    const monthName = new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString('en-US', { timeZone: 'UTC', month: 'long' });
+    const decimals = match[2].includes('.') ? match[2].split('.')[1].length : 0;
 
-    return `${day.name} is ${monthName}, so ${season} rates apply: ${rates.demandRateLabel} per kW.`;
+    return `${match[1]}${(Number(match[2]) * Math.min(Math.max(progress, 0), 1)).toFixed(decimals)}${match[3]}`;
+  }
+
+  public static hookSentence(roundedKwh: number): string {
+    return `One kW off the peak is worth about ${roundedKwh.toLocaleString('en-US')} kWh moved. DETOUR goes after the peak.`;
+  }
+
+  public static forecastTile(preview: IStartPreview | null, day: IPlanningDay): IStartTile {
+    const base = { ...startTileSpecs[0], unit: `rush hour ${day.word}` };
+
+    if (!preview) {
+      return { ...base, figure: '—', caption: 'Reading the PACE forecast…', isMuted: true };
+    }
+
+    return {
+      ...base,
+      figure: preview.rushLabel,
+      caption: preview.rushIsAssumption ? 'Assumed block: PACE has not posted the forecast yet' : "The four busiest hours in PACE's day-ahead forecast",
+      isMuted: false
+    };
+  }
+
+  public static decideTile(day: IPlanningDay): IStartTile {
+    const rates = PlanHelper.hookNumbers(day.targetDate ? PlanHelper.seasonOf(day.targetDate) : 'summer');
+
+    return {
+      ...startTileSpecs[1],
+      figure: rates.demandRateLabel,
+      unit: day.targetDate ? `per kW ${day.word}` : 'per kW of summer peak',
+      caption: 'Simulated airport, Schedule 8',
+      isMuted: false
+    };
+  }
+
+  public static proveTile(year: IBacktestYear | null): IStartTile {
+    const base = { ...startTileSpecs[2], unit: 'saved so far this year' };
+    const rows = (year?.rows ?? []).filter((row) => row.siteId === startSettings.PROVE_SITE_ID && row.scheduleId === startSettings.PROVE_SCHEDULE_ID);
+
+    if (rows.length === 0) {
+      return { ...base, figure: '—', caption: 'The year summary is not available yet', isMuted: true };
+    }
+
+    const saved = rows.reduce((sum, row) => sum + row.savedUsd, 0);
+    const ceiling = rows.reduce((sum, row) => sum + (row.captureRate !== null && row.captureRate > 0 ? row.savedUsd / row.captureRate : row.savedUsd), 0);
+    const capture = ceiling > 0 ? Math.round((saved / ceiling) * 100) : 0;
+
+    return {
+      ...base,
+      figure: `$${Math.round(saved).toLocaleString('en-US')}`,
+      caption: `${capture}% of perfect hindsight, ${rows.length} months replayed`,
+      isMuted: false
+    };
   }
 
   public static dateLabel(localDate: string): string {

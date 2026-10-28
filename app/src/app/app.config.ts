@@ -8,8 +8,8 @@ import {
 import { TitleStrategy, provideRouter, withViewTransitions } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { initializeFirestore, persistentLocalCache, provideFirestore } from '@angular/fire/firestore';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { connectFunctionsEmulator, getFunctions, provideFunctions } from '@angular/fire/functions';
 import { routes } from './app.routes';
@@ -32,7 +32,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     provideHttpClient(),
     provideFirebaseApp(() => initializeApp(firebaseConfig)),
-    provideFirestore(() => getFirestore()),
+    provideFirestore(() => initializeFirestore(getApp(), { localCache: persistentLocalCache() })),
     provideAuth(() => getAuth()),
     provideFunctions(() => {
       const functions = getFunctions();

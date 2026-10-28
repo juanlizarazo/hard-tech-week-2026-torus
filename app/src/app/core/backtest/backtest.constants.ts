@@ -13,7 +13,6 @@ export const backtestSettings = {
   FULL_DAY_HOURS: 24,
   LOAD_FORECAST_LAG_DAYS: [7, 14, 21, 28],
   FORECAST_TERMINAL_PULSE_FRACTION: 0.9,
-  RECENT_LOAD_PEAK_DAYS: 7,
 };
 
 export const backtestProvenance: Record<
