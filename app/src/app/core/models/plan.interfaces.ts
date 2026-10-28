@@ -64,6 +64,15 @@ export interface IPlanMetrics {
   pulseThroughputKwh: number;
   objectiveValue: number;
   value: IPlanValue;
+  realized: IPlanRealized | null;
+}
+
+export interface IPlanRealized {
+  rushPeakCutKw: number;
+  peakCutKw: number;
+  baselinePeakKw: number;
+  realizedPeakKw: number;
+  forecastErrorPeakKw: number;
 }
 
 export interface IPlanValue {
