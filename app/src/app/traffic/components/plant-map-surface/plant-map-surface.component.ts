@@ -22,12 +22,12 @@ export class PlantMapSurfaceComponent implements OnInit {
   private _hasFailed = false;
 
   public ngOnInit(): void {
-    this.useDeck = GridSceneHelper.canUseDeck();
+    this.useDeck = GridSceneHelper.canUseDeck(this.fill);
   }
 
   @HostListener('window:resize')
   public onResize(): void {
-    this.useDeck = !this._hasFailed && GridSceneHelper.canUseDeck();
+    this.useDeck = !this._hasFailed && GridSceneHelper.canUseDeck(this.fill);
   }
 
   public onFailed(): void {

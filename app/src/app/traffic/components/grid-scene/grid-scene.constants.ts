@@ -10,6 +10,7 @@ export const gridSceneSettings = {
   PARALLAX_EASE: 0.06,
   CHART_ZOOM_TRIM: 0.6,
   HOME_ZOOM_TRIM: 0.05,
+  HOME_NARROW_ZOOM_TRIM: 0.45,
   HOME_LEFT_PADDING: 0.3,
   PADDING_PX: 16,
   LABELED_CITIES: ['Salt Lake City', 'St. George'],

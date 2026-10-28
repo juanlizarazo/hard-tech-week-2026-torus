@@ -241,15 +241,16 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     if (key !== this._fitKey || !this._fit) {
       const padding = gridSceneSettings.PADDING_PX;
+      const isWideHome = this.home && width >= gridSceneSettings.MOBILE_MIN_WIDTH_PX;
       const viewport = new modules.core.WebMercatorViewport({ width, height });
       const fit = viewport.fitBounds(
         [
           [plantMapLayout.WEST_LON, plantMapLayout.SOUTH_LAT],
           [plantMapLayout.EAST_LON, plantMapLayout.NORTH_LAT]
         ],
-        { padding: { top: padding, bottom: padding, right: padding, left: this.home ? Math.round(width * gridSceneSettings.HOME_LEFT_PADDING) : padding } }
+        { padding: { top: padding, bottom: padding, right: padding, left: isWideHome ? Math.round(width * gridSceneSettings.HOME_LEFT_PADDING) : padding } }
       );
-      const trim = this.home ? gridSceneSettings.HOME_ZOOM_TRIM : gridSceneSettings.CHART_ZOOM_TRIM;
+      const trim = isWideHome ? gridSceneSettings.HOME_ZOOM_TRIM : this.home ? gridSceneSettings.HOME_NARROW_ZOOM_TRIM : gridSceneSettings.CHART_ZOOM_TRIM;
 
       this._fit = { longitude: fit.longitude, latitude: fit.latitude, zoom: fit.zoom - trim };
       this._fitKey = key;

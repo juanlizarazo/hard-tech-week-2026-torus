@@ -2,6 +2,8 @@
 
 **A day-ahead rush-hour planner for hybrid storage on Utah's grid.**
 
+**Live:** https://hard-tech-week-2026-torus.web.app
+
 Built solo for the Torus bounty (Option 1: Rush Hour for Electrons) at the Hard Tech Hackathon, Hard Tech Week 2026, Salt Lake City.
 
 ## The problem

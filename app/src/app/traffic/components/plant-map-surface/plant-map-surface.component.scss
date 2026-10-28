@@ -65,9 +65,12 @@
 }
 
 @media (max-width: 767.98px) {
-  .surface--fill,
   .surface__svg--fill {
     position: relative;
     inset: auto;
+  }
+
+  .surface--fill .surface__legend {
+    display: none;
   }
 }
