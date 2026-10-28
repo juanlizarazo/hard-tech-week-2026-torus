@@ -70,7 +70,7 @@ export class LoadChartComponent extends ResponsiveChartDirective implements OnCh
     this.tooltip = ChartHelper.tooltip(
       ChartHelper.formatLocalTime(interval.startUtc),
       [
-        { label: 'Site load', value: ChartHelper.formatKw(interval.loadKw), swatch: chartColors.LOAD },
+        { label: 'Site load forecast', value: ChartHelper.formatKw(interval.loadKw), swatch: chartColors.LOAD },
         { label: 'Grid draw', value: ChartHelper.formatKw(interval.gridKw), swatch: chartColors.GRID_DRAW },
         {
           label: 'Shaved by station',

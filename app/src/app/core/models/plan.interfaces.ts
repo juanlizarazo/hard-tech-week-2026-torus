@@ -73,6 +73,10 @@ export interface IPlanRealized {
   baselinePeakKw: number;
   realizedPeakKw: number;
   forecastErrorPeakKw: number;
+  baselineRushPeakKw: number;
+  realizedRushPeakKw: number;
+  rushKwhMoved: number;
+  value: IPlanValue;
 }
 
 export interface IPlanValue {

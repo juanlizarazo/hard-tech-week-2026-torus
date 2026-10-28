@@ -50,7 +50,7 @@ Move the Wattsmart reserve slider. Say:
 
 Point at D0, tomorrow's route, and read it top to bottom. Say:
 
-> This is tomorrow's route: a handful of timed turns, each with its reason. Charge in the price trough, cap the grid through the on-peak window, discharge through rush hour, and arrive with 587 kW off PACE's rush hour and 800 kWh still held for Wattsmart.
+> This is tomorrow's route: a handful of timed turns, each with its reason. Charge in the price trough, cap the grid through the on-peak window, discharge through rush hour, and arrive with 531 kW off PACE's rush hour and 800 kWh still held for Wattsmart. The plan never saw today's load: it planned from a forecast of the last four weeks and is checked against the simulated day.
 
 Read the numbers off the Arrive row; they change when the snapshot re-freezes. If asked whether it runs itself, open the run log in the solver rail: each cloud step has its real timestamp, and the last row is the re-solve in this browser. The summary says "Ran itself at" only when the data was pulled in the 3 p.m. window; otherwise it says "Data pulled at".
 
@@ -90,7 +90,7 @@ Then click July in the ledger and say:
 
 Return to Start here and open How DETOUR works. Say two steps and the record, then:
 
-> DETOUR plans every Torus station for tomorrow's rush hour. At this site it takes 587 kW off PACE's peak and still saves the customer $12,437 a month at October's $14.90 demand rate, if those two days set the month's peak. Every simulated number is labeled; every public input has a source.
+> DETOUR plans every Torus station for tomorrow's rush hour. At this site it takes 531 kW off PACE's peak, planned a day ahead from a forecast, and still saves the customer $8,591 a month at October's $14.90 demand rate if that day sets the month's peak. Every simulated number is labeled; every public input has a source.
 
 Read the kW and dollar figures off Decide on the day; they are today's airport, Schedule 8 defaults and move when the snapshot re-freezes.
 

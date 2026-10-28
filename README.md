@@ -22,7 +22,7 @@ On a simulated 2 MW regional airport on Rocky Mountain Power Schedule 8, replaye
 | **Saved Jan 1 to Oct 26, 2026** | **$88,928** vs no storage, 57% of the perfect-hindsight ceiling |
 | Best month | September, $13,000 |
 | July | $11,546, 76% of perfect hindsight, 85% of it from the demand charge, 946 kWh held for Wattsmart |
-| Grid relief, planning day | **587 kW off PACE's rush hour** (6–10 p.m., planning day only), 1,466 kWh moved out of it. A fixed-threshold battery on the same hardware takes 36 kW, because it only trims load above its 1,600 kW line |
+| Grid relief, planning day | **531 kW off PACE's rush hour** (6–10 p.m.), 1,597 kWh moved out of it. Planned the day before from a forecast of the site load, then checked against the simulated day |
 | Tomorrow's plan | 192 fifteen-minute steps, 1,347 variables, 1,272 constraints, solved in the browser in about 50 ms |
 
 The site load and Torus asset parameters are simulated (seed 42, reproducible anywhere). The grid data, prices and tariffs are real. Perfect hindsight is the same planner told the whole month in advance; no real controller can match it, so it is the 100% mark.
@@ -40,7 +40,7 @@ On top of that, a Wattsmart demand-response call can drain the battery right bef
 ## What DETOUR does
 
 1. **Traffic report.** Reads tomorrow's PACE grid conditions: load forecast, day-ahead prices, marginal CO2 by hour.
-2. **Plan.** Solves an LP in 15-minute steps that decides when the site's flywheel and battery charge and discharge. It takes load off PACE's rush hour, cuts the customer's bill, avoids dirty hours and keeps a reserve for Wattsmart. The result reads as a route: timed dispatch orders ending in an Arrive line, shareable as a link or a PDF plan sheet.
+2. **Plan.** Forecasts the site's load from its past four weeks, then solves an LP in 15-minute steps that decides when the site's flywheel and battery charge and discharge. It takes load off PACE's rush hour, cuts the customer's bill, avoids dirty hours and keeps a reserve for Wattsmart. The result reads as a route: timed dispatch orders ending in an Arrive line, shareable as a link or a PDF plan sheet.
 3. **Proof.** Replays every month of 2026 against no storage, a naive peak-shaver and a perfect-hindsight optimum, and reports how much of the possible savings it captured.
 
 | 1 Forecast | 2 Decide | Record |
@@ -87,7 +87,7 @@ Every screen ends with a "Next stop" link, so the demo walks Start → 1 Forecas
 
 | From the bounty card | Where it is |
 |---|---|
-| How would you manage the grid's congestion? | Price it. The LP carries a grid-relief term ($/kW on the site's peak draw in PACE's rush hour) with its own dial, and 2 Decide leads with kW off PACE's rush hour (587 kW at the demo site), plus an illustrative fleet line in MW and % of PACE's load |
+| How would you manage the grid's congestion? | Price it. The LP carries a grid-relief term ($/kW on the site's peak draw in PACE's rush hour) with its own dial, and 2 Decide leads with kW off PACE's rush hour (531 kW at the demo site, planned from a forecast and checked against the simulated day), plus an illustrative fleet line in MW and % of PACE's load |
 | Knows when the grid is jammed | 1 Forecast finds tomorrow's PACE rush hour from load, price and marginal CO2 |
 | Stays out of traffic | 2 Decide plans the station's charge and discharge around it |
 | A traffic report for tomorrow's grid | 1 Forecast, refreshed daily at 3 p.m. after the day-ahead market posts |
