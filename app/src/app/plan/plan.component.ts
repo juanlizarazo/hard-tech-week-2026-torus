@@ -347,8 +347,14 @@ export class PlanComponent {
   }
 
   private _update(changes: Partial<IPlanControls>): void {
+    const next = { ...this.controls, ...changes };
+
+    if ((Object.keys(next) as (keyof IPlanControls)[]).every((key) => next[key] === this.controls[key])) {
+      return;
+    }
+
     this.isSharedPlan = false;
-    this.controls = { ...this.controls, ...changes };
+    this.controls = next;
     this._refreshAssetRows();
     this._controls$.next(this.controls);
   }
