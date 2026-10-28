@@ -7,7 +7,7 @@ export const startSettings = {
   TYPE_START_MS: 700,
   TYPE_END_MS: 1900,
   TILES_AT_MS: 1900,
-  ROTATE_PERIOD_MS: 5600,
+  ROTATE_PERIOD_MS: 8500,
   DISSOLVE_OUT_MS: 620,
   PROVE_SITE_ID: 'airport',
   PROVE_SCHEDULE_ID: 'schedule-8',
