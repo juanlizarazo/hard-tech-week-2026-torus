@@ -127,7 +127,7 @@
 .plan__result {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
   transition: opacity var(--dt-motion-2) var(--dt-ease);
 }
@@ -692,4 +692,33 @@
     margin: 4px -12px -14px;
     padding: 12px;
   }
+}
+
+.plan__result-title {
+  margin: 0;
+  font-size: var(--dt-text-17);
+  font-weight: 800;
+}
+
+.plan__costs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 20px;
+  margin: 0;
+  font-size: var(--dt-text-15);
+  color: var(--dt-muted);
+}
+
+.plan__costs-title {
+  font-weight: 800;
+  color: var(--dt-ink);
+}
+
+.plan__cost strong {
+  color: var(--dt-ink);
+}
+
+.plan__sources {
+  margin: 0;
 }

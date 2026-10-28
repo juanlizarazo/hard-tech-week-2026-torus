@@ -147,11 +147,23 @@ export class BacktestComponent {
   public readonly emptyMessage = backtestScreenSettings.EMPTY_MESSAGE;
 
   public onMonthSelected(month: string): void {
+    this.scrollToMonth();
     this._selectedDate$.next(null);
     this._month$.next(month);
     this._location.replaceState(
       this._router.createUrlTree([], { relativeTo: this._route, queryParams: { month }, queryParamsHandling: 'merge' }).toString()
     );
+  }
+
+  public onJumpToMonth(event: Event): void {
+    event.preventDefault();
+    this.scrollToMonth();
+  }
+
+  public scrollToMonth(): void {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    document.getElementById('backtest-month')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
   }
 
   public onSiteChange(siteId: string): void {

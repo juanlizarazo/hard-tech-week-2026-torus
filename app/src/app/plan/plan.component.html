@@ -219,40 +219,6 @@
                 <p class="plan__stale" role="status">No feasible plan at these settings. The dispatch orders below are the last plan that solved.</p>
               }
 
-              @if (solve.viewModel; as viewModel) {
-                @let deltaState = deltas$ | async;
-                @let deltas = deltaState?.deltas ?? {};
-                @if (deltaState?.isUnchanged) {
-                  <p class="plan__unchanged" role="status">Same plan as the last solve: at these settings nothing in the figures moved.</p>
-                }
-                <div class="plan__result" [class.plan__body--solving]="solve.status === 'solving'">
-                    <div class="dt-figures plan__figures">
-                      @for (tile of leadTiles(viewModel.tiles); track tile.id + tile.value) {
-                        <dt-figure class="plan__figure" [class.plan__figure--changed]="!!deltas[tile.id]" [value]="tile.value" [label]="tile.label" [detail]="tile.detail" [tone]="tile.tone">
-                          @if (deltas[tile.id]; as delta) {
-                            <span figure-delta class="plan__delta" role="status">{{ delta.text }}</span>
-                          }
-                          @if (tile.source) {
-                            <dt-source-chip figure-source [label]="tile.source"></dt-source-chip>
-                          }
-                        </dt-figure>
-                      }
-                    </div>
-                    <div class="dt-figures dt-figures--secondary plan__figures plan__figures--secondary">
-                      @for (tile of secondaryTiles(viewModel.tiles); track tile.id + tile.value) {
-                        <dt-figure class="plan__figure" [class.plan__figure--changed]="!!deltas[tile.id]" [value]="tile.value" [label]="tile.label" [detail]="tile.detail" [tone]="tile.tone" size="small">
-                          @if (deltas[tile.id]; as delta) {
-                            <span figure-delta class="plan__delta" role="status">{{ delta.text }}</span>
-                          }
-                          @if (tile.source) {
-                            <dt-source-chip figure-source [label]="tile.source"></dt-source-chip>
-                          }
-                        </dt-figure>
-                      }
-                    </div>
-                </div>
-              }
-
               <!-- dispatch orders run sheet -->
               <section class="plan__orders" aria-labelledby="plan-orders-title">
                 <header class="plan__orders-head">
@@ -335,6 +301,43 @@
                   </div>
                 }
               </section>
+
+              @if (solve.viewModel; as viewModel) {
+                @let deltaState = deltas$ | async;
+                @let deltas = deltaState?.deltas ?? {};
+                @if (deltaState?.isUnchanged) {
+                  <p class="plan__unchanged" role="status">Same plan as the last solve: at these settings nothing in the figures moved.</p>
+                }
+                <section class="plan__result" aria-labelledby="plan-result-title" [class.plan__body--solving]="solve.status === 'solving'">
+                  <h2 class="plan__result-title" id="plan-result-title">What this plan achieves</h2>
+                  <div class="dt-figures plan__figures">
+                    @for (tile of leadTiles(viewModel.tiles); track tile.id + tile.value) {
+                      <dt-figure class="plan__figure" [class.plan__figure--changed]="!!deltas[tile.id]" [value]="tile.value" [label]="tile.label" [detail]="tile.detail" [tone]="tile.tone">
+                        @if (deltas[tile.id]; as delta) {
+                          <span figure-delta class="plan__delta" role="status">{{ delta.text }}</span>
+                        }
+                      </dt-figure>
+                    }
+                  </div>
+                  <p class="plan__costs">
+                    <span class="plan__costs-title">What it costs</span>
+                    @for (tile of secondaryTiles(viewModel.tiles); track tile.id + tile.value) {
+                      <span class="plan__cost" [class.plan__figure--changed]="!!deltas[tile.id]" [attr.title]="tile.detail">
+                        <strong class="dt-mono">{{ tile.value }}</strong> {{ tile.label }}
+                        @if (deltas[tile.id]; as delta) {
+                          <span class="plan__delta" role="status">{{ delta.text }}</span>
+                        }
+                      </span>
+                    }
+                  </p>
+                  <p class="dt-hint plan__sources">
+                    Sources:
+                    @for (source of tileSources(viewModel.tiles); track source; let last = $last) {
+                      {{ source }}{{ last ? '' : ' · ' }}
+                    }
+                  </p>
+                </section>
+              }
 
               @if (solve.viewModel; as viewModel) {
                 <div class="plan__body" [class.plan__body--solving]="solve.status === 'solving'">

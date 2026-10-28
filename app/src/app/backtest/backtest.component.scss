@@ -689,3 +689,26 @@
 .dt-backtest__body--replaying {
   opacity: 0.55;
 }
+
+.dt-backtest__month {
+  scroll-margin-top: 190px;
+}
+
+.dt-backtest__jump {
+  margin: 12px 0 0;
+  font-size: var(--dt-text-15);
+  font-weight: 800;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--dt-ink);
+  }
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}

@@ -210,6 +210,10 @@ export class PlanComponent {
     return !solve.isStale && solve.viewModel?.result.status === 'infeasible' ? 'infeasible' : 'failed';
   }
 
+  public tileSources(tiles: IPlanTile[]): string[] {
+    return [...new Set(tiles.map((tile) => tile.source).filter((source): source is string => !!source))];
+  }
+
   public leadTiles(tiles: IPlanTile[]): IPlanTile[] {
     return tiles.filter((tile) => tile.id !== 'energy' && tile.id !== 'co2');
   }
