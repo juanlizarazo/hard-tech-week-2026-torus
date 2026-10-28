@@ -4,7 +4,7 @@
 
 ## Live at [detourgrid.com](https://detourgrid.com)
 
-> Built solo by [Juan Lizarazo](https://juanlizarazo.com) for the **Torus bounty (Option 1: Rush Hour for Electrons)** at the Hard Tech Hackathon, Hard Tech Week 2026, Salt Lake City.
+> Built solo by [Juan Lizarazo](https://www.linkedin.com/in/juanlizarazo/) for the **Torus bounty (Option 1: Rush Hour for Electrons)** at the Hard Tech Hackathon, Hard Tech Week 2026, Salt Lake City.
 
 > "Build software that knows when the grid is jammed and stays out of traffic."
 > — the bounty
