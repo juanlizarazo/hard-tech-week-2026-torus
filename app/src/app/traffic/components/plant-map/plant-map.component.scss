@@ -360,7 +360,14 @@
     font-size: 10px;
     letter-spacing: -0.04em;
   }
+}
 
-  @media (prefers-reduced-motion: reduce) {
-  .plant-map__play,
-  
+@media (prefers-reduced-motion: reduce) {
+  .plant-map__play {
+    visibility: hidden;
+  }
+
+  .plant-map__bar-fill {
+    transition: none;
+  }
+}
