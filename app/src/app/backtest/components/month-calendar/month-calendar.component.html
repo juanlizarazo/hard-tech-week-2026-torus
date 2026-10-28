@@ -1,27 +1,20 @@
 <section class="dt-month-calendar" [attr.aria-label]="'Daily peak calendar, ' + monthLabel">
   <ul class="dt-month-calendar__legend">
     <li class="dt-month-calendar__key">
-      <span class="dt-month-calendar__key-dot" aria-hidden="true"></span>
-      <span>No storage, day's billed peak</span>
+      <span class="dt-month-calendar__key-swatch" aria-hidden="true"></span>
+      <span>Each bar is the day's peak without storage. The green top is what {{ scale.leadName }} shaved off.</span>
     </li>
     <li class="dt-month-calendar__key">
-      <span class="dt-month-calendar__key-dot dt-month-calendar__key-dot--lead" aria-hidden="true"></span>
-      <span>{{ scale.leadName }}, day's billed peak</span>
+      <span class="dt-month-calendar__key-corner" aria-hidden="true"></span>
+      <span>
+        Corner mark: the day that set the month's peak
+        @if (peakLabel) {
+          (<strong class="dt-month-calendar__strong">{{ peakLabel }}</strong>)
+        }
+      </span>
     </li>
-    @if (peakLabel) {
-      <li class="dt-month-calendar__key">
-        <span class="dt-month-calendar__key-dash" aria-hidden="true"></span>
-        <span>Month peak, no storage: <strong class="dt-month-calendar__strong">{{ peakLabel }}</strong></span>
-      </li>
-    }
-    @if (scale.leadMonthPeakKw > 0) {
-      <li class="dt-month-calendar__key">
-        <span class="dt-month-calendar__key-dash dt-month-calendar__key-dash--lead" aria-hidden="true"></span>
-        <span>Month peak, {{ scale.leadName }}: <strong class="dt-month-calendar__strong">{{ formatKw(scale.leadMonthPeakKw) }}</strong></span>
-      </li>
-    }
   </ul>
-  <p class="dt-month-calendar__scale">Every square shares one scale: {{ formatKw(scale.minKw) }} at the bottom, {{ formatKw(scale.maxKw) }} at the top.</p>
+  <p class="dt-month-calendar__scale">The number in each square is kW shaved. Every bar uses one scale: {{ formatKw(scale.minKw) }} at the bottom, {{ formatKw(scale.maxKw) }} at the top. Hover or click a day for both peaks.</p>
 
   @if (cells.length === 0) {
     <p class="dt-month-calendar__empty">No days to show for this month yet.</p>
@@ -44,27 +37,16 @@
           }"
           [attr.aria-pressed]="cell.isSelected"
           [attr.aria-label]="ariaLabel(cell)"
-          [attr.title]="cell.isOffPeakDay && cell.offPeakReason ? cell.offPeakReason : null"
+          [attr.title]="cellTitle(cell)"
           (click)="select(cell)"
         >
           <span class="dt-month-calendar__day">{{ cell.dayOfMonth }}</span>
           @if (cell.peakKw > 0) {
-            <span class="dt-month-calendar__values" aria-hidden="true">
-              <span class="dt-month-calendar__value">{{ formatNumber(cell.peakKw) }}</span>
-              <span class="dt-month-calendar__value dt-month-calendar__value--lead">{{ formatNumber(cell.leadPeakKw) }}</span>
-            </span>
+            <span class="dt-month-calendar__shaved" aria-hidden="true">{{ shavedLabel(cell) }}</span>
             <span class="dt-month-calendar__plot" aria-hidden="true">
-              <span class="dt-month-calendar__ref" [style.bottom.%]="100"></span>
-              @if (scale.leadMonthPeakKw > 0) {
-                <span class="dt-month-calendar__ref dt-month-calendar__ref--lead" [style.bottom.%]="scale.leadMonthPeakFraction * 100"></span>
-              }
-              <span
-                class="dt-month-calendar__stem"
-                [style.bottom.%]="lowFraction(cell) * 100"
-                [style.height.%]="(highFraction(cell) - lowFraction(cell)) * 100"
-              ></span>
-              <span class="dt-month-calendar__dot" [style.bottom.%]="cell.peakFraction * 100"></span>
-              <span class="dt-month-calendar__dot dt-month-calendar__dot--lead" [style.bottom.%]="cell.leadFraction * 100"></span>
+              <span class="dt-month-calendar__bar" [style.height.%]="cell.peakFraction * 100">
+                <span class="dt-month-calendar__cut" [style.height.%]="cutShare(cell) * 100"></span>
+              </span>
             </span>
           }
         </button>

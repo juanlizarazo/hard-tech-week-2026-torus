@@ -1,6 +1,7 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, combineLatest, defer, from, map, of, shareReplay, tap } from 'rxjs';
-import { IBacktestCalendar, IBacktestResult, IBacktestSnapshotSources, IBacktestStrategy } from '../backtest/backtest.interfaces';
+import { Observable, catchError, combineLatest, defer, from, map, of, shareReplay, tap } from 'rxjs';
+import { IBacktestCalendar, IBacktestResult, IBacktestSnapshotSources, IBacktestStrategy, IBacktestStrategyResult } from '../backtest/backtest.interfaces';
 import { BacktestMonthsHelper } from '../backtest/backtest-months.helper';
 import { BacktestRunnerHelper } from '../backtest/backtest-runner.helper';
 import { LpStrategyHelper } from '../backtest/lp-strategy.helper';
@@ -14,6 +15,7 @@ import { SnapshotService } from './snapshot.service';
 
 @Injectable({ providedIn: 'root' })
 export class BacktestService {
+  private readonly _http = inject(HttpClient);
   private readonly _snapshotService = inject(SnapshotService);
   private readonly _gridSignalsService = inject(GridSignalsService);
   private readonly _planSolverService = inject(PlanSolverService);
@@ -113,9 +115,28 @@ export class BacktestService {
         return of(cached);
       }
 
-      return from(BacktestRunnerHelper.run(input, this.strategies)).pipe(
+      const local$ = defer(() => from(BacktestRunnerHelper.run(input, this.strategies)));
+
+      return this._http.get<IBacktestResult>(`/data/replays/${month}-${siteId}-${scheduleId}.json`).pipe(
+        map((result: IBacktestResult) => BacktestService.relinkLead(result)),
+        catchError(() => local$),
         tap((result: IBacktestResult) => this._resultCache.set(key, result)),
       );
     });
+  }
+
+  private static relinkLead(result: IBacktestResult): IBacktestResult {
+    if (!result.lead.intervals.length) {
+      throw new Error('The precomputed replay has no lead intervals.');
+    }
+
+    const leadId = result.lead.strategy.id;
+
+    return {
+      ...result,
+      strategies: result.strategies.map((entry: IBacktestStrategyResult) =>
+        entry.strategy.id === leadId ? { ...entry, intervals: result.lead.intervals } : entry,
+      ),
+    };
   }
 }

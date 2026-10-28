@@ -13,6 +13,7 @@ export class LpTextComponent implements OnChanges, OnDestroy {
 
   @Input({ required: true }) public lpText = '';
   @Input() public solveMs: number | null = null;
+  @Input() public date = '';
 
   public lineCount = 0;
   public constraintCount = 0;
@@ -37,7 +38,7 @@ export class LpTextComponent implements OnChanges, OnDestroy {
       parts.push(`solved in ${Math.round(this.solveMs)} ms`);
     }
 
-    return `${parts.join(', ')}. CPLEX LP format: paste it into any LP solver to check the plan.`;
+    return `${parts.join(', ')}.`;
   }
 
   public ngOnChanges(): void {
@@ -68,6 +69,19 @@ export class LpTextComponent implements OnChanges, OnDestroy {
       this._copiedTimer = null;
       this._changeDetector.detectChanges();
     }, 2000);
+  }
+
+  public onDownload(): void {
+    const blob = new Blob([this.lpText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = `detour-plan-${this.date || 'day'}.lp`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   private _computeCounts(text: string): void {

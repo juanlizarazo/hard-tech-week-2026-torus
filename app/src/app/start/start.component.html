@@ -27,7 +27,7 @@
 
   <div class="home__body">
     <div class="home__copy">
-      <h1 class="cdk-visually-hidden" id="home-title">DETOUR: the grid has a rush hour, and DETOUR plans a Torus Station around it</h1>
+      <h1 class="cdk-visually-hidden" id="home-title">Two steps, then the record</h1>
       <p class="cdk-visually-hidden">
         {{ hook.demandRateLabel }} per kW every month in summer, versus {{ hook.spreadLabel }} per kWh for moving energy to a cheaper hour. {{ hookSentence }}
       </p>
@@ -78,10 +78,15 @@
       <ol class="home__tiles">
         @for (tile of tiles$ | async; track tile.path; let index = $index) {
           <li class="home__tile-item" [style.--tile-index]="index">
-            <a class="home__tile dt-stage-light" [class.home__tile--muted]="tile.isMuted" [routerLink]="tile.path">
+            <a class="home__tile dt-stage-light" [class.home__tile--muted]="tile.isMuted" [class.home__tile--record]="tile.isRecord" [routerLink]="tile.path">
               <span class="home__tile-head">
                 <span class="dt-tag dt-tag--ink">{{ tile.code }}</span>
                 <span class="home__tile-stage">{{ tile.stage }}</span>
+                @if (tile.isRecord) {
+                  <svg class="home__tile-ledger" viewBox="0 0 12 12" width="14" height="14" aria-hidden="true" focusable="false">
+                    <path d="M1.5 3h9M1.5 6h9M1.5 9h9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+                  </svg>
+                }
                 <mat-icon class="home__tile-arrow" aria-hidden="true">east</mat-icon>
               </span>
               <span class="home__tile-figure">{{ tile.figure }}</span>

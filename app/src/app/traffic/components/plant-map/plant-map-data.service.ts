@@ -17,7 +17,7 @@ export class PlantMapDataService {
     weatherPoints$: Observable<Detour.Firestore.Snapshot.IWeatherPoint[]>,
     rushTrack$: Observable<IRushTrack>
   ): Observable<IPlantMapState> {
-    return combineLatest([this._plants$, this._states$, this._gridSignalsService.history$, weatherPoints$, rushTrack$]).pipe(
+    return combineLatest([this._plants$, this._states$, this._gridSignalsService.recentHistory$, weatherPoints$, rushTrack$]).pipe(
       map(([plantsFile, statesFile, history, weatherPoints, rushTrack]): IPlantMapState => {
         const data = PlantMapHelper.build(plantsFile, statesFile, history, weatherPoints, rushTrack);
 

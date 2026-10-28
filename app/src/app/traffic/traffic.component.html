@@ -1,6 +1,6 @@
 <div class="dt-page">
   <header class="dt-page__head traffic__head">
-    <p class="dt-page__step"><span class="cdk-visually-hidden">Step 1 of 3: </span><span class="dt-page__step-number" aria-hidden="true">01</span><span class="dt-page__step-name">Forecast</span></p>
+    <p class="dt-page__step"><span class="cdk-visually-hidden">Step 1 of 2: </span><span class="dt-page__step-number" aria-hidden="true">01</span><span class="dt-page__step-name">Forecast</span></p>
     <h1 class="dt-question">When is the grid jammed {{ (day$ | async)?.word }}?</h1>
     @if (viewModel$ | async; as viewModel) {
       @if (viewModel.answer.length > 0) {
@@ -9,6 +9,7 @@
             {{ sentence }}
           }
         </p>
+        <dt-next-stop variant="inline" path="/plan" sign="2" label="Next · Decide" [title]="'Plan around it: what should the station do ' + ((day$ | async)?.word ?? 'tomorrow') + '?'"></dt-next-stop>
       }
     }
   </header>
@@ -18,7 +19,7 @@
       @case ('loading') {
         <div class="dt-state" role="status">
           <mat-spinner diameter="24"></mat-spinner>
-          <span>Reading two years of PACE grid data…</span>
+          <span>Reading the grid snapshot…</span>
         </div>
       }
       @case ('error') {
@@ -149,6 +150,7 @@
                     [cursorIndex]="hour"
                     [valueFormat]="carbonFormat"
                   ></dt-hour-chart>
+                  <p class="dt-hint dt-plain">In plain words: tomorrow's carbon barely changes hour to hour, so DETOUR uses it as a tie-breaker. The bill and the grid price decide; carbon settles ties.</p>
                   <div how-to-read>
                     <p class="dt-hint">
                       Across: hours of the day for the {{ report.season }} season. Up: pounds of CO2 from one more megawatt-hour of demand.
@@ -213,7 +215,7 @@
                           ></dt-figure>
                         </div>
 
-                        <dt-under-the-hood summary="How the forecasts were scored" [description]="(forecast.hoursScored | number: '1.0-0') + ' common hours'">
+                        <dt-under-the-hood summary="How the forecasts were scored" [description]="'In plain words: ours misses by ' + (forecast.comparison[0].score.mapePercent | number: '1.1-1') + '% in a typical hour, PACE by ' + (forecast.comparison[1].score.mapePercent | number: '1.1-1') + '%'">
                           <div class="dt-table-wrap">
                             <table class="dt-table">
                               <thead>

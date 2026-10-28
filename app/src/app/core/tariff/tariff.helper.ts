@@ -1,4 +1,3 @@
-import { TimeHelper } from '../helpers/time.helper';
 import {
   IBillBreakdown,
   IBillingDeterminants,

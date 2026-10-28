@@ -1,11 +1,12 @@
-import { writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import highsLoader from 'highs';
 import { BacktestMonthsHelper } from '../src/app/core/backtest/backtest-months.helper';
 import { BacktestRunnerHelper } from '../src/app/core/backtest/backtest-runner.helper';
-import { IBacktestResult, IBacktestStrategy, ILpSolver } from '../src/app/core/backtest/backtest.interfaces';
+import { IBacktestResult, IBacktestStrategy, IBacktestStrategyResult, ILpSolver } from '../src/app/core/backtest/backtest.interfaces';
 import { LpStrategyHelper } from '../src/app/core/backtest/lp-strategy.helper';
 import { NaiveShaverHelper } from '../src/app/core/backtest/naive-shaver.helper';
 import { PlanEngineHelper } from '../src/app/core/plan/plan-engine.helper';
@@ -21,6 +22,48 @@ const firebaseConfig = {
   projectId: 'hard-tech-week-2026-torus',
 };
 const outputPath = 'public/data/backtest-year.json';
+const replayDirectory = 'public/data/replays';
+const replaySiteIds = ['airport'];
+
+function roundValue(value: unknown): unknown {
+  if (typeof value === 'number') {
+    const decimals = Math.abs(value) < 1 ? 4 : 2;
+
+    return Number(value.toFixed(decimals));
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(roundValue);
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, roundValue(entry)]));
+  }
+
+  return value;
+}
+
+function trimResult(result: IBacktestResult): IBacktestResult {
+  const emptied = (entry: IBacktestStrategyResult | null): IBacktestStrategyResult | null =>
+    entry ? { ...entry, intervals: [] } : entry;
+
+  return roundValue({
+    ...result,
+    baseline: emptied(result.baseline),
+    strategies: result.strategies.map((entry) => emptied(entry)),
+    oracle: emptied(result.oracle),
+    perfectLoad: emptied(result.perfectLoad),
+    shaver: emptied(result.shaver),
+  }) as IBacktestResult;
+}
+
+function writeReplay(month: string, siteId: string, scheduleId: string, result: IBacktestResult): void {
+  mkdirSync(replayDirectory, { recursive: true });
+  const path = `${replayDirectory}/${month}-${siteId}-${scheduleId}.json`;
+  writeFileSync(path, JSON.stringify(trimResult(result)));
+  const gzipKb = gzipSync(readFileSync(path)).length / 1024;
+  console.log(`  ${path} ${(statSync(path).size / 1024).toFixed(0)} KB raw, ${gzipKb.toFixed(0)} KB gzip`);
+}
 
 async function main(): Promise<void> {
   const app = initializeApp(firebaseConfig);
@@ -82,6 +125,10 @@ async function main(): Promise<void> {
           wattsmartKwh: Math.round(result.lead.wattsmart.minimumHeldKwh),
         });
         console.log(`${month} ${site.id} ${schedule.id}: $${Math.round(total)} ${result.lead.captureRate}`);
+
+        if (replaySiteIds.includes(site.id)) {
+          writeReplay(month, site.id, schedule.id, result);
+        }
       }
     }
   }

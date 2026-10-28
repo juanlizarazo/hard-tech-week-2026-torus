@@ -14,4 +14,5 @@ export class NextStopComponent {
   @Input() public sign = '';
   @Input() public fragment: string | undefined;
   @Input() public label = 'Next stop';
+  @Input() public variant: 'bar' | 'inline' | 'hero' = 'bar';
 }

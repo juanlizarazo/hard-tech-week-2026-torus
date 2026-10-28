@@ -1,4 +1,4 @@
-export type PlanDateMode = 'target' | 'july-peak';
+export type PlanDateMode = 'target';
 
 export type PeakSoFarMode = 'fresh' | 'month-to-date';
 

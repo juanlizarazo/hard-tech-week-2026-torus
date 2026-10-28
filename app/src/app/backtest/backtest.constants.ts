@@ -14,7 +14,7 @@ export const backtestScreenSettings = {
   ON_PEAK_BAND_COLOR: 'var(--dt-muted)',
   EMPTY_MESSAGE: "Grid data isn't loaded yet. Refresh in a minute.",
   ERROR_MESSAGE: 'We could not replay this month from the grid data. Check your connection and refresh the page.',
-  LOADING_MESSAGE: 'Replaying the month day by day. This takes about ten seconds…',
+  LOADING_MESSAGE: 'Loading the month…',
 };
 
 export const backtestStrategyNames: Record<BacktestStrategyRole, string> = {

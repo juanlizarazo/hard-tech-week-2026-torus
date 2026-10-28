@@ -341,6 +341,15 @@ body {
   max-width: 80ch;
 }
 
+.dt-plain {
+  margin: 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--dt-clear);
+  font-size: var(--dt-text-15);
+  color: var(--dt-ink);
+  max-width: 72ch;
+}
+
 .dt-figures {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

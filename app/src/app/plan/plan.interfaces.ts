@@ -125,10 +125,3 @@ export interface IPlanDeltaState {
   deltas: Record<string, IPlanTileDelta>;
   isUnchanged: boolean;
 }
-
-export interface IPlanTryChip {
-  id: string;
-  label: string;
-  effect: string;
-  changes: Partial<IPlanControls>;
-}

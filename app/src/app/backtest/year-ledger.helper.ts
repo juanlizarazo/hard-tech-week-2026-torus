@@ -3,7 +3,7 @@ import { tariffSchedules } from '@app/core/tariff/tariff.constants';
 import { ITariffSchedule } from '@app/core/models';
 import { monthNames } from './backtest.constants';
 import { BacktestHelper } from './backtest.helper';
-import { IYearLedger, IYearLedgerMonth } from './backtest.interfaces';
+import { IBacktestTile, IYearLedger, IYearLedgerMonth } from './backtest.interfaces';
 
 export class YearLedgerHelper {
   public static build(
@@ -57,6 +57,16 @@ export class YearLedgerHelper {
     const labelOf = (row: IBacktestYearRow): string =>
       `${months.find((entry: IYearLedgerMonth) => entry.month === row.month)?.shortLabel} ${BacktestHelper.formatMoney(row.savedUsd)}`;
 
+    const leadFigures: IBacktestTile[] =
+      totals.length === 0
+        ? []
+        : [
+            { id: 'saved', label: 'Saved in 2026 to date', value: BacktestHelper.formatMoney(savedTotal), hint: `Bill savings versus no storage across ${months.length} months.`, tone: 'good', source: null },
+            { id: 'hindsight', label: 'Of perfect hindsight', value: `${BacktestHelper.formatNumber((savedTotal / ceilingTotal) * 100)}%`, hint: 'The share of what a planner told each month in advance would have saved.', tone: 'neutral', source: null },
+            { id: 'best', label: 'Best month', value: labelOf(ranked[0]), hint: 'The month DETOUR saved the most.', tone: 'neutral', source: null },
+            { id: 'months', label: 'Months replayed', value: String(totals.length), hint: 'Each replayed day by day on a simulated site.', tone: 'neutral', source: null },
+          ];
+
     return {
       months,
       title: `Year to date, ${first}–${last} ${calendar.throughDate.slice(0, 4)}`,
@@ -64,6 +74,8 @@ export class YearLedgerHelper {
         totals.length === 0
           ? 'The year summary is not available yet; pick a month to replay it.'
           : `${BacktestHelper.formatMoney(savedTotal)} saved across ${months.length} months, ${BacktestHelper.formatNumber((savedTotal / ceilingTotal) * 100)}% of perfect hindsight. Best month ${labelOf(ranked[0])}, weakest ${labelOf(ranked[ranked.length - 1])}.`,
+      leadFigures,
+      hindsightLine: 'Perfect hindsight is the same planner told the whole month in advance. No real controller can match it, so it is the 100% mark.',
       summerRange: summerIndexes.length > 0 ? [summerIndexes[0], summerIndexes[summerIndexes.length - 1]] : null,
       partialLabel: partial ? `${partial.shortLabel} 1–${Number(calendar.throughDate.slice(8, 10))}, to date` : '',
       note: year && year.snapshotId !== calendar.snapshotId ? `Year summary from snapshot ${year.snapshotId}.` : '',

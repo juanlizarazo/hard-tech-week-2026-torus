@@ -28,12 +28,30 @@ export class MonthCalendarComponent implements OnChanges {
     this.daySelected.emit(cell.localDate);
   }
 
-  public lowFraction(cell: IMonthCalendarCell): number {
-    return Math.min(cell.peakFraction, cell.leadFraction);
+  public cutShare(cell: IMonthCalendarCell): number {
+    if (cell.peakFraction <= 0) {
+      return 0;
+    }
+
+    return Math.max(0, cell.peakFraction - cell.leadFraction) / cell.peakFraction;
   }
 
-  public highFraction(cell: IMonthCalendarCell): number {
-    return Math.max(cell.peakFraction, cell.leadFraction);
+  public shavedLabel(cell: IMonthCalendarCell): string {
+    const shaved = Math.round(cell.peakKw - cell.leadPeakKw);
+
+    return shaved > 0 ? `−${shaved.toLocaleString('en-US')}` : '0';
+  }
+
+  public cellTitle(cell: IMonthCalendarCell): string | null {
+    if (cell.isOffPeakDay && cell.offPeakReason) {
+      return cell.offPeakReason;
+    }
+
+    if (cell.peakKw > 0) {
+      return `No storage ${this.formatKw(cell.peakKw)} · ${this.scale.leadName} ${this.formatKw(cell.leadPeakKw)}`;
+    }
+
+    return null;
   }
 
   public formatNumber(kw: number): string {

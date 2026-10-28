@@ -278,7 +278,7 @@ export class PlanHelper {
   }
 
   public static dayPhrase(dateMode: PlanDateMode | null, planningDayWord: string, dateLabel: string): string {
-    return dateMode === 'july-peak' ? `on ${dateLabel}` : planningDayWord;
+    return planningDayWord;
   }
 
   private static co2Sentence(controls: IPlanControls, result: IPlanResult): string {
@@ -503,7 +503,7 @@ export class PlanHelper {
       return '';
     }
 
-    return `${stats.intervalCount.toLocaleString('en-US')} intervals · ${stats.variableCount.toLocaleString('en-US')} variables · ${stats.constraintCount.toLocaleString('en-US')} constraints · solved in ${Math.round(stats.solveMs).toLocaleString('en-US')} ms by HiGHS in this browser.`;
+    return `${stats.intervalCount.toLocaleString('en-US')} intervals · ${stats.variableCount.toLocaleString('en-US')} variables · ${stats.constraintCount.toLocaleString('en-US')} constraints · solved in ${Math.round(stats.solveMs).toLocaleString('en-US')} ms by HiGHS.`;
   }
 
   private static valueLines(result: IPlanResult): IBillLineDelta[] {
@@ -548,6 +548,12 @@ export class PlanHelper {
     return co2WeightPerKg > 0
       ? `Mostly charging losses; the bill outweighs carbon at ${weight}`
       : 'Carbon not valued at $0/kg';
+  }
+
+  public static orderSummary(orderCount: number, dateLabel: string, siteName: string, scheduleLabel: string): string {
+    const day = dateLabel.replace(/,\s*\d{4}$/, '').replace(',', '');
+
+    return `${orderCount} ${orderCount === 1 ? 'order' : 'orders'} · ${day} · ${siteName} · ${scheduleLabel}`;
   }
 
   private static dateLabel(date: string): string {

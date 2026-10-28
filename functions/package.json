@@ -4,6 +4,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck:dev": "tsc -p tsconfig.dev.json",
+    "derive": "tsx src/dev/derive-admin.ts",
     "ingest": "tsx src/dev/ingest-snapshot.ts",
     "ingest:plants": "tsx src/dev/ingest-plants.ts",
     "check:hours": "tsx src/dev/check-hour-labels.ts",
@@ -21,13 +22,14 @@
   "engines": {
     "node": "22"
   },
-  "main": "lib/index.js",
+  "main": "lib/functions/src/index.js",
   "dependencies": {
     "@google-cloud/firestore": "7.11.6",
     "fflate": "0.8.3",
     "firebase-admin": "13.7.0",
     "firebase-functions": "6.3.2",
-    "google-auth-library": "9.15.1"
+    "google-auth-library": "9.15.1",
+    "highs": "1.15.4"
   },
   "devDependencies": {
     "tsx": "4.19.2",

@@ -40,16 +40,22 @@
     <nav class="dt-shell__nav" aria-label="Steps">
       <ol class="dt-shell__steps">
         @for (link of links$ | async; track link.path) {
-          <li class="dt-shell__step-item">
+          <li class="dt-shell__step-item" [class.dt-shell__step-item--record]="link.kind === 'record'">
             <a
               class="dt-shell__step"
               [routerLink]="link.path"
               routerLinkActive="dt-shell__step--active"
               ariaCurrentWhenActive="page"
-              [attr.aria-label]="link.step ? 'Step ' + link.step + ': ' + link.label : link.label"
+              [attr.aria-label]="link.kind === 'step' ? 'Step ' + link.step + ': ' + link.label : link.kind === 'record' ? 'Record: 2026, month by month' : link.label"
             >
-              @if (link.step) {
+              @if (link.kind === 'step') {
                 <span class="dt-shell__step-number" aria-hidden="true">{{ link.step }}</span>
+              } @else if (link.kind === 'record') {
+                <span class="dt-shell__step-number dt-shell__step-number--record" aria-hidden="true">
+                  <svg viewBox="0 0 12 12" width="12" height="12" focusable="false">
+                    <path d="M1.5 3h9M1.5 6h9M1.5 9h9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+                  </svg>
+                </span>
               } @else {
                 <span class="dt-shell__step-number dt-shell__step-number--start" aria-hidden="true"></span>
               }

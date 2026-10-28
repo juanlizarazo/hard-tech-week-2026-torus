@@ -107,7 +107,7 @@ export class StartHelper {
   }
 
   public static proveTile(year: IBacktestYear | null): IStartTile {
-    const base = { ...startTileSpecs[2], unit: 'saved so far this year' };
+    const base = { ...startTileSpecs[2], unit: 'saved so far this year', isRecord: true };
     const rows = (year?.rows ?? []).filter((row) => row.siteId === startSettings.PROVE_SITE_ID && row.scheduleId === startSettings.PROVE_SCHEDULE_ID);
 
     if (rows.length === 0) {

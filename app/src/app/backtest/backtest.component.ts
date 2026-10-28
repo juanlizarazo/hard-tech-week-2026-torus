@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AsyncPipe, Location } from '@angular/common';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AsyncPipe, Location, NgTemplateOutlet } from '@angular/common';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -39,6 +39,8 @@ import { YearLedgerHelper } from './year-ledger.helper';
   selector: 'dt-backtest',
   imports: [
     AsyncPipe,
+    NgTemplateOutlet,
+    RouterLink,
     MatButtonToggleModule,
     MatFormFieldModule,
     MatIconModule,
@@ -97,11 +99,12 @@ export class BacktestComponent {
       const throughDate = calendar ? BacktestMonthsHelper.partialThrough(month, calendar.throughDate) : null;
 
       return {
-        question: `Would it have paid off in ${BacktestHelper.monthPhrase(month, throughDate)}?`,
+        question: 'Has DETOUR paid off in 2026?',
+        monthQuestion: `Would it have paid off in ${BacktestHelper.monthPhrase(month, throughDate)}?`,
         monthLabel: BacktestHelper.monthLabel(month, throughDate)
       };
     }),
-    startWith<IBacktestHeading>({ question: 'Would it have paid off in July?', monthLabel: 'July 2026' })
+    startWith<IBacktestHeading>({ question: 'Has DETOUR paid off in 2026?', monthQuestion: 'Would it have paid off in July?', monthLabel: 'July 2026' })
   );
 
   public readonly ledger$: Observable<IYearLedgerScreen | null> = combineLatest([

@@ -8,7 +8,7 @@ Open Start here. Say:
 
 > The grid has a rush hour. One kilowatt of summer peak demand costs $16.84 every month, versus only about 3.1 cents saved once for moving a kilowatt-hour to a cheaper hour. Cutting one kilowatt off the peak saves as much as moving about 550 kilowatt-hours, so I go after the peak first, then use Spin and Pulse to make the trade safely.
 
-Let the map and the three launch tiles finish loading while you say it. Explain that the towers are real PACE plants, taller when their fuel supplies more power at their real locations and the streams are shares of power, not a literal road map. Every site number is simulated, seed 42.
+Let the map and the launch tiles finish loading while you say it. Explain that the towers are real PACE plants, taller when their fuel supplies more power at their real locations and the streams are shares of power, not a literal road map. Every site number is simulated, seed 42.
 
 ## 0:30–1:20 — Tomorrow's grid (1 Forecast)
 
@@ -44,23 +44,23 @@ Move the CO2 weight. Say:
 
 > Watch the plan re-solve. Because PACE's carbon signal barely varies in this snapshot, this dial nudges the result; the tariff peak and rush-hour constraints do most of the work.
 
-Click “Hold 1,000 kWh for Wattsmart” or move the reserve slider. Say:
+Move the Wattsmart reserve slider. Say:
 
 > More reserve protects a future grid call, but leaves less energy available for today's bill. That is the operational trade Torus hardware makes visible.
 
-Point at the dispatch orders in the solver rail and press Approve plan. Say:
+Point at the dispatch orders and press Approve and queue for Lattice. Say:
 
 > This is what DETOUR hands Lattice for tomorrow. Approve, and Lattice runs it; Wattsmart calls still override it.
 
-Switch the rate plan between Schedule 6 and Schedule 8 and say:
+Click See if this pays off beside the Approved stamp; it opens Record. Say that Approve is the only real action, and Record is where the plan is judged. Then, if time allows, go back and switch the rate plan between Schedule 6 and Schedule 8 and say:
 
 > On Schedule 6 demand counts in any hour, so the station has to shave every spike; on Schedule 8 it only has to protect the on-peak window. Same engine, different plan.
 
 Skip Under the hood unless a judge asks.
 
-## 3:10–4:15 — The proof, month by month (3 Prove)
+## 3:10–4:15 — The record
 
-Open 3 Prove. Say:
+Open Record. Say:
 
 > This is the honest backtest: a simple shaver, DETOUR planning one day ahead, and perfect hindsight as the ceiling. The capture rate is how much of that ceiling DETOUR reaches.
 
@@ -68,7 +68,7 @@ Read the lead sentence on the screen aloud:
 
 > $11,546 saved on a simulated 2 MW Schedule 8 site, 85% of it from demand, 76% of the perfect-hindsight optimum, and 946 kWh held for Wattsmart.
 
-Point to the year ledger at the top, then the calendar and the peak note:
+Point to the year ledger at the top, which is the lead, then the calendar and the peak note:
 
 > Same engine, every month: best is September at $13,000 and 78%, weakest is June at about 21%, and here's why: summer shoulder months have a smaller demand charge to shave. Winter runs 63 to 69%, so about two-thirds. October is the month to date.
 
@@ -78,8 +78,8 @@ Then click July in the ledger and say:
 
 ## 4:15–4:35 — Close
 
-Return to Start here and open How DETOUR works. Say:
+Return to Start here and open How DETOUR works. Say two steps and the record, then:
 
 > DETOUR is a planning layer above a Torus Station's real-time controller: public grid data becomes a forecast, the forecast becomes a constrained dispatch, and the month-by-month replay proves what the strategy earned. Every simulated number is labeled; every public input has a source.
 
-Timing note: the lead sentence, ledger line and Schedule 6/8 beat are required; the info-panel and dotted-term demo on Forecast was cut to make room. The total is estimated from word count, not yet re-timed with a stopwatch.
+Timing note: the added Approve then Record click costs about five seconds. the lead sentence, ledger line and Schedule 6/8 beat are required; the info-panel and dotted-term demo on Forecast was cut to make room. The total is estimated from word count, not yet re-timed with a stopwatch.

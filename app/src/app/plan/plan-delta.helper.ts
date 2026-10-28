@@ -1,5 +1,5 @@
-import { IPlanControls, IPlanDeltaState, IPlanParsedValue, IPlanTile, IPlanTileDelta, IPlanTryChip } from './plan.interfaces';
-import { planDeltaSettings, planTryChips } from './plan.constants';
+import { IPlanControls, IPlanDeltaState, IPlanParsedValue, IPlanTile, IPlanTileDelta } from './plan.interfaces';
+import { planDeltaSettings } from './plan.constants';
 
 export class PlanDeltaHelper {
   private static readonly _numberPattern = /([−+-]?)\$?([\d,]+(?:\.\d+)?)/;
@@ -59,23 +59,5 @@ export class PlanDeltaHelper {
 
   public static emptyState(): IPlanDeltaState {
     return { deltas: {}, isUnchanged: false };
-  }
-
-  public static chipChanges(chip: IPlanTryChip, maxReserveKwh: number): Partial<IPlanControls> {
-    if (chip.changes.wattsmartReserveKwh === undefined) {
-      return chip.changes;
-    }
-
-    return { ...chip.changes, wattsmartReserveKwh: Math.min(chip.changes.wattsmartReserveKwh, maxReserveKwh) };
-  }
-
-  public static chipIsActive(chip: IPlanTryChip, controls: IPlanControls, maxReserveKwh: number): boolean {
-    const changes = PlanDeltaHelper.chipChanges(chip, maxReserveKwh);
-
-    return (Object.keys(changes) as (keyof IPlanControls)[]).every((key) => controls[key] === changes[key]);
-  }
-
-  public static chips(): IPlanTryChip[] {
-    return planTryChips;
   }
 }

@@ -1,12 +1,12 @@
 <div class="dt-page">
   <header class="dt-page__head">
-    <p class="dt-page__step"><span class="cdk-visually-hidden">Step 2 of 3: </span><span class="dt-page__step-number" aria-hidden="true">02</span><span class="dt-page__step-name">Decide</span></p>
+    <p class="dt-page__step"><span class="cdk-visually-hidden">Step 2 of 2: </span><span class="dt-page__step-number" aria-hidden="true">02</span><span class="dt-page__step-name">Decide</span></p>
     <h1 class="dt-question">What should the <dt-term key="TORUS_STATION">Torus Station</dt-term> do {{ headingDay(solve$ | async, (day$ | async)?.word) }}?</h1>
     @if (solve$ | async; as solve) {
       @if (solve.viewModel; as viewModel) {
         <p class="dt-answer" aria-live="polite">{{ viewModel.answer }}</p>
       } @else {
-        <p class="dt-answer">Solving the plan in your browser…</p>
+        <p class="dt-answer">Solving the plan…</p>
       }
     }
     @if (hook$ | async; as hook) {
@@ -121,20 +121,6 @@
               <hr class="plan__dials-rule" />
 
               <div class="plan__dial">
-                <span class="plan__dial-label" id="dial-day">Day</span>
-                <mat-button-toggle-group
-                  class="plan__toggle"
-                  [value]="controls.dateMode"
-                  (change)="onDateModeChange($event.value)"
-                  aria-labelledby="dial-day"
-                  hideSingleSelectionIndicator
-                >
-                  <mat-button-toggle value="target">{{ (day$ | async)?.name }}</mat-button-toggle>
-                  <mat-button-toggle value="july-peak">July's peak day</mat-button-toggle>
-                </mat-button-toggle-group>
-              </div>
-
-              <div class="plan__dial">
                 <span class="plan__dial-label" id="dial-tariff">Rate plan</span>
                 <mat-button-toggle-group
                   class="plan__toggle"
@@ -194,15 +180,14 @@
                 </span>
                 <p class="plan__status">
                   @if (rail === 'solving') {
-                    <span>Solving in your browser…</span>
+                    <span>Solving live…</span>
                   } @else if (rail === 'infeasible') {
-                    <span><dt-term key="HIGHS">HiGHS</dt-term> found no feasible plan for these settings in your browser.</span>
+                    <span><dt-term key="HIGHS">HiGHS</dt-term> found no feasible plan for these settings.</span>
                   } @else if (rail === 'failed') {
                     <span>The solver did not return a plan for these settings.</span>
                   } @else if (solve.viewModel) {
                     <span>
-                      {{ solve.viewModel.solveLabel }} in your browser with <dt-term key="HIGHS">HiGHS</dt-term>.
-                      {{ solve.viewModel.dateLabel }} and the next day, {{ solve.viewModel.result.intervals.length }} fifteen-minute steps.
+                      Solved live: {{ solve.viewModel.dateLabel }} and the next day, {{ solve.viewModel.result.intervals.length }} fifteen-minute steps, {{ solve.viewModel.result.solveMs | number: '1.0-0' }} ms with <dt-term key="HIGHS">HiGHS</dt-term>.
                     </span>
                   }
                 </p>
@@ -213,6 +198,14 @@
                     <span class="plan__rail-stat">{{ railModel.result.lpStats.constraintCount | number }} constraints</span>
                     <span class="plan__rail-stat">{{ railModel.result.lpStats.solveMs | number: '1.0-0' }} ms</span>
                   </span>
+                }
+                @if (sheet && !isApproved(sheet)) {
+                  <button mat-flat-button type="button" class="plan__rail-approve" [disabled]="!canApprove(solve, sheet)" (click)="onApprove(sheet)">
+                    <div class="btn-content">
+                      <mat-icon aria-hidden="true">task_alt</mat-icon>
+                      <span>Approve</span>
+                    </div>
+                  </button>
                 }
               </div>
 
@@ -263,32 +256,34 @@
                   } @else {
                     <p class="dt-hint">The station sits idle on this day at these settings: no orders to send.</p>
                   }
-                  <div class="plan__orders-actions">
+                  <p class="dt-hint plan__orders-note">No device is connected; <dt-term key="LATTICE">Lattice</dt-term> runs the real-time control and Wattsmart calls override this plan.</p>
+                  <div class="plan__orders-actions" [class.plan__orders-actions--approved]="isApproved(sheet)">
                     @if (isApproved(sheet)) {
                       <p class="plan__approved" role="status">
                         <mat-icon class="plan__approved-icon" aria-hidden="true">task_alt</mat-icon>
-                        <span class="plan__approved-stamp dt-mono">Approved {{ approval?.approvedAtLabel }} · queued for <dt-term key="LATTICE">Lattice</dt-term></span>
-                        <span class="dt-tag dt-tag--sim">Simulated</span>
+                        <span class="plan__approved-stamp dt-mono">Approved {{ approval?.approvedAtLabel }} · queued for <dt-term key="LATTICE">Lattice</dt-term> · SIMULATED</span>
                       </p>
                     } @else {
+                      <p class="plan__orders-summary dt-mono">{{ orderSummary(sheet) }}</p>
                       @if (approval) {
                         <p class="plan__changed dt-mono" role="status">Plan changed since approval at {{ approval.approvedAtLabel }}</p>
                       }
-                      <button mat-flat-button type="button" [disabled]="!canApprove(solve, sheet)" (click)="onApprove(sheet)">
+                      <button mat-flat-button type="button" class="plan__approve" [disabled]="!canApprove(solve, sheet)" (click)="onApprove(sheet)">
                         <div class="btn-content">
-                          <mat-icon aria-hidden="true">check</mat-icon>
-                          <span>Approve plan</span>
+                          <mat-icon aria-hidden="true">task_alt</mat-icon>
+                          <span>Approve and queue for Lattice</span>
                         </div>
                       </button>
                     }
-                    <button mat-stroked-button type="button" (click)="onDownloadCsv(sheet)">
-                      <div class="btn-content">
-                        <mat-icon aria-hidden="true">download</mat-icon>
-                        <span>Download schedule (CSV)</span>
-                      </div>
-                    </button>
+                    <button type="button" class="plan__csv-link" (click)="onDownloadCsv(sheet)">Download schedule (CSV)</button>
+                    <dt-next-stop
+                      [variant]="isApproved(sheet) ? 'hero' : 'inline'"
+                      path="/backtest"
+                      sign="REC"
+                      label="Next · Record"
+                      [title]="isApproved(sheet) ? 'Approved. Now see if it pays off' : 'See if this pays off, month by month'"
+                    ></dt-next-stop>
                   </div>
-                  <p class="dt-hint plan__orders-note">No device is connected; <dt-term key="LATTICE">Lattice</dt-term> runs the real-time control and Wattsmart calls override this plan.</p>
                 } @else {
                   <div class="dt-state plan__orders-empty" role="status">
                     @if (rail === 'solving') {
@@ -307,45 +302,45 @@
                 }
               </section>
 
-              <section class="plan__try" aria-labelledby="plan-try-title">
-                <h2 class="plan__try-title" id="plan-try-title">Try this</h2>
-                <ul class="plan__try-list">
-                  @for (chip of tryChips; track chip.id) {
-                    <li class="plan__try-item">
-                      <button
-                        type="button"
-                        class="plan__try-chip"
-                        [attr.aria-pressed]="isChipActive(chip)"
-                        [attr.aria-describedby]="'plan-try-' + chip.id"
-                        (click)="onTryChip(chip)"
-                      >
-                        {{ chip.label }}
-                      </button>
-                      <span class="plan__try-effect" [id]="'plan-try-' + chip.id">{{ chip.effect }}</span>
-                    </li>
-                  }
-                </ul>
-              </section>
-
               @if (solve.viewModel; as viewModel) {
                 @let deltaState = deltas$ | async;
                 @let deltas = deltaState?.deltas ?? {};
                 @if (deltaState?.isUnchanged) {
                   <p class="plan__unchanged" role="status">Same plan as the last solve: at these settings nothing in the figures moved.</p>
                 }
-                <div class="plan__body" [class.plan__body--solving]="solve.status === 'solving'">
+                <section class="plan__result" aria-labelledby="plan-result-title" [class.plan__body--solving]="solve.status === 'solving'">
+                  <h2 class="plan__result-title" id="plan-result-title">What this plan achieves</h2>
                   <div class="dt-figures plan__figures">
-                    @for (tile of viewModel.tiles; track tile.id + tile.value) {
+                    @for (tile of leadTiles(viewModel.tiles); track tile.id + tile.value) {
                       <dt-figure class="plan__figure" [class.plan__figure--changed]="!!deltas[tile.id]" [value]="tile.value" [label]="tile.label" [detail]="tile.detail" [tone]="tile.tone">
                         @if (deltas[tile.id]; as delta) {
                           <span figure-delta class="plan__delta" role="status">{{ delta.text }}</span>
                         }
-                        @if (tile.source) {
-                          <dt-source-chip figure-source [label]="tile.source"></dt-source-chip>
-                        }
                       </dt-figure>
                     }
                   </div>
+                  <p class="plan__costs">
+                    <span class="plan__costs-title">What it costs</span>
+                    @for (tile of secondaryTiles(viewModel.tiles); track tile.id + tile.value) {
+                      <span class="plan__cost" [class.plan__figure--changed]="!!deltas[tile.id]" [attr.title]="tile.detail">
+                        <strong class="dt-mono">{{ tile.value }}</strong> {{ tile.label }}
+                        @if (deltas[tile.id]; as delta) {
+                          <span class="plan__delta" role="status">{{ delta.text }}</span>
+                        }
+                      </span>
+                    }
+                  </p>
+                  <p class="dt-hint plan__sources">
+                    Sources:
+                    @for (source of tileSources(viewModel.tiles); track source; let last = $last) {
+                      {{ source }}{{ last ? '' : ' · ' }}
+                    }
+                  </p>
+                </section>
+              }
+
+              @if (solve.viewModel; as viewModel) {
+                <div class="plan__body" [class.plan__body--solving]="solve.status === 'solving'">
                   @if (viewModel.lpStatsLine) {
                     <p class="dt-hint plan__lp-stats">{{ viewModel.lpStatsLine }} <dt-term key="LP_SIZE">What do these mean?</dt-term></p>
                   }
@@ -447,7 +442,7 @@
                     @if (viewModel.lpStatsLine) {
                       <p class="dt-hint plan__lp-stats">{{ viewModel.lpStatsLine }}</p>
                     }
-                    <dt-lp-text [lpText]="viewModel.result.lpText" [solveMs]="viewModel.result.solveMs"></dt-lp-text>
+                    <dt-lp-text [lpText]="viewModel.result.lpText" [solveMs]="viewModel.result.solveMs" [date]="viewModel.dateLabel"></dt-lp-text>
 
                     <div class="plan__assets">
                       <h3 class="dt-subheading">The <dt-term key="TORUS_STATION">Torus Station</dt-term> for this site</h3>
@@ -492,5 +487,5 @@
       }
     }
   }
-  <dt-next-stop path="/backtest" sign="3" label="Next stop · Prove" title="The proof: would it have paid off?"></dt-next-stop>
+  <dt-next-stop path="/backtest" sign="REC" label="Next · Record" title="Did it pay off? 2026, month by month"></dt-next-stop>
 </div>

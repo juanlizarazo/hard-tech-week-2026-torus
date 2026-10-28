@@ -176,6 +176,7 @@ export interface IBacktestScreenModel {
 
 export interface IBacktestHeading {
   question: string;
+  monthQuestion: string;
   monthLabel: string;
 }
 
@@ -213,6 +214,8 @@ export interface IYearLedger {
   months: IYearLedgerMonth[];
   title: string;
   summary: string;
+  leadFigures: IBacktestTile[];
+  hindsightLine: string;
   summerRange: [number, number] | null;
   partialLabel: string;
   note: string;
