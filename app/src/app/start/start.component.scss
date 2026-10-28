@@ -534,24 +534,63 @@
     min-height: 0;
   }
 
+  .home__bar {
+    order: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 20px 16px 0;
+  }
+
+  .home__brand {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .home__plate {
+    gap: 12px;
+    padding: 10px 16px 7px;
+    font-size: var(--dt-text-42);
+  }
+
+  .home__plate-mark {
+    width: 26px;
+    height: 26px;
+    margin-top: -4px;
+  }
+
+  .home__tagline {
+    font-size: var(--dt-text-13);
+    letter-spacing: 0.04em;
+  }
+
   .home__scene {
     position: relative;
     inset: auto;
-    order: 3;
-    padding: 0 16px 24px;
+    order: 1;
+    height: clamp(300px, 52svh, 480px);
+    margin-top: -56px;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, var(--dt-paper) 0, transparent 16%, transparent 72%, var(--dt-paper) 100%);
+    }
   }
 
   .home__veil {
     display: none;
   }
 
-  .home__bar {
-    padding: 16px 16px 0;
-  }
-
   .home__body {
+    order: 2;
     flex: none;
-    padding: 20px 16px 16px;
+    gap: 28px;
+    margin-top: -40px;
+    padding: 0 16px 24px;
   }
 
   .home__copy {
@@ -565,21 +604,47 @@
 
 @media (max-width: 599.98px) {
   .home__figures {
-    grid-template-columns: 1fr;
-    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .home__number {
+    font-size: clamp(1.75rem, 9vw, 2.5rem);
   }
 
   .home__vs {
-    margin-top: 0;
-    justify-self: start;
+    margin-top: 1.25rem;
   }
 
-  .home__tagline {
-    display: none;
+  .home__label {
+    font-size: var(--dt-text-13);
+
+    strong {
+      font-size: var(--dt-text-17);
+    }
+  }
+
+  .home__hook {
+    font-size: var(--dt-text-17);
+    min-height: calc(1.35em * 4);
+  }
+
+  .home__flywheel {
+    width: 24px;
+    height: 24px;
+  }
+
+  .home__tile {
+    padding: 12px 14px 14px;
   }
 
   .home__tile-caption {
     display: none;
+  }
+
+  .home__how {
+    align-self: stretch;
+    justify-content: center;
   }
 
   .home__below {
