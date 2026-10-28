@@ -1,7 +1,7 @@
 import { cityLabels, mapFuels, paceNode, plantMapLayout, sitePin, stateLabels } from '../plant-map/plant-map.constants';
 import { IPlantMapData, IPlantMapHourView, IStateOutline } from '../plant-map/plant-map.interfaces';
 import { fallbackScenePalette, gridSceneSettings } from './grid-scene.constants';
-import { ISceneColumnGroup, ISceneDot, ISceneLabel, ISceneParticle, IScenePoint, IScenePalette, SceneColor } from './grid-scene.interfaces';
+import { ISceneColumnGroup, ISceneDot, ISceneLabel, ISceneWire, ISceneParticle, IScenePoint, IScenePalette, SceneColor } from './grid-scene.interfaces';
 
 export class GridSceneHelper {
   private static _webgl2: boolean | null = null;
@@ -157,23 +157,19 @@ export class GridSceneHelper {
     return result;
   }
 
-  public static curvePoint(particle: ISceneParticle, t: number, clock = 0, relative = 0): [number, number, number] {
+  public static curvePoint(particle: ISceneParticle, t: number): [number, number, number] {
     const inverse = 1 - t;
     const lon = inverse * inverse * particle.from.lon + 2 * inverse * t * particle.control.lon + t * t * particle.to.lon;
     const lat = inverse * inverse * particle.from.lat + 2 * inverse * t * particle.control.lat + t * t * particle.to.lat;
-    const xScale = Math.cos((particle.from.lat * Math.PI) / 180);
-    const dx = (particle.to.lon - particle.from.lon) * xScale;
-    const dy = particle.to.lat - particle.from.lat;
-    const length = Math.hypot(dx, dy) || 1;
-    const amplitude = length * gridSceneSettings.WAVE_AMPLITUDE * (0.35 + 0.65 * relative) * Math.sin(Math.PI * t);
-    const wave = amplitude * Math.sin(2 * Math.PI * (gridSceneSettings.WAVE_CYCLES * t - gridSceneSettings.WAVE_SPEED * clock) + particle.offset * 6.283);
 
-    return [lon - ((dy / length) * wave) / xScale, lat + (dx / length) * wave, Math.sin(Math.PI * t) * particle.lift];
+    return [lon, lat, Math.sin(Math.PI * t) * particle.lift];
   }
 
-  public static trail(particle: ISceneParticle, t: number, clock: number, relative: number, color: SceneColor): ISceneDot[] {
-    const { TRAIL_SAMPLES, TRAIL_STEP } = gridSceneSettings;
-    const dots: ISceneDot[] = [];
+  public static beam(particle: ISceneParticle, t: number, clock: number, relative: number, color: SceneColor, dots: ISceneDot[], cores: ISceneDot[]): void {
+    const { TRAIL_SAMPLES, TRAIL_STEP, CORE_SAMPLES, PULSE_HZ, FLICKER_HZ } = gridSceneSettings;
+    const pulse = 0.7 + 0.3 * Math.sin(2 * Math.PI * (PULSE_HZ * clock + particle.offset));
+    const flicker = 0.85 + 0.15 * Math.sin(2 * Math.PI * (FLICKER_HZ * clock + particle.offset * 7));
+    const energy = (0.35 + 0.65 * relative) * pulse * flicker;
 
     for (let index = 0; index < TRAIL_SAMPLES; index += 1) {
       const along = t - index * TRAIL_STEP;
@@ -184,15 +180,39 @@ export class GridSceneHelper {
 
       const taper = 1 - index / TRAIL_SAMPLES;
       const fade = Math.sqrt(Math.sin(Math.PI * along));
+      const position = GridSceneHelper.curvePoint(particle, along);
+      const alpha = 255 * energy * fade * Math.pow(taper, 2.2);
 
-      dots.push({
-        position: GridSceneHelper.curvePoint(particle, along, clock, relative),
-        color: [color[0], color[1], color[2], Math.round((70 + 185 * relative) * fade * taper * taper)],
-        size: (1.2 + 2.6 * relative) * (0.35 + 0.65 * taper)
+      dots.push({ position, color: [color[0], color[1], color[2], Math.round(alpha)], size: (1.3 + 2.4 * relative) * (0.4 + 0.6 * taper) });
+
+      if (index < CORE_SAMPLES) {
+        cores.push({ position, color: [255, 255, 255, Math.round(alpha * (1 - index / CORE_SAMPLES))], size: 0.9 + 1.1 * relative });
+      }
+    }
+  }
+
+  public static wires(particles: ISceneParticle[]): ISceneWire[] {
+    const seen = new Set<string>();
+    const wires: ISceneWire[] = [];
+
+    for (const particle of particles) {
+      const key = `${particle.from.lon},${particle.from.lat}>${particle.to.lon},${particle.to.lat}`;
+
+      if (seen.has(key)) {
+        continue;
+      }
+
+      seen.add(key);
+
+      const color = particle.kind === 'site' ? fallbackScenePalette.ink : GridSceneHelper.fuelColor(particle.fuelKey);
+
+      wires.push({
+        path: [GridSceneHelper.curvePoint(particle, 0), GridSceneHelper.curvePoint(particle, 1)],
+        color: [color[0], color[1], color[2], gridSceneSettings.WIRE_ALPHA]
       });
     }
 
-    return dots;
+    return wires;
   }
 
   public static labels(palette: IScenePalette): ISceneLabel[] {

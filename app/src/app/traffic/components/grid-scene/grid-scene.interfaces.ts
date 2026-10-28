@@ -48,6 +48,11 @@ export interface ISceneDot {
   size: number;
 }
 
+export interface ISceneWire {
+  path: [number, number, number][];
+  color: [number, number, number, number];
+}
+
 export interface ISceneLabel {
   text: string;
   lon: number;
