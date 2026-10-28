@@ -253,8 +253,53 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
           getFillColor: (column) => [...GridSceneHelper.fuelColor(column.fuelKey), GridSceneHelper.alpha(view.opacityByFuel[column.fuelKey] ?? 0)],
           getElevation: (column) => GridSceneHelper.elevation(GridSceneHelper.relative(view, column.fuelKey)),
           material: { ambient: 0.65, diffuse: 0.5, shininess: 24, specularColor: [200, 200, 200] },
+          wireframe: true,
+          getLineColor: [...palette.ink, 200],
+          lineWidthMinPixels: 1,
           updateTriggers: { getFillColor: hour, getElevation: hour },
           transitions: { getFillColor: transition, getElevation: transition }
+        })
+    );
+
+    const footprints = this._columnGroups.map(
+      (group) =>
+        new ScatterplotLayer<{ lon: number; lat: number }>({
+          id: `scene-footprints-${group.id}`,
+          data: group.columns,
+          stroked: true,
+          filled: true,
+          radiusUnits: 'meters',
+          lineWidthUnits: 'pixels',
+          getPosition: (column) => [column.lon, column.lat],
+          getRadius: group.radius * gridSceneSettings.FOOTPRINT_SCALE,
+          getFillColor: [...palette.panel, 150],
+          getLineColor: [...palette.ink, 230],
+          getLineWidth: 1.5,
+          parameters: { depthWriteEnabled: false }
+        })
+    );
+
+    const caps = this._columnGroups.map(
+      (group) =>
+        new ColumnLayer<{ lon: number; lat: number; fuelKey: string }>({
+          id: `scene-caps-${group.id}`,
+          data: group.columns,
+          diskResolution: group.diskResolution,
+          radius: group.radius,
+          extruded: true,
+          getPosition: (column) => [
+            column.lon,
+            column.lat,
+            GridSceneHelper.elevation(GridSceneHelper.relative(view, column.fuelKey))
+          ],
+          getElevation: gridSceneSettings.CAP_HEIGHT_M,
+          getFillColor: [...palette.panel, 255],
+          getLineColor: [...palette.ink, 255],
+          wireframe: true,
+          lineWidthMinPixels: 1,
+          material: { ambient: 0.9, diffuse: 0.2, shininess: 8 },
+          updateTriggers: { getPosition: hour },
+          transitions: { getPosition: transition }
         })
     );
 
@@ -294,7 +339,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       billboard: true
     });
 
-    return [states, ...columns, markers, labels];
+    return [states, ...footprints, ...columns, ...caps, markers, labels];
   }
 
   private _buildLiveLayers(modules: IDeckModules): Layer[] {

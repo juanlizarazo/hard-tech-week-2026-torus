@@ -1,6 +1,10 @@
 @if (useDeck) {
   <div class="surface" [class.surface--fill]="fill" [style.aspect-ratio]="fill ? null : width + ' / ' + data.height">
     <dt-grid-scene [data]="data" [hourView]="hourView" [paused]="paused" [drift]="fill" [home]="fill" (failed)="onFailed()"></dt-grid-scene>
+    <p class="surface__legend" aria-hidden="true">
+      <span class="surface__legend-tower"></span>
+      Each tower is a power plant. Taller means its fuel supplies more of the power at this hour. Hexagon: coal. Square: gas. Round: everything else.
+    </p>
   </div>
 } @else {
   <dt-plant-map-svg class="surface__svg" [class.surface__svg--fill]="fill" [data]="data" [hourView]="hourView" [paused]="paused" [fill]="fill"></dt-plant-map-svg>

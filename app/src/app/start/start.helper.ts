@@ -67,7 +67,7 @@ export class StartHelper {
   }
 
   public static hookSentence(roundedKwh: number): string {
-    return `One kW off the peak is worth about ${roundedKwh.toLocaleString('en-US')} kWh moved. DETOUR goes after the peak.`;
+    return `Cutting one kW off the peak saves as much as moving about ${roundedKwh.toLocaleString('en-US')} kWh to cheaper hours. So DETOUR goes after the peak.`;
   }
 
   public static forecastTile(preview: IStartPreview | null, day: IPlanningDay): IStartTile {

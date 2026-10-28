@@ -43,9 +43,13 @@
 }
 
 .dt-shell__header {
+  position: sticky;
+  top: 0;
+  z-index: 900;
   background: var(--dt-panel);
   border-bottom: 1px solid var(--dt-ink);
-  box-shadow: 0 3px 0 -1px var(--dt-line);
+  border-top: 4px solid var(--dt-rush);
+  box-shadow: 0 3px 0 -1px var(--dt-line), 0 6px 16px -8px rgb(23 32 43 / 35%);
 }
 
 .dt-shell__bar {
@@ -73,29 +77,30 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px 4px;
+  padding: 8px 14px 6px;
   border-radius: var(--dt-radius-tag);
   background: var(--dt-ink);
   color: var(--dt-panel);
-  font-size: var(--dt-text-21);
+  font-size: 1.75rem;
   line-height: 1;
   font-weight: 800;
   letter-spacing: 0.14em;
 }
 
 .dt-shell__plate-mark {
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   margin-top: -2px;
   flex: none;
 }
 
 .dt-shell__tagline {
   font-family: var(--dt-mono);
-  font-size: var(--dt-text-11);
+  font-size: var(--dt-text-13);
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--dt-muted);
+  color: var(--dt-ink);
 }
 
 .dt-shell__badges {

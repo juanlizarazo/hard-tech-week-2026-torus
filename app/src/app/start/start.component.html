@@ -29,16 +29,23 @@
     <div class="home__copy">
       <h1 class="cdk-visually-hidden" id="home-title">DETOUR: the grid has a rush hour, and DETOUR plans a Torus Station around it</h1>
       <p class="cdk-visually-hidden">
-        {{ hook.demandRateLabel }} per kW of summer peak. {{ hook.spreadLabel }} per kWh moved. {{ hookSentence }}
+        {{ hook.demandRateLabel }} per kW every month in summer, versus {{ hook.spreadLabel }} per kWh for moving energy to a cheaper hour. {{ hookSentence }}
       </p>
       <dl class="home__figures" aria-hidden="true">
         <div class="home__figure">
           <dt class="home__number">{{ peakFigure }}</dt>
-          <dd class="home__label">per kW of summer peak</dd>
+          <dd class="home__label">
+            <strong>per kW, every month</strong>
+            <span>Summer peak charge: set by your single busiest 15 minutes.</span>
+          </dd>
         </div>
+        <div class="home__vs">vs</div>
         <div class="home__figure">
           <dt class="home__number">{{ spreadFigure }}</dt>
-          <dd class="home__label">per kWh moved</dd>
+          <dd class="home__label">
+            <strong>per kWh, once</strong>
+            <span>What you save by moving one kWh from a costly hour to a cheaper one.</span>
+          </dd>
         </div>
       </dl>
       <p class="home__hook" aria-hidden="true">

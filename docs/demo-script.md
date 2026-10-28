@@ -6,9 +6,9 @@ Target length: about 4 minutes 40 seconds, estimated from word count; not yet re
 
 Open Start here. Say:
 
-> The grid has a rush hour. One kilowatt of summer peak demand costs $16.84 every month; shifting one kilowatt-hour between energy prices is only about 3.1 cents. One kilowatt off the peak is worth about 550 kilowatt-hours moved, so I go after the peak first, then use Spin and Pulse to make the trade safely.
+> The grid has a rush hour. One kilowatt of summer peak demand costs $16.84 every month, versus only about 3.1 cents saved once for moving a kilowatt-hour to a cheaper hour. Cutting one kilowatt off the peak saves as much as moving about 550 kilowatt-hours, so I go after the peak first, then use Spin and Pulse to make the trade safely.
 
-Let the map and the three launch tiles finish loading while you say it. Explain that the glowing columns are real PACE plants at their real locations and the streams are shares of power, not a literal road map. Every site number is simulated, seed 42.
+Let the map and the three launch tiles finish loading while you say it. Explain that the towers are real PACE plants, taller when their fuel supplies more power at their real locations and the streams are shares of power, not a literal road map. Every site number is simulated, seed 42.
 
 ## 0:30–1:20 — Tomorrow's grid (1 Forecast)
 
