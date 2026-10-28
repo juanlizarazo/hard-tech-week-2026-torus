@@ -547,6 +547,16 @@ ol.dt-list {
   }
 }
 
+::view-transition-group(dt-header) {
+  z-index: 2;
+  animation: none;
+}
+
+::view-transition-old(dt-header),
+::view-transition-new(dt-header) {
+  animation: none;
+}
+
 ::view-transition-old(dt-main) {
   animation: var(--dt-motion-1) var(--dt-ease) both dt-route-out;
 }

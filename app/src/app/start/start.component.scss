@@ -101,7 +101,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 34rem;
+  max-width: 44ch;
   margin: auto 0;
 }
 
@@ -481,6 +481,30 @@
   color: var(--dt-muted);
 }
 
+.home__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+
+.home__credit {
+  margin: 0;
+  font-size: var(--dt-text-13);
+  color: var(--dt-ink-soft);
+}
+
+.home__credit-link {
+  color: var(--dt-ink);
+  font-weight: 600;
+  text-underline-offset: 3px;
+
+  &:focus-visible {
+    outline: 2px solid var(--dt-spin);
+    outline-offset: 2px;
+  }
+}
+
 .home__how {
   display: inline-flex;
   align-items: center;
@@ -640,6 +664,12 @@
 
   .home__tile-caption {
     display: none;
+  }
+
+  .home__foot {
+    flex-direction: column;
+    align-items: stretch;
+    align-self: stretch;
   }
 
   .home__how {
