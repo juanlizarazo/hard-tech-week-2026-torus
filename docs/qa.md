@@ -20,9 +20,9 @@ PACE's carbon signal barely varies by hour in this snapshot. The dial is still i
 
 The Plan screen annualizes the peak from the selected 48-hour scenario: it asks what that peak would cost if it held for a full month. The proof uses the actual month and charges only the single peak that occurred, so its realized saving can be smaller.
 
-## Why July? Did you cherry-pick it?
+## Why does the record open on the year?
 
-July is only the opening view. The year ledger at the top of Prove replays every month of 2026 from the same frozen snapshot, site and rate plan. July is not the strongest month for every site (September is), and the winter months still earn; the ledger shows each month's saving and capture rate side by side.
+The record opens on the year, so nobody has to ask whether July was cherry-picked. The year ledger at the top of Record replays every month of 2026 from the same frozen snapshot, site and rate plan. July is not the strongest month for every site (September is), and the winter months still earn; the ledger shows each month's saving and capture rate side by side.
 
 ## Why is October partial?
 
@@ -31,6 +31,10 @@ The snapshot was pulled on October 27, so October is replayed through the last c
 ## What does the Wattsmart reserve mean?
 
 It is a Pulse-only minimum state of charge held through rush hour for a possible demand-response call. Spin can still handle short spikes; increasing the reserve trades some customer savings for grid-call readiness.
+
+## What runs where?
+
+The cloud does the daily batch at 3 p.m.: fetch, validate, regress, forecast, replay. Your screen does the live part: the tariff maths and the LP re-solve. No upstream API is called while you use the app.
 
 ## Is the LP running on a server?
 
