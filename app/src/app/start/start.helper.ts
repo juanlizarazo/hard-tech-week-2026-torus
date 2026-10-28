@@ -70,6 +70,15 @@ export class StartHelper {
     return `Cutting one kW off the peak saves as much as moving about ${roundedKwh.toLocaleString('en-US')} kWh to cheaper hours. So DETOUR goes after the peak.`;
   }
 
+  public static hookLines(roundedKwh: number): string[] {
+    return [
+      StartHelper.hookSentence(roundedKwh),
+      'Your bill is set by one 15-minute spike, not your average day. Flatten that spike and the whole month costs less.',
+      'A flywheel takes the sharp spikes and a battery holds the long blocks. DETOUR plans both a day ahead.',
+      'Moving energy to a cheaper hour saves cents. Shaving the peak saves dollars. That is the detour.'
+    ];
+  }
+
   public static forecastTile(preview: IStartPreview | null, day: IPlanningDay): IStartTile {
     const base = { ...startTileSpecs[0], unit: `rush hour ${day.word}` };
 

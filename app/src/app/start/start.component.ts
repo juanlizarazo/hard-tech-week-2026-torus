@@ -2,7 +2,7 @@ import { Component, ElementRef, OnDestroy, OnInit, inject } from '@angular/core'
 import { AsyncPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { Observable, Subscription, animationFrames, catchError, combineLatest, distinctUntilChanged, filter, map, of, shareReplay, startWith, takeWhile } from 'rxjs';
+import { Observable, Subscription, animationFrames, catchError, combineLatest, distinctUntilChanged, filter, interval, map, of, shareReplay, startWith, takeWhile } from 'rxjs';
 import { BacktestYearService, GridSignalsService, PlanningDayService, SnapshotService } from '@app/core';
 import {
   AlertBannerComponent,
@@ -46,9 +46,14 @@ export class StartComponent implements OnInit, OnDestroy {
   private readonly _elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private _sequence: Subscription | null = null;
   private _fragment: Subscription | null = null;
+  private _rotation: Subscription | null = null;
+  private _hookIndex = 0;
+  private _rotateMode: 'hold' | 'erase' | 'type' = 'hold';
+  private _holdTicks = 0;
 
   public readonly hook = PlanHelper.hookNumbers();
   public readonly hookSentence = StartHelper.hookSentence(this.hook.roundedKwh);
+  public readonly hookLines = StartHelper.hookLines(this.hook.roundedKwh);
   public readonly architectureId = startSettings.ARCHITECTURE_ID;
   public readonly day$ = this._planningDayService.day$;
   public figureProgress = 0;
@@ -110,7 +115,7 @@ export class StartComponent implements OnInit, OnDestroy {
   );
 
   public get typedHook(): string {
-    return this.hookSentence.slice(0, this.typedLength);
+    return this.hookLines[this._hookIndex].slice(0, this.typedLength);
   }
 
   public get peakFigure(): string {
@@ -140,6 +145,7 @@ export class StartComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this._sequence?.unsubscribe();
+    this._rotation?.unsubscribe();
     this._fragment?.unsubscribe();
   }
 
@@ -161,8 +167,8 @@ export class StartComponent implements OnInit, OnDestroy {
     this.figureProgress = 1 - Math.pow(1 - Math.min(elapsed / startSettings.COUNT_UP_MS, 1), 3);
 
     const typeProgress = (elapsed - startSettings.TYPE_START_MS) / (startSettings.TYPE_END_MS - startSettings.TYPE_START_MS);
-    this.typedLength = Math.round(this.hookSentence.length * Math.min(Math.max(typeProgress, 0), 1));
-    this.isTyping = this.typedLength < this.hookSentence.length;
+    this.typedLength = Math.round(this.hookLines[0].length * Math.min(Math.max(typeProgress, 0), 1));
+    this.isTyping = this.typedLength < this.hookLines[0].length;
     this.areTilesIn = elapsed >= startSettings.TILES_AT_MS;
 
     if (elapsed >= startSettings.SEQUENCE_MS) {
@@ -172,8 +178,47 @@ export class StartComponent implements OnInit, OnDestroy {
 
   private _finishSequence(): void {
     this.figureProgress = 1;
-    this.typedLength = this.hookSentence.length;
+    this._hookIndex = 0;
+    this.typedLength = this.hookLines[0].length;
     this.isTyping = false;
     this.areTilesIn = true;
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && !this._rotation) {
+      this._holdTicks = 0;
+      this._rotateMode = 'hold';
+      this._rotation = interval(startSettings.ROTATE_TICK_MS).subscribe(() => this._rotateHook());
+    }
+  }
+
+  private _rotateHook(): void {
+    const line = this.hookLines[this._hookIndex];
+
+    if (this._rotateMode === 'hold') {
+      this._holdTicks += 1;
+      this._rotateMode = this._holdTicks >= startSettings.ROTATE_HOLD_TICKS ? 'erase' : 'hold';
+
+      return;
+    }
+
+    if (this._rotateMode === 'erase') {
+      this.isTyping = true;
+      this.typedLength = Math.max(0, this.typedLength - startSettings.ROTATE_ERASE_STEP);
+
+      if (this.typedLength === 0) {
+        this._hookIndex = (this._hookIndex + 1) % this.hookLines.length;
+        this._rotateMode = 'type';
+      }
+
+      return;
+    }
+
+    this.typedLength += 1;
+
+    if (this.typedLength >= line.length) {
+      this.typedLength = line.length;
+      this.isTyping = false;
+      this._holdTicks = 0;
+      this._rotateMode = 'hold';
+    }
   }
 }

@@ -48,6 +48,14 @@ export interface ISceneDot {
   size: number;
 }
 
+export interface ISceneEdge {
+  points: [number, number][];
+  cumulative: number[];
+  length: number;
+  speed: number;
+  offset: number;
+}
+
 export interface ISceneWire {
   path: [number, number, number][];
   color: [number, number, number, number];

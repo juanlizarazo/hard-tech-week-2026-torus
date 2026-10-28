@@ -1,7 +1,7 @@
 import { cityLabels, mapFuels, paceNode, plantMapLayout, sitePin, stateLabels } from '../plant-map/plant-map.constants';
 import { IPlantMapData, IPlantMapHourView, IStateOutline } from '../plant-map/plant-map.interfaces';
 import { fallbackScenePalette, gridSceneSettings } from './grid-scene.constants';
-import { ISceneColumnGroup, ISceneDot, ISceneLabel, ISceneWire, ISceneParticle, IScenePoint, IScenePalette, SceneColor } from './grid-scene.interfaces';
+import { ISceneColumnGroup, ISceneDot, ISceneEdge, ISceneLabel, ISceneWire, ISceneParticle, IScenePoint, IScenePalette, SceneColor } from './grid-scene.interfaces';
 
 export class GridSceneHelper {
   private static _webgl2: boolean | null = null;
@@ -181,12 +181,56 @@ export class GridSceneHelper {
       const taper = 1 - index / TRAIL_SAMPLES;
       const fade = Math.sqrt(Math.sin(Math.PI * along));
       const position = GridSceneHelper.curvePoint(particle, along);
-      const alpha = 255 * energy * fade * Math.pow(taper, 2.2);
+      const alpha = 150 * energy * fade * Math.pow(taper, 2.2);
 
-      dots.push({ position, color: [color[0], color[1], color[2], Math.round(alpha)], size: (1.3 + 2.4 * relative) * (0.4 + 0.6 * taper) * (index < 3 ? 1.7 : 1) });
+      dots.push({ position, color: [color[0], color[1], color[2], Math.round(alpha)], size: (1 + 1.6 * relative) * (0.4 + 0.6 * taper) * (index < 3 ? 1.3 : 1) });
 
       if (index < CORE_SAMPLES) {
-        cores.push({ position, color: [255, 255, 255, Math.round(alpha * (1 - index / CORE_SAMPLES))], size: 0.9 + 1.1 * relative });
+        cores.push({ position, color: [255, 255, 255, Math.round(alpha * 0.7 * (1 - index / CORE_SAMPLES))], size: 0.7 + 0.7 * relative });
+      }
+    }
+  }
+
+  public static edges(states: IStateOutline[]): ISceneEdge[] {
+    return states.map((state, index) => {
+      const points = state.rings[0].map((point): [number, number] => [point[0], point[1]]);
+      const cumulative = [0];
+
+      for (let step = 1; step < points.length; step += 1) {
+        cumulative.push(cumulative[step - 1] + Math.hypot(points[step][0] - points[step - 1][0], points[step][1] - points[step - 1][1]));
+      }
+
+      const length = cumulative[cumulative.length - 1];
+
+      return { points, cumulative, length, speed: 1, offset: (index * 0.37) % 1 };
+    });
+  }
+
+  public static edgeComet(edge: ISceneEdge, clock: number, color: SceneColor, dots: ISceneDot[], cores: ISceneDot[]): void {
+    const { EDGE_SPEED_UNITS_PER_S, EDGE_TAIL_FRACTION, EDGE_SAMPLES } = gridSceneSettings;
+    const head = (((clock * EDGE_SPEED_UNITS_PER_S) / edge.length + edge.offset) % 1 + 1) % 1;
+
+    for (let index = 0; index < EDGE_SAMPLES; index += 1) {
+      const fraction = (((head - (index / EDGE_SAMPLES) * EDGE_TAIL_FRACTION) % 1) + 1) % 1;
+      const distance = fraction * edge.length;
+      let segment = 1;
+
+      while (segment < edge.cumulative.length - 1 && edge.cumulative[segment] < distance) {
+        segment += 1;
+      }
+
+      const span = edge.cumulative[segment] - edge.cumulative[segment - 1] || 1;
+      const mix = (distance - edge.cumulative[segment - 1]) / span;
+      const from = edge.points[segment - 1];
+      const to = edge.points[segment];
+      const position: [number, number, number] = [from[0] + (to[0] - from[0]) * mix, from[1] + (to[1] - from[1]) * mix, 0];
+      const taper = 1 - index / EDGE_SAMPLES;
+      const alpha = Math.round(120 * taper * taper);
+
+      dots.push({ position, color: [color[0], color[1], color[2], alpha], size: 0.8 + 1.1 * taper });
+
+      if (index < 10) {
+        cores.push({ position, color: [255, 255, 255, Math.round(alpha * 0.8 * (1 - index / 10))], size: 0.6 + 0.5 * taper });
       }
     }
   }
@@ -241,7 +285,7 @@ export class GridSceneHelper {
     return [
       ...stateLabels.map(state),
       ...cityLabels.filter((label) => gridSceneSettings.LABELED_CITIES.includes(label.label)).map(city),
-      { text: paceNode.label.toUpperCase(), lon: paceNode.lon, lat: paceNode.lat, size: 12, color: ink, offset: [0, -18], anchor: 'middle' },
+      { text: paceNode.label.toUpperCase(), lon: paceNode.lon, lat: paceNode.lat, size: 17, color: ink, offset: [0, -34], anchor: 'middle' },
       { text: sitePin.label, lon: sitePin.lon, lat: sitePin.lat, size: 12, color: ink, offset: [-12, 12], anchor: 'end' }
     ];
   }

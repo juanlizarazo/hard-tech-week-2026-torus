@@ -5,7 +5,7 @@ import { PlantMapHelper } from '../plant-map/plant-map.helper';
 import { IPlantMapData, IPlantMapHourView } from '../plant-map/plant-map.interfaces';
 import { gridSceneSettings } from './grid-scene.constants';
 import { GridSceneHelper } from './grid-scene.helper';
-import { ISceneColumnGroup, ISceneDot, ISceneWire, ISceneLabel, ISceneParticle, IScenePalette, ISceneViewState } from './grid-scene.interfaces';
+import { ISceneColumnGroup, ISceneDot, ISceneEdge, ISceneWire, ISceneLabel, ISceneParticle, IScenePalette, ISceneViewState } from './grid-scene.interfaces';
 
 interface IDeckModules {
   core: typeof import('@deck.gl/core');
@@ -41,6 +41,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
   private _dots: ISceneDot[] = [];
   private _cores: ISceneDot[] = [];
   private _wires: ISceneWire[] = [];
+  private _edges: ISceneEdge[] = [];
   private _staticLayers: Layer[] = [];
   private _isStaticDirty = true;
   private _isDataDirty = true;
@@ -163,6 +164,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       this._labels = GridSceneHelper.labels(this._palette);
       this._particles = GridSceneHelper.particles(this.data);
       this._wires = GridSceneHelper.wires(this._particles);
+      this._edges = GridSceneHelper.edges(this.data.geoStates);
       this._isDataDirty = false;
     }
 
@@ -174,7 +176,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (this._size.width > 0 && this._size.height > 0) {
       this._deck.setProps({
         viewState: this._viewState(this._modules, time),
-        layers: [...this._staticLayers, ...this._buildLiveLayers(this._modules)]
+        layers: [...this._buildLiveLayers(this._modules), ...this._staticLayers]
       });
     }
 
@@ -200,6 +202,10 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       const color = particle.kind === 'site' ? (view.isRush ? this._palette.rush : this._palette.ink) : GridSceneHelper.fuelColor(particle.fuelKey);
 
       GridSceneHelper.beam(particle, t, this._clock, relative, color, dots, cores);
+    }
+
+    for (const edge of this._edges) {
+      GridSceneHelper.edgeComet(edge, this._clock, this._palette.lineStrong, dots, cores);
     }
 
     this._dots = dots;
@@ -314,7 +320,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
     const markers = new ScatterplotLayer<{ lon: number; lat: number; radius: number; color: number[]; edge: number[] }>({
       id: 'scene-markers',
       data: [
-        { lon: paceNode.lon, lat: paceNode.lat, radius: 6, color: [...palette.ink, 255], edge: [...palette.panel, 255] },
+        { lon: paceNode.lon, lat: paceNode.lat, radius: gridSceneSettings.NODE_RADIUS_PX, color: [...palette.ink, 255], edge: [...palette.rush, 255] },
         { lon: sitePin.lon, lat: sitePin.lat, radius: 5, color: [...palette.ink, 255], edge: [...palette.panel, 255] },
         ...cityLabels.map((city) => ({ lon: city.lon, lat: city.lat, radius: 3.5, color: [...palette.clear, 255], edge: [...palette.panel, 255] }))
       ],
@@ -326,6 +332,24 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       getFillColor: (marker) => marker.color as [number, number, number, number],
       getLineColor: (marker) => marker.edge as [number, number, number, number],
       getLineWidth: 1.5
+    });
+
+    const nodeGlow = new ScatterplotLayer<{ radius: number; alpha: number }>({
+      id: 'scene-node-glow',
+      data: [
+        { radius: gridSceneSettings.NODE_HALO_PX, alpha: 55 },
+        { radius: gridSceneSettings.NODE_RING_PX, alpha: 0 }
+      ],
+      stroked: true,
+      filled: true,
+      radiusUnits: 'pixels',
+      lineWidthUnits: 'pixels',
+      getPosition: () => [paceNode.lon, paceNode.lat],
+      getRadius: (ring) => ring.radius,
+      getFillColor: (ring) => [...palette.rush, ring.alpha],
+      getLineColor: (ring) => [...palette.rush, ring.alpha === 0 ? 255 : 0],
+      getLineWidth: 2.5,
+      parameters: gridSceneSettings.ADDITIVE
     });
 
     const labels = new TextLayer<ISceneLabel>({
@@ -347,7 +371,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       billboard: true
     });
 
-    return [states, ...footprints, ...columns, ...caps, markers, labels];
+    return [states, ...footprints, ...columns, ...caps, nodeGlow, markers, labels];
   }
 
   private _buildLiveLayers(modules: IDeckModules): Layer[] {
@@ -359,7 +383,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       getPath: (wire) => wire.path,
       getColor: (wire) => wire.color,
       widthUnits: 'pixels',
-      getWidth: 1.2,
+      getWidth: 1,
       capRounded: true,
       parameters: gridSceneSettings.ADDITIVE
     });
@@ -379,7 +403,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
       radiusUnits: 'pixels',
       getPosition: (dot) => dot.position,
       getRadius: (dot) => dot.size * gridSceneSettings.HALO_SCALE,
-      getFillColor: (dot) => [dot.color[0], dot.color[1], dot.color[2], Math.round(dot.color[3] * 0.18)],
+      getFillColor: (dot) => [dot.color[0], dot.color[1], dot.color[2], Math.round(dot.color[3] * 0.1)],
       updateTriggers: { getPosition: frame, getRadius: frame, getFillColor: frame },
       parameters: gridSceneSettings.ADDITIVE
     });

@@ -16,16 +16,27 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  max-width: 34ch;
+  max-width: 42ch;
   margin: 0;
   padding: 8px 10px;
   border: 1px solid var(--dt-ink);
   border-radius: var(--dt-radius-tag);
   background: var(--dt-panel);
-  font-size: var(--dt-text-11);
-  line-height: 1.35;
+  font-size: var(--dt-text-13);
+  line-height: 1.4;
   color: var(--dt-ink);
   pointer-events: none;
+}
+
+.surface__legend-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: var(--dt-text-15);
+    font-weight: 800;
+  }
 }
 
 .surface__legend-tower {
