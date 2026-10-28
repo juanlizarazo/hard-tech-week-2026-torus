@@ -17,6 +17,7 @@
 | 07 | Industrial UI, Traffic flow-map hero, Plan dispatch orders + Approve | — | — (06b merged) | `phase-07-industrial-ui.md` | Done |
 | 08 | Year-to-date proof: month ledger on Prove, any-month replay, pre-judging polish | — | — (07 merged) | `phase-08-year-to-date.md` | Done |
 | 09 | Coherence, honesty and demo readiness: replay seed fix, consistent copy, home launcher over a living map, script and Q&A | — | — (08 merged) | `phase-09-coherence.md` | In development |
+| 10 | Two steps and the record: Prove becomes Record and leads with the year, CTAs at the decision moment, plain words over the LP and rail; cloud batch for MEF, forecast and month replays with browser fallback | — | — (09 merged); track B merges only if green by Wed 1 p.m. | `phase-10-record-and-batch.md` | Planned |
 
 ### Phase scope
 
@@ -118,7 +119,7 @@ From the brief's out-of-scope list (§6), cut because the brief says so:
 
 Our own cuts:
 
-- **Cloud Functions on the demo path** — the snapshot is read straight from Firestore and the LP solves in the browser, so no function sits between the judge and a number
+- **Cloud Functions on the demo path** — the snapshot is read straight from Firestore and the LP solves in the browser, so no function sits between the judge and a number. Phase 10 keeps this: the 3 p.m. run also writes derived signals (MEF, forecast, score) next to the snapshot, and month replays are static files on hosting; the browser reads results and falls back to local compute if they are missing
 - **Wattsmart event-probability model** — the reserve slider already demos the constraint and the trade-off; a probability model we can't validate in 42 hours adds a number we can't defend
 - **Schedule 9** — same on-peak logic as Schedule 8 with different rates; adds no new insight to the 6-vs-8 toggle
 - **One-minute flywheel sub-simulation** — the Spin vs Pulse stack plus the battery ramp limit already shows the hybrid split at 15 minutes; sub-second control is Lattice's job, not ours
