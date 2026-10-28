@@ -58,7 +58,6 @@ export class PlantMapComponent implements OnDestroy {
   public readonly tickHours = [0, 6, 12, 18];
   public readonly tickLabel = PlantMapHelper.tickLabel;
   public isPlaying = false;
-  public isFlowPaused = false;
 
   private readonly _rushTrack$: Observable<IRushTrack> = this._rush$.pipe(map((rush) => PlantMapHelper.rushTrack(rush)));
 
@@ -78,10 +77,6 @@ export class PlantMapComponent implements OnDestroy {
   public onHourInput(event: Event): void {
     this.onStop();
     this._setHour(Number((event.target as HTMLInputElement).value));
-  }
-
-  public onToggleFlow(): void {
-    this.isFlowPaused = !this.isFlowPaused;
   }
 
   public valueText(hour: number, summary: string): string {

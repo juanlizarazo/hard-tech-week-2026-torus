@@ -20,12 +20,11 @@
       @case ('ready') {
         @if (viewModel.state.data; as data) {
           @if (viewModel.hourView; as hourView) {
-            <div class="plant-map" [class.plant-map--still]="isFlowPaused" [class.plant-map--rush]="hourView.isRush">
+            <div class="plant-map" [class.plant-map--rush]="hourView.isRush">
               <div class="plant-map__map">
                 <dt-plant-map-surface
                   [data]="data"
                   [hourView]="hourView"
-                  [paused]="isFlowPaused"
                 ></dt-plant-map-surface>
                 <p class="plant-map__schematic">
                   <span class="dt-tag">Schematic</span>
@@ -96,9 +95,6 @@
                       }
                     </div>
                   </div>
-                  <button type="button" class="plant-map__flow-toggle" [attr.aria-pressed]="!isFlowPaused" (click)="onToggleFlow()">
-                    Flow<span class="plant-map__flow-text" aria-hidden="true">&nbsp;{{ isFlowPaused ? 'off' : 'on' }}</span>
-                  </button>
                 </div>
 
                 <ng-container [ngTemplateOutlet]="stack"></ng-container>
@@ -142,7 +138,7 @@
       </p>
       <ul class="dt-list">
         <li>Drag the hour slider, use the arrow keys, or press Play, to step through the day. Each fuel's circles brighten, and its streams thicken, with that fuel's share of PACE generation in that hour.</li>
-        <li>Streams run from every plant into one PACE grid node, then on to the simulated airport. They are a schematic of shares, not real transmission lines: EIA reports fuel totals, not plant-by-plant flows. "Flow off" stops the animation.</li>
+        <li>Streams run from every plant into one PACE grid node, then on to the simulated airport. They are a schematic of shares, not real transmission lines: EIA reports fuel totals, not plant-by-plant flows.</li>
         <li>The dark stream from the node to the airport widens with the airport's simulated draw in that hour (seed 42).</li>
         <li>Brown circles are coal (dark) and gas (light). Yellow is solar, blue is wind, teal is hydro, grey is everything else.</li>
         <li>Orange stripes on the slider: PACE's rush hour.</li>
