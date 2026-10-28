@@ -8,6 +8,7 @@ import {
   IMarginalEmissionsSeries,
   IPlanInterval,
   IPlanMetrics,
+  IPlanRealized,
   IPlanRequest,
   IPlanResult,
   IPlanValue,
@@ -18,6 +19,8 @@ import {
   ITariffSchedule,
 } from '../models';
 import { NaiveShaverHelper } from '../backtest/naive-shaver.helper';
+import { PlanReplayHelper } from '../backtest/plan-replay.helper';
+import { SiteLoadForecastHelper } from '../backtest/site-load-forecast.helper';
 import { SiteGeneratorHelper } from '../sites/site-generator.helper';
 import { TariffHelper } from '../tariff/tariff.helper';
 import { LpBuilderHelper } from './lp-builder.helper';
@@ -56,7 +59,8 @@ export class PlanEngineHelper {
   ): ILpInput {
     const dayDates = [request.date, TimeHelper.addDays(request.date, 1)];
     const intervals = PlanEngineHelper.reindex(dayDates.flatMap((day: string) => TimeHelper.localDayIntervals(day)));
-    const loadKw = dayDates.flatMap((day: string) => PlanEngineHelper.loadFor(site, day));
+    const loadKw = dayDates.flatMap((day: string) => SiteLoadForecastHelper.forecastDay(site, day));
+    const actualLoadKw = dayDates.flatMap((day: string) => PlanEngineHelper.loadFor(site, day));
     const onPeakMask = TariffHelper.onPeakMask(schedule, intervals);
     const isOnPeakBasis = schedule.demandBasis === 'on-peak';
     const energyPricePerKwh = intervals.map((interval: IInterval, i: number) => {
@@ -84,6 +88,7 @@ export class PlanEngineHelper {
       assets,
       intervals,
       loadKw,
+      actualLoadKw,
       onPeakMask,
       energyPricePerKwh,
       marginalKgCo2PerKwh,
@@ -261,6 +266,7 @@ export class PlanEngineHelper {
       pulseThroughputKwh,
       objectiveValue,
       value: PlanEngineHelper.planValue(input, gridKw, plannedCo2Kg - baselineCo2Kg),
+      realized: PlanEngineHelper.realized(input, intervals),
     };
 
     return {
@@ -274,6 +280,53 @@ export class PlanEngineHelper {
       solveMs: lpStats.solveMs,
       lpStats,
       metrics,
+    };
+  }
+
+  public static realized(input: ILpInput, planned: IPlanInterval[]): IPlanRealized | null {
+    const actualLoadKw = input.actualLoadKw;
+    const dayIndexes = input.intervals
+      .map((interval: IInterval, t: number) => (interval.localDate === input.request.date ? t : -1))
+      .filter((t: number) => t >= 0);
+
+    if (!actualLoadKw || dayIndexes.length === 0) {
+      return null;
+    }
+
+    const isOnPeakBasis = input.schedule.demandBasis === 'on-peak';
+    const billedFloorKw = isOnPeakBasis ? input.request.peakSoFarOnPeakKw : input.request.peakSoFarAllHoursKw;
+    const billedMask = dayIndexes.map((t: number) => !isOnPeakBasis || input.onPeakMask[t]);
+    const rushHourMask = dayIndexes.map((t: number) => input.rushHourMask[t]);
+    const dayLoadKw = dayIndexes.map((t: number) => actualLoadKw[t]);
+    const day = PlanReplayHelper.replayDay({
+      assets: input.assets,
+      loadKw: dayLoadKw,
+      planned: dayIndexes.map((t: number) => planned[t]),
+      billedMask,
+      rushHourMask,
+      wattsmartReserveKwh: input.request.wattsmartReserveKwh,
+      stepHours: input.intervals[0]?.hours ?? 0.25,
+      state: {
+        pulseSocKwh: input.request.initialPulseSocKwh,
+        spinSocKwh: input.request.initialSpinSocKwh,
+        pulseNetKw: input.request.initialPulseNetKw ?? 0,
+        billedPeakKw: billedFloorKw,
+        billedLoadPeakKw: billedFloorKw,
+        facilitiesPeakKw: input.request.peakSoFarAllHoursKw,
+        facilitiesLoadPeakKw: input.request.peakSoFarAllHoursKw,
+      },
+    });
+    const replayedKw = day.intervals.map((planInterval: IPlanInterval) => planInterval.gridKw);
+    const baselinePeakKw = PlanEngineHelper.maskedPeak(dayLoadKw, billedMask);
+    const realizedPeakKw = PlanEngineHelper.maskedPeak(replayedKw, billedMask);
+    const forecastKw = dayIndexes.map((t: number) => input.loadKw[t]);
+
+    return {
+      rushPeakCutKw: Math.max(0, PlanEngineHelper.maskedPeak(dayLoadKw, rushHourMask) - PlanEngineHelper.maskedPeak(replayedKw, rushHourMask)),
+      peakCutKw: Math.max(0, Math.max(baselinePeakKw, billedFloorKw) - Math.max(realizedPeakKw, billedFloorKw)),
+      baselinePeakKw,
+      realizedPeakKw,
+      forecastErrorPeakKw: Math.max(...dayLoadKw) - Math.max(...forecastKw),
     };
   }
 

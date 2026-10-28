@@ -6,6 +6,7 @@ export interface ILpInput {
   assets: IStationAssets;
   intervals: IInterval[];
   loadKw: number[];
+  actualLoadKw?: number[];
   onPeakMask: boolean[];
   energyPricePerKwh: number[];
   marginalKgCo2PerKwh: number[];
