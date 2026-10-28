@@ -6,6 +6,7 @@ export const backtestScreenSettings = {
   DEFAULT_SCHEDULE_ID: 'schedule-8' as TariffScheduleId,
   MONTH_LABEL: 'July 2026',
   CALENDAR_SCALE_STEP_KW: 100,
+  CAPTURE_TICKS: [0, 25, 50, 75, 100],
   LOAD_COLOR: 'var(--dt-ink)',
   GRID_COLOR: 'var(--dt-clear-mark)',
   SPIN_COLOR: 'var(--dt-spin)',

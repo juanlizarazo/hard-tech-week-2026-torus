@@ -37,7 +37,9 @@ export class ComponentBarsComponent implements OnChanges {
           bar,
           lengthPercent,
           isNegative,
-          startPercent: isNegative ? this.zeroPercent - lengthPercent : this.zeroPercent
+          startPercent: isNegative ? this.zeroPercent - lengthPercent : this.zeroPercent,
+          offsetPercent: isNegative ? this.zeroPercent - 100 : this.zeroPercent,
+          scale: Math.max(lengthPercent, 0.3) / 100
         };
       })
     }));

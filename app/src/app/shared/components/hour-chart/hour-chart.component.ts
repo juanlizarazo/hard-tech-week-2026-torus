@@ -33,6 +33,7 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input() public title = '';
   @Input() public dividerIndices: number[] = [];
   @Input() public estimateFromIndex: number | null = null;
+  @Input() public cursorIndex: number | null = null;
 
   public readonly stripeId = `dt-hour-chart-stripes-${HourChartComponent._instanceCount++}`;
   public readonly stripeFill = `url(#${this.stripeId})`;
@@ -68,6 +69,14 @@ export class HourChartComponent implements OnChanges, AfterViewInit, OnDestroy {
 
   public get hoverX(): number {
     return this._xAt(this.hoverIndex ?? 0);
+  }
+
+  public get cursorX(): number | null {
+    if (this.cursorIndex === null || this.cursorIndex < 0 || this.cursorIndex >= this._pointCount()) {
+      return null;
+    }
+
+    return this._xAt(this.cursorIndex);
   }
 
   public get hoverMarkers(): IHourChartMarker[] {

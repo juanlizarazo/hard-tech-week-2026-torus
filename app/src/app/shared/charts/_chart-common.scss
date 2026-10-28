@@ -88,7 +88,8 @@
 
 .chart__axis-text {
   fill: var(--dt-theme--chart-ink-muted);
-  font-size: 12px;
+  font-family: var(--dt-mono);
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -129,8 +130,8 @@
   z-index: 2;
   min-width: 168px;
   padding: 8px 10px;
-  border: 1px solid var(--dt-theme--border);
-  border-radius: 8px;
+  border: 1px solid var(--dt-theme--primary);
+  border-radius: var(--dt-radius-control);
   background: var(--dt-theme--card);
   box-shadow: 0 4px 14px rgba(31, 42, 55, 0.12);
   font-size: 0.75rem;
@@ -168,6 +169,7 @@
 }
 
 .chart__tooltip-value {
+  font-family: var(--dt-mono);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
 }

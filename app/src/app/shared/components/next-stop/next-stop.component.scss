@@ -5,7 +5,7 @@
 
 .dt-next-stop {
   padding-top: 24px;
-  border-top: 4px dashed var(--dt-line);
+  border-top: 1px dashed var(--dt-line-strong);
 }
 
 .dt-next-stop__link {
@@ -14,13 +14,14 @@
   gap: 16px;
   max-width: 560px;
   padding: 14px 18px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-frame);
   background: var(--dt-ink);
   color: var(--dt-panel);
   text-decoration: none;
+  transition: background-color var(--dt-motion-1) var(--dt-ease);
 
   &:hover {
-    background: color-mix(in srgb, var(--dt-ink) 85%, white);
+    background: var(--dt-ink-soft);
 
     .dt-next-stop__arrow {
       transform: translateX(3px);
@@ -42,10 +43,11 @@
   height: 40px;
   padding-top: 3px;
   box-sizing: border-box;
-  border: 2px solid var(--dt-panel);
-  border-radius: 999px;
+  border: 1px solid var(--dt-panel);
+  border-radius: var(--dt-radius-tag);
+  font-family: var(--dt-mono);
   font-size: var(--dt-text-17);
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .dt-next-stop__text {
@@ -56,7 +58,10 @@
 }
 
 .dt-next-stop__label {
-  font-size: var(--dt-text-13);
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   font-weight: 600;
   color: color-mix(in srgb, var(--dt-panel) 75%, transparent);
 }
@@ -68,7 +73,7 @@
 
 .dt-next-stop__arrow {
   flex: none;
-  transition: transform 120ms ease-out;
+  transition: transform var(--dt-motion-1) var(--dt-ease);
 }
 
 @media (prefers-reduced-motion: reduce) {

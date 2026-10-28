@@ -4,8 +4,8 @@
 }
 
 .dt-under-the-hood {
-  border-top: 1px solid var(--dt-line);
-  border-bottom: 1px solid var(--dt-line);
+  border-top: 1px solid var(--dt-ink);
+  border-bottom: 1px solid var(--dt-line-strong);
 }
 
 .dt-under-the-hood__summary {
@@ -29,7 +29,7 @@
     border-right: 2px solid var(--dt-ink);
     border-bottom: 2px solid var(--dt-ink);
     transform: rotate(-45deg);
-    transition: transform 120ms ease;
+    transition: transform var(--dt-motion-2) var(--dt-ease);
   }
 }
 
@@ -44,11 +44,15 @@
 }
 
 .dt-under-the-hood__description {
-  font-size: var(--dt-text-13);
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--dt-muted);
 }
 
 .dt-under-the-hood__body {
+  animation: dt-rise var(--dt-motion-2) var(--dt-ease) backwards;
   display: flex;
   flex-direction: column;
   gap: 24px;

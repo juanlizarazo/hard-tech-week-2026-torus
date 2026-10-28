@@ -6,10 +6,29 @@
 .dt-chart-frame {
   margin: 0;
   padding: 20px;
-  background: var(--dt-panel);
+  background:
+    linear-gradient(var(--dt-ink), var(--dt-ink)) top left / 14px 2px no-repeat,
+    linear-gradient(var(--dt-ink), var(--dt-ink)) top left / 2px 14px no-repeat,
+    linear-gradient(var(--dt-ink), var(--dt-ink)) bottom right / 14px 2px no-repeat,
+    linear-gradient(var(--dt-ink), var(--dt-ink)) bottom right / 2px 14px no-repeat,
+    var(--dt-panel);
   border: 1px solid var(--dt-line);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-frame);
   min-width: 0;
+}
+
+.dt-chart-frame__index {
+  flex: none;
+  align-self: center;
+  padding: 4px 6px 3px;
+  border-radius: var(--dt-radius-tag);
+  background: var(--dt-ink);
+  color: var(--dt-panel);
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.06em;
 }
 
 .dt-chart-frame__head {
@@ -49,10 +68,11 @@
   flex: none;
   padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--dt-radius-control);
   background: transparent;
   color: var(--dt-muted);
   cursor: pointer;
+  transition: background-color var(--dt-motion-1) var(--dt-ease);
 
   &:hover {
     background: var(--dt-paper);
@@ -75,17 +95,27 @@
 }
 
 .dt-chart-frame__notice-label {
-  font-weight: 800;
+  margin-right: 4px;
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dt-muted);
 }
 
 .dt-chart-frame__tag {
   flex: none;
-  padding: 2px 8px;
-  border: 1px solid var(--dt-line);
-  border-radius: 999px;
-  font-size: var(--dt-text-13);
+  padding: 3px 7px 2px;
+  border: 1px solid var(--dt-pulse);
+  border-radius: var(--dt-radius-tag);
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
   font-weight: 600;
-  color: var(--dt-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dt-pulse);
+  white-space: nowrap;
 }
 
 .dt-chart-frame__sources {
@@ -110,6 +140,7 @@
 .dt-chart-frame__body {
   margin-top: 16px;
   min-width: 0;
+  animation: dt-reveal var(--dt-motion-4) var(--dt-ease) backwards;
 }
 
 .dt-chart-frame__how {

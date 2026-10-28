@@ -1,4 +1,5 @@
 import { EmissionsHelper, emissionFactors, signalsConfig } from '@app/core';
+import { SiteGeneratorHelper, siteArchetypes } from '@app/core/sites';
 import {
   IForecastComparisonRow,
   ILoadForecast,
@@ -13,6 +14,7 @@ import { PlanEngineHelper } from '@app/core/plan';
 import { TimeLabelHelper } from '@app/shared/helpers/time-label.helper';
 import { IHourChartBand, IHourChartHighlight, IHourChartSeries } from '@app/shared/components/hour-chart/hour-chart.interfaces';
 import { IRankSlopeRow } from './components/rank-slope/rank-slope.interfaces';
+import { ISignalRow } from './components/signal-stack/signal-stack.interfaces';
 import { trafficCalendar, trafficChartDefaults, trafficConfig } from './traffic.constants';
 import {
   ITrafficHour,
@@ -143,6 +145,65 @@ export class TrafficHelper {
       },
       carbon: TrafficHelper._carbonChart(report, dayHighlight, options.showUncertainty),
     };
+  }
+
+  public static signalRows(report: ITrafficReport): ISignalRow[] {
+    return [
+      {
+        key: 'load',
+        label: 'Load',
+        values: report.hours.map((hour) => hour.forecastMw),
+        color: 'var(--dt-ink)',
+        format: TrafficHelper.megawattText,
+      },
+      {
+        key: 'price',
+        label: 'Price',
+        values: report.hours.map((hour) => hour.lmp),
+        color: 'var(--dt-price-high)',
+        format: TrafficHelper.priceText,
+      },
+      {
+        key: 'carbon',
+        label: 'CO2',
+        values: report.hours.map((hour) => hour.mefFossilLbPerMwh),
+        color: 'var(--dt-carbon-high)',
+        format: (value: number) => `${Math.round(value).toLocaleString()} lb`,
+      },
+    ];
+  }
+
+  public static clockReadouts(report: ITrafficReport, dayWord: string): string[] {
+    const text = (value: number | null, format: (value: number) => string, missing: string): string =>
+      value === null ? missing : format(value);
+
+    return report.hours.map(
+      (hour) =>
+        `${TrafficHelper.hourLabel(hour.hour)} ${dayWord}: PACE load forecast ${text(hour.forecastMw, TrafficHelper.megawattText, 'not posted')}, ` +
+        `day-ahead price ${text(hour.lmp, TrafficHelper.priceText, 'not posted yet')}, ` +
+        `marginal CO2 ${text(hour.mefFossilLbPerMwh, (value) => `${Math.round(value).toLocaleString()} lb/MWh`, 'not available')}`,
+    );
+  }
+
+  public static siteKwByHour(localDate: string): number[] {
+    const sums = new Array<number>(24).fill(0);
+    const counts = new Array<number>(24).fill(0);
+
+    for (const interval of SiteGeneratorHelper.generateDay(siteArchetypes.AIRPORT, localDate)) {
+      const hour = TimeHelper.localParts(Date.parse(interval.startUtc)).hour;
+      sums[hour] += interval.kw;
+      counts[hour] += 1;
+    }
+
+    return sums.map((sum, hour) => (counts[hour] > 0 ? Math.round(sum / counts[hour]) : 0));
+  }
+
+  public static megawattText(value: number): string {
+    return `${Math.round(value).toLocaleString()} MW`;
+  }
+
+  public static priceText(value: number): string {
+    return `$${value.toFixed(0)}/MWh`;
   }
 
   public static answer(report: ITrafficReport): string[] {

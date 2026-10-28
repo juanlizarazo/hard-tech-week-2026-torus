@@ -10,9 +10,12 @@ import {
 } from './backtest.constants';
 import {
   IBacktestBillComponentDefinition,
+  IBacktestCaptureBar,
+  IBacktestCaptureGauge,
   IBacktestComparisonRow,
   IBacktestCycleRow,
   IBacktestDayCharts,
+  IBacktestSelectedDay,
   IBacktestTile,
   IBacktestViewModel,
   IComponentBarGroup,
@@ -27,9 +30,12 @@ export class BacktestHelper {
     const tiles = BacktestHelper.tiles(result);
     const cycleRows = BacktestHelper.cycleRows(result);
     const calendarScale = BacktestHelper.calendarScale(result);
+    const calendarCells = BacktestHelper.calendarCells(result, activeDate, calendarScale);
 
     return {
       answer: BacktestHelper.answerSentence(result),
+      capture: BacktestHelper.captureGauge(result),
+      selectedDay: BacktestHelper.selectedDay(calendarCells),
       leadTiles: tiles.slice(0, 4),
       secondaryTiles: tiles.slice(4),
       comparisonRows: BacktestHelper.comparisonRows(result),
@@ -40,7 +46,7 @@ export class BacktestHelper {
       componentNotice: BacktestHelper.componentNotice(result),
       cyclesNotice: BacktestHelper.cyclesNotice(cycleRows),
       dayNotice: BacktestHelper.dayNotice(result, activeDate),
-      calendarCells: BacktestHelper.calendarCells(result, activeDate, calendarScale),
+      calendarCells,
       calendarScale,
       barGroups: BacktestHelper.barGroups(result),
       billSource: result.sources.tariff,
@@ -228,6 +234,7 @@ export class BacktestHelper {
   public static comparisonRows(result: IBacktestResult): IBacktestComparisonRow[] {
     return result.strategies.map((entry: IBacktestStrategyResult) => ({
       strategyId: entry.strategy.id,
+      role: entry.strategy.role,
       strategyLabel: BacktestHelper.strategyName(entry),
       color: BacktestHelper.strategyColor(entry),
       isLead: entry.strategy.id === result.lead.strategy.id,
@@ -238,6 +245,54 @@ export class BacktestHelper {
       wearCost: entry.value.wearCost,
       totalValue: entry.value.total,
     }));
+  }
+
+  public static captureGauge(result: IBacktestResult): IBacktestCaptureGauge {
+    const capture = result.lead.captureRate;
+    const ordered = [result.lead, result.shaver, result.oracle].filter(
+      (entry): entry is IBacktestStrategyResult => entry !== null && entry !== undefined
+    );
+    const bars: IBacktestCaptureBar[] = ordered
+      .filter((entry: IBacktestStrategyResult) => entry.captureRate !== null || entry.strategy.role === 'oracle')
+      .map((entry: IBacktestStrategyResult) => {
+        const rate = entry.strategy.role === 'oracle' ? 1 : (entry.captureRate ?? 0);
+
+        return {
+          strategyId: entry.strategy.id,
+          label: BacktestHelper.strategyName(entry),
+          role: entry.strategy.role,
+          isLead: entry.strategy.id === result.lead.strategy.id,
+          fraction: Math.min(1, Math.max(0, rate)),
+          captureLabel: `${BacktestHelper.formatNumber(rate * 100)}%`,
+          savingsLabel: BacktestHelper.formatMoney(entry.savings.total),
+        };
+      });
+
+    return {
+      isAvailable: capture !== null && result.oracle !== null,
+      valueLabel: capture === null ? 'Not available' : `${BacktestHelper.formatNumber(capture * 100)}%`,
+      oracleSavingsLabel: result.oracle ? BacktestHelper.formatMoney(result.oracle.savings.total) : '',
+      bars,
+    };
+  }
+
+  public static selectedDay(cells: IMonthCalendarCell[]): IBacktestSelectedDay | null {
+    const cell = cells.find((entry: IMonthCalendarCell) => entry.isSelected) ?? cells[0];
+
+    if (!cell) {
+      return null;
+    }
+
+    return {
+      localDate: cell.localDate,
+      dateLabel: BacktestHelper.formatLongDay(cell.localDate),
+      isOffPeakDay: cell.isOffPeakDay,
+      offPeakReason: cell.offPeakReason,
+      isPeakDay: cell.isPeakDay,
+      baselinePeakLabel: cell.peakKw > 0 ? `${BacktestHelper.formatNumber(cell.peakKw)} kW` : '—',
+      leadPeakLabel: cell.peakKw > 0 ? `${BacktestHelper.formatNumber(cell.leadPeakKw)} kW` : '—',
+      shavedLabel: cell.peakKw > 0 ? `${BacktestHelper.formatNumber(Math.max(0, cell.peakKw - cell.leadPeakKw))} kW` : '—',
+    };
   }
 
   public static valueNotice(result: IBacktestResult): string {

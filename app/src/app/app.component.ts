@@ -29,6 +29,6 @@ export class AppComponent {
 
   public readonly isLoading$ = this._loadingService.isLoading$.pipe(observeOn(asapScheduler));
   public readonly links$: Observable<INavLink[]> = this._planningDayService.day$.pipe(
-    map((day) => navLinks.map((link) => (link.dayNoun ? { ...link, label: `${day.possessive} ${link.dayNoun}` } : link)))
+    map((day) => navLinks.map((link) => (link.dayNoun ? { ...link, description: `${day.possessive} ${link.dayNoun}` } : link)))
   );
 }

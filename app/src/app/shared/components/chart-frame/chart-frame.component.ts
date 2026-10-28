@@ -16,6 +16,7 @@ export class ChartFrameComponent {
   @Input() public notice = '';
   @Input() public simulated = false;
   @Input() public hasHowToRead = true;
+  @Input() public index = '';
 
   public readonly seed = siteArchetypes.AIRPORT.seed;
 

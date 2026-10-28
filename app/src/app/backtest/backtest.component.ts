@@ -21,7 +21,7 @@ import {
 } from '@app/shared/components';
 import { backtestScheduleOptions, backtestScreenSettings } from './backtest.constants';
 import { BacktestHelper } from './backtest.helper';
-import { IBacktestControls, IBacktestScreenModel, IBacktestViewState } from './backtest.interfaces';
+import { IBacktestCaptureBar, IBacktestControls, IBacktestScreenModel, IBacktestViewState } from './backtest.interfaces';
 import { BacktestViewStateHelper } from './backtest-view-state.helper';
 import { ComponentBarsComponent, MonthCalendarComponent } from './components';
 
@@ -79,6 +79,7 @@ export class BacktestComponent {
     }))
   );
 
+  public readonly captureTicks = backtestScreenSettings.CAPTURE_TICKS;
   public readonly loadingMessage = backtestScreenSettings.LOADING_MESSAGE;
   public readonly emptyMessage = backtestScreenSettings.EMPTY_MESSAGE;
 
@@ -94,6 +95,19 @@ export class BacktestComponent {
 
   public onDaySelected(localDate: string): void {
     this._selectedDate$.next(localDate);
+  }
+
+  public captureAria(bars: IBacktestCaptureBar[]): string {
+    return bars.map((bar) => `${bar.label}: ${bar.captureLabel} capture, ${bar.savingsLabel} saved`).join('. ');
+  }
+
+  public scrollToDay(event: Event): void {
+    event.preventDefault();
+    const target = document.getElementById('backtest-day-title');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    target?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    target?.focus({ preventScroll: true });
   }
 
   public barWidth(percentOfLife: number): number {

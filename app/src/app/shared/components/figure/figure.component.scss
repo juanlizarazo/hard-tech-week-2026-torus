@@ -10,6 +10,7 @@
   min-width: 0;
   padding-top: 12px;
   border-top: 3px solid var(--dt-ink);
+  animation: dt-rise var(--dt-motion-3) var(--dt-ease) backwards;
 }
 
 .dt-figure__value {
@@ -17,6 +18,7 @@
   line-height: 1.1;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
   color: var(--dt-ink);
   overflow-wrap: anywhere;
 }
@@ -37,6 +39,7 @@
 
 .dt-figure__detail {
   font-size: var(--dt-text-13);
+  line-height: 1.45;
   color: var(--dt-muted);
   font-variant-numeric: tabular-nums;
 }

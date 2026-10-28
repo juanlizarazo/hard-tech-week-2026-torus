@@ -16,6 +16,8 @@ import {
   UnderTheHoodComponent
 } from '@app/shared/components';
 import { PlantMapComponent } from './components/plant-map/plant-map.component';
+import { plantMapSettings } from './components/plant-map/plant-map.constants';
+import { SignalStackComponent } from './components/signal-stack/signal-stack.component';
 import { RankSlopeComponent } from './components/rank-slope/rank-slope.component';
 import {
   forecastLimitations,
@@ -25,7 +27,7 @@ import {
   trafficMethodSteps
 } from './traffic.constants';
 import { TrafficHelper } from './traffic.helper';
-import { ITrafficChartOptions } from './traffic.interfaces';
+import { ITrafficChartOptions, ITrafficReport } from './traffic.interfaces';
 import { TrafficViewStateHelper } from './traffic-view-state.helper';
 
 @Component({
@@ -43,6 +45,7 @@ import { TrafficViewStateHelper } from './traffic-view-state.helper';
     NextStopComponent,
     PlantMapComponent,
     RankSlopeComponent,
+    SignalStackComponent,
     SourceChipComponent,
     TermComponent,
     UnderTheHoodComponent
@@ -71,6 +74,7 @@ export class TrafficComponent {
   public readonly frameSource = TrafficHelper.frameSource;
 
   public options = this._options$.value;
+  public selectedHour: number | null = null;
 
   public readonly forecastViewModel$ = TrafficViewStateHelper.forecastFromSources(this._loadForecastService.forecast$);
 
@@ -84,16 +88,32 @@ export class TrafficComponent {
       score$: this._gridSignalsService.forecastScore$
     }),
     this.forecastViewModel$,
-    this._options$
+    this._options$,
+    this.day$
   ]).pipe(
-    map(([state, forecastState, options]) => ({
+    map(([state, forecastState, options, day]) => ({
       state,
       hasOurForecast: !!forecastState.forecast,
       charts: state.report ? TrafficHelper.charts(state.report, forecastState.forecast, options) : null,
       answer: state.report ? TrafficHelper.answer(state.report) : [],
+      signalRows: state.report ? TrafficHelper.signalRows(state.report) : [],
+      clockReadouts: state.report ? TrafficHelper.clockReadouts(state.report, day.word) : [],
+      siteKwByHour: state.report ? TrafficHelper.siteKwByHour(state.report.targetDate) : [],
       notices: state.report ? TrafficHelper.notices(state.report, forecastState.forecast) : null
     }))
   );
+
+  public resolvedHour(report: ITrafficReport): number {
+    return this.selectedHour ?? report.paceRush?.startLocalHour ?? plantMapSettings.FALLBACK_HOUR;
+  }
+
+  public loadCursorIndex(report: ITrafficReport, hour: number): number {
+    return this.options.showAllDays ? report.load.targetStartIndex + hour : hour;
+  }
+
+  public onHourChange(hour: number): void {
+    this.selectedHour = hour;
+  }
 
   public onToggle(option: keyof ITrafficChartOptions): void {
     this.options = { ...this.options, [option]: !this.options[option] };

@@ -10,9 +10,13 @@ Open Start here. Say:
 
 Point to the three-clocks strip. Explain that the orange stripes are the four busiest forecast hours, not a literal road map.
 
-## 0:30–1:20 — Tomorrow's grid
+## 0:30–1:20 — Tomorrow's grid (1 Forecast)
 
-Open Tomorrow's grid. Say:
+Open 1 Forecast. The map is already moving at tomorrow's rush hour. Say:
+
+> Every PACE power plant streams into one grid node and on to our simulated airport. At 6 p.m. the solar streams have gone thin and coal and gas carry about 70% of the power. It's a schematic of shares, not a literal road map or real wires.
+
+Drag the hour back to noon, or press Play, and point at the three signal rows moving with it. Then say:
 
 > This is tomorrow's PACE traffic report: load and net load, the EDAM day-ahead price, and marginal CO2. The data is real and frozen for the demo; the site and storage behavior are simulated.
 
@@ -22,9 +26,9 @@ Point out the rush-hour band, the price trough and evening ramp, then the carbon
 
 Open one chart's information panel and one dotted term. If asked about forecast quality, show the forecast comparison figures and explain that DETOUR is scored against PACE's own day-ahead forecast.
 
-## 1:20–3:10 — Tomorrow's plan
+## 1:20–3:10 — Tomorrow's plan (2 Decide)
 
-Open Tomorrow's plan. Say:
+Open 2 Decide. Say:
 
 > Now the signal becomes a decision. This is a 48-hour linear program in the browser, with 15-minute steps. It prices the tariff, energy, marginal CO2, machine wear and a Wattsmart reserve together.
 
@@ -40,11 +44,15 @@ Click “Hold 1,000 kWh for Wattsmart” or move the reserve slider. Say:
 
 > More reserve protects a future grid call, but leaves less energy available for today's bill. That is the operational trade Torus hardware makes visible.
 
+Point at the dispatch orders in the solver rail and press Approve plan. Say:
+
+> This is what DETOUR hands Lattice for tomorrow. Approve, and Lattice runs it; Wattsmart calls still override it.
+
 Switch Schedule 6 / 8 if time allows. Open Under the hood and show the LP stats line, then the generated LP text for ten seconds.
 
-## 3:10–4:10 — July's proof
+## 3:10–4:10 — July's proof (3 Prove)
 
-Open July's proof. Say:
+Open 3 Prove. Say:
 
 > This is the honest backtest: a simple shaver, DETOUR planning one day ahead, and perfect hindsight as the ceiling. The capture rate is how much of that ceiling DETOUR reaches.
 

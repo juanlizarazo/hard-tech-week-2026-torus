@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, ElementRef, inject } from '@angular/core';
 import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,8 +29,10 @@ export class StartComponent {
   private readonly _snapshotService = inject(SnapshotService);
   private readonly _gridSignalsService = inject(GridSignalsService);
   private readonly _planningDayService = inject(PlanningDayService);
+  private readonly _elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
   public readonly hook = PlanHelper.hookNumbers();
+  public readonly architectureId = startSettings.ARCHITECTURE_ID;
   public readonly day$ = this._planningDayService.day$;
   public readonly seasonBridge$: Observable<string> = this.day$.pipe(map((day) => StartHelper.seasonBridge(day)));
   public readonly steps$: Observable<IStartStep[]> = this.day$.pipe(
@@ -71,4 +73,18 @@ export class StartComponent {
     }),
     startWith<IStartViewState>({ status: 'loading', preview: null, errorMessage: '' })
   );
+
+  public openArchitecture(): void {
+    const host = this._elementRef.nativeElement.querySelector<HTMLElement>(`#${this.architectureId}`);
+    const details = host?.querySelector<HTMLDetailsElement>('details');
+    const summary = details?.querySelector<HTMLElement>('summary');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (details) {
+      details.open = true;
+    }
+
+    host?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    summary?.focus({ preventScroll: true });
+  }
 }

@@ -53,6 +53,14 @@ export class DispatchChartComponent extends ResponsiveChartDirective implements 
   private _pulseMaxKwh = 1;
   private _spinMaxKwh = 1;
 
+  public cssPath(path: string): string | null {
+    return path ? `path('${path}')` : null;
+  }
+
+  public barKey(bar: IRect): string {
+    return `${bar.x}|${bar.y < this.zeroY - 0.5 ? 'out' : 'in'}`;
+  }
+
   public ngOnChanges(): void {
     this.render();
   }

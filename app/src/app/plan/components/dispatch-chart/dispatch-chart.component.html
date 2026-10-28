@@ -66,11 +66,11 @@
       <text class="chart__axis-text" [attr.x]="margins.left - 6" [attr.y]="powerTop - 8" text-anchor="end">kW</text>
 
       <!-- Power bars -->
-      @for (bar of spinBars; track $index) {
-        <rect class="dispatch-chart__spin-bar" [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.width" [attr.height]="bar.height"></rect>
+      @for (bar of spinBars; track barKey(bar)) {
+        <rect class="dispatch-chart__spin-bar" [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.width" [attr.height]="bar.height" [style.y.px]="bar.y" [style.height.px]="bar.height"></rect>
       }
-      @for (bar of pulseBars; track $index) {
-        <rect class="dispatch-chart__pulse-bar" [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.width" [attr.height]="bar.height"></rect>
+      @for (bar of pulseBars; track barKey(bar)) {
+        <rect class="dispatch-chart__pulse-bar" [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.width" [attr.height]="bar.height" [style.y.px]="bar.y" [style.height.px]="bar.height"></rect>
       }
       <line class="chart__baseline" [attr.x1]="margins.left" [attr.x2]="plotRight" [attr.y1]="zeroY" [attr.y2]="zeroY"></line>
       <text class="dispatch-chart__side-text chart__halo-text" [attr.x]="plotRight - 4" [attr.y]="powerTop + 12" text-anchor="end">
@@ -111,16 +111,16 @@
       }
       @if (showReserve) {
         @for (range of rushRanges; track range.x0; let first = $first) {
-          <line class="dispatch-chart__reserve" [attr.x1]="range.x0" [attr.x2]="range.x1" [attr.y1]="reserveY" [attr.y2]="reserveY"></line>
+          <line class="dispatch-chart__reserve" [attr.x1]="range.x0" [attr.x2]="range.x1" y1="0" y2="0" [style.transform]="'translateY(' + reserveY + 'px)'"></line>
           @if (first) {
-            <text class="dispatch-chart__reserve-text chart__halo-text" [attr.x]="range.x0 - 4" [attr.y]="reserveY + 4" text-anchor="end">
+            <text class="dispatch-chart__reserve-text chart__halo-text" [attr.x]="range.x0 - 4" y="4" [style.transform]="'translateY(' + reserveY + 'px)'" text-anchor="end">
               Reserve floor
             </text>
           }
         }
       }
-      <path class="dispatch-chart__spin-soc" [attr.d]="spinSocPath"></path>
-      <path class="dispatch-chart__pulse-soc" [attr.d]="pulseSocPath"></path>
+      <path class="dispatch-chart__spin-soc" [attr.d]="spinSocPath" [style.d]="cssPath(spinSocPath)"></path>
+      <path class="dispatch-chart__pulse-soc" [attr.d]="pulseSocPath" [style.d]="cssPath(pulseSocPath)"></path>
 
       <!-- Hour axis -->
       @for (tick of hourTicks; track tick.x) {

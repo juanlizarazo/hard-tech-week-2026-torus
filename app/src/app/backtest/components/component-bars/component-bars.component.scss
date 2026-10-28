@@ -22,7 +22,7 @@
   color: var(--dt-viz-ink);
   background: transparent;
   border: 1px solid var(--dt-viz-axis);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-control);
   padding: 4px 10px;
   cursor: pointer;
 
@@ -58,7 +58,7 @@
 .dt-component-bars__swatch {
   width: 12px;
   height: 8px;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-tag);
 }
 
 .dt-component-bars__group {
@@ -106,13 +106,32 @@
   position: absolute;
   top: 2px;
   bottom: 2px;
-  min-width: 2px;
-  border-radius: 0 4px 4px 0;
+  left: 0;
+  width: 100%;
+  transform: translateX(var(--dt-bar-x, 0%)) scaleX(var(--dt-bar-scale, 1));
+  transform-origin: left center;
+  transition: transform var(--dt-motion-3) var(--dt-ease);
+  animation: dt-bar-grow var(--dt-motion-4) var(--dt-ease) backwards;
+}
+
+.dt-component-bars__bar--neg {
+  transform-origin: right center;
+}
+
+.dt-component-bars__value {
+  animation: dt-rise var(--dt-motion-3) var(--dt-ease) var(--dt-motion-2) backwards;
+}
+
+@keyframes dt-bar-grow {
+  from {
+    transform: translateX(var(--dt-bar-x, 0%)) scaleX(0);
+  }
 }
 
 .dt-component-bars__value {
   position: absolute;
   top: 0;
+  font-family: var(--dt-mono);
   font-size: 12px;
   line-height: 16px;
   font-variant-numeric: tabular-nums;

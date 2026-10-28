@@ -10,11 +10,12 @@
   gap: 6px;
   max-width: 100%;
   min-width: 0;
-  padding: 2px 8px;
-  border: 1px solid var(--dt-line);
-  border-radius: 8px;
-  background: var(--dt-paper);
+  padding: 2px 8px 1px 0;
+  border: 1px solid var(--dt-line-strong);
+  border-radius: var(--dt-radius-tag);
+  background: var(--dt-panel);
   font-size: var(--dt-text-13);
+  transition: border-color var(--dt-motion-1) var(--dt-ease);
   line-height: 1.5;
   color: var(--dt-muted);
   text-decoration: none;
@@ -27,8 +28,22 @@
 
 .dt-source-chip__kind {
   flex: none;
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  margin: -2px 0 -1px;
+  padding: 0 6px;
+  background: var(--dt-paper);
+  border-right: 1px solid var(--dt-line-strong);
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
   font-weight: 600;
+  letter-spacing: 0.04em;
   color: var(--dt-ink);
+}
+
+.dt-source-chip:not(:has(.dt-source-chip__kind)) {
+  padding-left: 8px;
 }
 
 .dt-source-chip__label {

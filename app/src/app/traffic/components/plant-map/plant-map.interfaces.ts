@@ -64,6 +64,34 @@ export interface ISitePin {
   labelLat: number;
 }
 
+export interface IPaceNode {
+  label: string;
+  note: string;
+  lon: number;
+  lat: number;
+}
+
+export interface INodeMark {
+  label: string;
+  note: string;
+  x: number;
+  y: number;
+  busX1: number;
+  busX2: number;
+}
+
+export interface IStreamGroup {
+  fuelKey: string;
+  color: string;
+  path: string;
+}
+
+export interface IStreamStyle {
+  width: number;
+  dashArray: string;
+  opacity: number;
+}
+
 export interface IPoint {
   x: number;
   y: number;
@@ -138,6 +166,9 @@ export interface IPlantMapData {
   cityMarks: ICityMark[];
   weatherMarks: IWeatherMark[];
   siteMark: ISiteMark;
+  nodeMark: INodeMark;
+  streamGroups: IStreamGroup[];
+  siteStreamPath: string;
   capacities: IFuelCapacity[];
   offMapPlants: string[];
   mix: IHourlyMix;
@@ -164,6 +195,9 @@ export interface IPlantMapHourView {
   isRush: boolean;
   rows: IFuelShareRow[];
   opacityByFuel: Record<string, number>;
+  streamByFuel: Record<string, IStreamStyle>;
+  siteStream: IStreamStyle;
+  siteKw: number | null;
   fossilPercent: number;
   summary: string;
 }

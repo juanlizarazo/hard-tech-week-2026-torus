@@ -2,6 +2,14 @@
 
 Global classes and component selectors use the `dt-` prefix. Keep it consistent.
 
+## Industrial Console Patterns
+
+- `[UI-16]` Page step: `<p class="dt-page__step"><span class="cdk-visually-hidden">Step N of 3: </span><span class="dt-page__step-number" aria-hidden="true">0N</span><span class="dt-page__step-name">Name</span></p>`. Start is the unnumbered cover; the others are 1 Forecast, 2 Decide, 3 Prove, everywhere (nav, step tags, next-stop signs, Start)
+- `[UI-17]` Rectangular nameplate tags: `.dt-tag` plus `--ink`, `--rush` (rush hour only), `--sim` (simulated) or `--clear`. Use them for evidence labels instead of pills
+- `[UI-18]` Every chart sits in `dt-chart-frame` with an `index` nameplate per screen: F1… on Forecast, D1… on Decide, P1… on Prove
+- `[UI-19]` Sections are open and ruled (`.dt-section`, an ink tick on a rule), not generic cards. Use `.dt-panel` only for real instruments
+- `[UI-20]` Motion answers an action. The one ambient exception is the Traffic flow map, which has a visible "Flow" pause control and stops under reduced motion
+
 ## Loading States
 
 - `[UI-01]` Use global `LoadingService` for page/data loading
@@ -34,10 +42,10 @@ Use the global `dt-card` classes for consistent clickable card lists:
 Note: Always use `appearance="outlined"` on mat-card for flat white cards with borders.
 
 Classes:
-- `.dt-card` - Base card with border, 12px radius, white background
+- `.dt-card` - Base card with border, 6px radius, white background
 - `.dt-card--clickable` - Adds hover effects (border color, shadow, translateY)
 - `.dt-card-header` - Flexbox row layout with centered items
-- `.dt-card-icon` - 48x48 circular icon container with primary background and white icon
+- `.dt-card-icon` - 48x48 icon container with primary background and white icon
 - `.dt-card-content` - Flex content area with h4 title and p description
 - `.dt-card-arrow` - Chevron arrow (gray, 24px)
 - `.dt-card-grid` - Container with flex column, 12px gap, max-width 600px

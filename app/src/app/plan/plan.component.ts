@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { AsyncPipe, CurrencyPipe, DecimalPipe } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -11,6 +12,7 @@ import {
   concat,
   filter,
   pairwise,
+  scan,
   timer,
   Observable,
   catchError,
@@ -47,10 +49,13 @@ import {
   LpTextComponent
 } from './components';
 import { IAssetRow, IPlanControls, IPlanDeltaState, IPlanHook, IPlanTryChip, IPlanViewModel, IPlanDateContext, IPlanSiteCard, IPlanSolveState } from './plan.interfaces';
-import { PeakSoFarMode, PlanDateMode } from './plan.types';
+import { PeakSoFarMode, PlanDateMode, PlanSolverRailState } from './plan.types';
 import { PlanHelper } from './plan.helper';
 import { planBaseline, planDefaults, planDeltaSettings } from './plan.constants';
 import { PlanDeltaHelper } from './plan-delta.helper';
+import { DispatchOrdersHelper } from './dispatch-orders.helper';
+import { IDispatchApproval, IDispatchOrder, IDispatchSheet } from './dispatch-orders.interfaces';
+import { TimeHelper } from '@app/core/helpers';
 
 @Component({
   selector: 'dt-plan',
@@ -58,6 +63,7 @@ import { PlanDeltaHelper } from './plan-delta.helper';
     AsyncPipe,
     CurrencyPipe,
     DecimalPipe,
+    MatButtonModule,
     MatButtonToggleModule,
     MatIconModule,
     MatProgressSpinnerModule,
@@ -93,6 +99,7 @@ export class PlanComponent {
   private _lastState: IPlanSolveState | null = null;
 
   public dialsOpen = false;
+  public approval: IDispatchApproval | null = null;
   public readonly day$ = this._planningDayService.day$;
   public readonly siteCards: IPlanSiteCard[] = PlanHelper.buildSiteCards();
   public readonly defaults = planDefaults;
@@ -157,6 +164,22 @@ export class PlanComponent {
 
   public readonly tryChips: IPlanTryChip[] = PlanDeltaHelper.chips();
 
+  public readonly sheet$: Observable<IDispatchSheet | null> = this.solve$.pipe(
+    filter(
+      (state: IPlanSolveState) =>
+        state.status === 'ready' && state.viewModel !== null && state.viewModel.result.status === 'optimal'
+    ),
+    map((state: IPlanSolveState) => state.viewModel as IPlanViewModel),
+    distinctUntilChanged(),
+    scan(
+      (previous: IDispatchSheet | null, viewModel: IPlanViewModel) =>
+        DispatchOrdersHelper.fromViewModel(viewModel, (previous?.revision ?? 0) + 1),
+      null as IDispatchSheet | null
+    ),
+    startWith(null),
+    shareReplay(1)
+  );
+
   public readonly deltas$: Observable<IPlanDeltaState> = this.solve$.pipe(
     filter((state: IPlanSolveState) => state.status === 'ready' && state.viewModel !== null),
     map((state: IPlanSolveState) => state.viewModel as IPlanViewModel),
@@ -195,6 +218,52 @@ export class PlanComponent {
     }
 
     this._update(PlanDeltaHelper.chipChanges(chip, this.maxReserveKwh));
+  }
+
+  public railState(solve: IPlanSolveState): PlanSolverRailState {
+    if (solve.status === 'solving') {
+      return 'solving';
+    }
+
+    if (solve.status === 'ready') {
+      return 'solved';
+    }
+
+    return !solve.isStale && solve.viewModel?.result.status === 'infeasible' ? 'infeasible' : 'failed';
+  }
+
+  public canApprove(solve: IPlanSolveState, sheet: IDispatchSheet | null): boolean {
+    return this.railState(solve) === 'solved' && sheet !== null;
+  }
+
+  public isApproved(sheet: IDispatchSheet | null): boolean {
+    return this.approval !== null && sheet !== null && this.approval.revision === sheet.revision;
+  }
+
+  public orderKey(order: IDispatchOrder): string {
+    return `${order.id}|${order.timeRange}|${order.amount}`;
+  }
+
+  public onApprove(sheet: IDispatchSheet): void {
+    const parts = TimeHelper.localParts(Date.now());
+
+    this.approval = {
+      approvedAtLabel: `${String(parts.hour).padStart(2, '0')}:${String(parts.minute).padStart(2, '0')} MT`,
+      revision: sheet.revision
+    };
+  }
+
+  public onDownloadCsv(sheet: IDispatchSheet): void {
+    const blob = new Blob([DispatchOrdersHelper.csv(sheet)], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = sheet.fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   public onToggleDials(): void {
