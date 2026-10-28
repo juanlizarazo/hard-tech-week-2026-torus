@@ -168,6 +168,16 @@ yarn --cwd functions ingest [--dry-run]      # run the same ingest by hand
 
 Demo day: let the 3 p.m. refresh run, check `snapshot:status` shows the new snapshot, then `snapshot:pin` it so nothing changes during judging.
 
+## Maintenance mode
+
+`maintenance/` holds a one-page "Back soon" site (noindex, no-store) that replaces every route on the live domain.
+
+```bash
+yarn --cwd app maintenance:on    # serve the Back soon page
+yarn --cwd app maintenance:off   # build and deploy the app again
+firebase hosting:channel:deploy judges --expires 7d   # private preview of the app while live is in maintenance
+```
+
 ## Run locally
 
 ```bash

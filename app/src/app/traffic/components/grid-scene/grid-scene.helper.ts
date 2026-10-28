@@ -6,8 +6,8 @@ import { ISceneColumnGroup, ISceneDot, ISceneEdge, ISceneLabel, ISceneWire, ISce
 export class GridSceneHelper {
   private static _webgl2: boolean | null = null;
 
-  public static canUseDeck(allowNarrow = false): boolean {
-    if (typeof window === 'undefined' || (!allowNarrow && window.innerWidth < gridSceneSettings.MOBILE_MIN_WIDTH_PX)) {
+  public static canUseDeck(): boolean {
+    if (typeof window === 'undefined') {
       return false;
     }
 

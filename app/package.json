@@ -8,6 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "deploy": "yarn build && firebase deploy --only hosting",
+    "maintenance:on": "firebase deploy --only hosting --config ../maintenance/firebase.json --project hard-tech-week-2026-torus",
+    "maintenance:off": "yarn deploy",
     "precompute:year": "../functions/node_modules/.bin/tsx scripts/precompute-year.ts"
   },
   "private": true,

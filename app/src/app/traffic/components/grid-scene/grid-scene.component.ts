@@ -248,7 +248,7 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
           [plantMapLayout.WEST_LON, plantMapLayout.SOUTH_LAT],
           [plantMapLayout.EAST_LON, plantMapLayout.NORTH_LAT]
         ],
-        { padding: { top: padding, bottom: padding, right: padding, left: isWideHome ? Math.round(width * gridSceneSettings.HOME_LEFT_PADDING) : padding } }
+        { padding: { top: padding, bottom: padding, right: padding, left: isWideHome ? Math.round(width * gridSceneSettings.HOME_LEFT_PADDING) : !this.home && width < gridSceneSettings.MOBILE_MIN_WIDTH_PX ? Math.round(width * gridSceneSettings.NARROW_CHART_LEFT_PADDING) : padding } }
       );
       const trim = isWideHome ? gridSceneSettings.HOME_ZOOM_TRIM : this.home ? gridSceneSettings.HOME_NARROW_ZOOM_TRIM : gridSceneSettings.CHART_ZOOM_TRIM;
 
