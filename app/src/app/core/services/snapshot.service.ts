@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { DOCUMENT, Injectable, inject } from '@angular/core';
 import { Firestore, doc, getDoc } from '@angular/fire/firestore';
 import { Observable, catchError, combineLatest, defer, finalize, from, map, of, shareReplay, switchMap, tap, timeout } from 'rxjs';
 import { IDerivedSignals } from '../models';
@@ -6,6 +6,9 @@ import { LoadingService } from './loading.service';
 import { ISnapshotResolution, ISnapshotStatus } from './snapshot.interfaces';
 
 const derivedReadTimeoutMs = 3000;
+const snapshotIdPattern = /^[\w.:-]{1,100}$/;
+const explicitSnapshotParam = 'snap';
+const explicitSnapshotPath = '/plan';
 
 @Injectable({ providedIn: 'root' })
 export class SnapshotService {
@@ -22,11 +25,13 @@ export class SnapshotService {
     shareReplay(1)
   );
 
+  private readonly _explicitSnapshotId = this._snapshotIdFromLocation(inject(DOCUMENT).location);
+
   private readonly _resolution$: Observable<ISnapshotResolution> = defer(() => {
     this._loadingService.show();
 
     return this.pointer$.pipe(
-      switchMap((pointer) => from(this._resolveManifest(pointer))),
+      switchMap((pointer) => from(this._resolveManifest(pointer, this._explicitSnapshotId))),
       tap({ error: (error) => console.error('Failed to load snapshot manifest', error) }),
       finalize(() => this._loadingService.hide())
     );
@@ -110,6 +115,16 @@ export class SnapshotService {
     return request$;
   }
 
+  private _snapshotIdFromLocation(location: Location | null): string | null {
+    if (!location?.pathname.endsWith(explicitSnapshotPath)) {
+      return null;
+    }
+
+    const snapshotId = new URLSearchParams(location.search).get(explicitSnapshotParam);
+
+    return snapshotId && snapshotIdPattern.test(snapshotId) ? snapshotId : null;
+  }
+
   private async _loadManifestById(snapshotId: string): Promise<Detour.Firestore.Snapshot.IManifest | null> {
     const snapshot = await getDoc(doc(this._firestore, `snapshots/${snapshotId}`));
 
@@ -126,7 +141,18 @@ export class SnapshotService {
     }
   }
 
-  private async _resolveManifest(pointer: Detour.Firestore.Snapshot.IPointer | null): Promise<ISnapshotResolution> {
+  private async _resolveManifest(
+    pointer: Detour.Firestore.Snapshot.IPointer | null,
+    explicitSnapshotId: string | null
+  ): Promise<ISnapshotResolution> {
+    if (explicitSnapshotId) {
+      const explicitManifest = await this._tryLoadManifest(explicitSnapshotId);
+
+      if (explicitManifest) {
+        return { manifest: explicitManifest, requestedSnapshotId: explicitSnapshotId, isFallback: false };
+      }
+    }
+
     if (!pointer) {
       return { manifest: null, requestedSnapshotId: null, isFallback: false };
     }

@@ -45,6 +45,16 @@ export interface IPlanMetrics {
   baselineRushHourKwh: number;
   plannedRushHourKwh: number;
   trafficAvoidedKwh: number;
+  baselineRushPeakKw: number;
+  plannedRushPeakKw: number;
+  rushPeakCutKw: number;
+  chargeSolarShare: number | null;
+  shaverChargeSolarShare: number | null;
+  solarShareProxyDate: string | null;
+  reboundPeakKw: number;
+  shaverReboundPeakKw: number;
+  shaverGridKw?: number[];
+  shaverChargeKw?: number[];
   rushHourWindows: IRushHourWindow[];
   wattsmartHeldKwh: number;
   rushHourPulseMinKwh: number;

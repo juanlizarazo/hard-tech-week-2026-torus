@@ -7,8 +7,6 @@ export const startSettings = {
   TYPE_START_MS: 700,
   TYPE_END_MS: 1900,
   TILES_AT_MS: 1900,
-  ROTATE_PERIOD_MS: 8500,
-  DISSOLVE_OUT_MS: 620,
   PROVE_SITE_ID: 'airport',
   PROVE_SCHEDULE_ID: 'schedule-8',
   ERROR_MESSAGE: "We could not read the PACE grid data. Check your connection and refresh the page.",

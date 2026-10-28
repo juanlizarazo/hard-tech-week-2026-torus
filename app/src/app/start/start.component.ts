@@ -2,7 +2,7 @@ import { Component, ElementRef, OnDestroy, OnInit, inject } from '@angular/core'
 import { AsyncPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { Observable, Subscription, animationFrames, catchError, combineLatest, distinctUntilChanged, filter, interval, map, of, shareReplay, startWith, switchMap, takeWhile, tap, timer } from 'rxjs';
+import { Observable, Subscription, animationFrames, catchError, combineLatest, distinctUntilChanged, filter, map, of, shareReplay, startWith, takeWhile } from 'rxjs';
 import { BacktestYearService, GridSignalsService, PlanningDayService, SnapshotService } from '@app/core';
 import {
   AlertBannerComponent,
@@ -46,12 +46,10 @@ export class StartComponent implements OnInit, OnDestroy {
   private readonly _elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private _sequence: Subscription | null = null;
   private _fragment: Subscription | null = null;
-  private _rotation: Subscription | null = null;
-  private _hookIndex = 0;
 
   public readonly hook = PlanHelper.hookNumbers();
   public readonly hookSentence = StartHelper.hookSentence(this.hook.roundedKwh);
-  public readonly hookLines = StartHelper.hookLines(this.hook.roundedKwh);
+  public readonly hookLine = StartHelper.congestionLine();
   public readonly architectureId = startSettings.ARCHITECTURE_ID;
   public readonly day$ = this._planningDayService.day$;
   public figureProgress = 0;
@@ -112,7 +110,7 @@ export class StartComponent implements OnInit, OnDestroy {
   );
 
   public get hookWords(): string[] {
-    return this.hookLines[this._hookIndex].split(' ');
+    return this.hookLine.split(' ');
   }
 
   public get peakFigure(): string {
@@ -141,7 +139,6 @@ export class StartComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this._sequence?.unsubscribe();
-    this._rotation?.unsubscribe();
     this._fragment?.unsubscribe();
   }
 
@@ -175,20 +172,7 @@ export class StartComponent implements OnInit, OnDestroy {
 
   private _finishSequence(): void {
     this.figureProgress = 1;
-    this._hookIndex = 0;
     this.hookPhase = 'in';
     this.areTilesIn = true;
-
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && !this._rotation) {
-      this._rotation = interval(startSettings.ROTATE_PERIOD_MS)
-        .pipe(
-          tap(() => (this.hookPhase = 'out')),
-          switchMap(() => timer(startSettings.DISSOLVE_OUT_MS))
-        )
-        .subscribe(() => {
-          this._hookIndex = (this._hookIndex + 1) % this.hookLines.length;
-          this.hookPhase = 'in';
-        });
-    }
   }
 }

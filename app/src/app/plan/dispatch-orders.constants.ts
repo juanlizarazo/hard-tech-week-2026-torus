@@ -17,6 +17,7 @@ export const dispatchOrderSettings = {
   MERGE_GAP_STEPS: 2,
   MAX_CHARGE_BLOCKS: 2,
   MAX_DISCHARGE_BLOCKS: 2,
+  MAX_ROUTE_ROWS: 6,
   STEP_HOURS: 0.25,
   MIXED_SHARE_MIN: 0.15,
   LB_PER_KG: 2.20462,

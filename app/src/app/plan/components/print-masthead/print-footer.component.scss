@@ -1,0 +1,50 @@
+:host {
+  display: none;
+}
+
+@media print {
+  :host {
+    display: block;
+    break-inside: avoid;
+  }
+}
+
+.dt-print-footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--dt-line-strong);
+}
+
+.dt-print-footer__qr {
+  display: block;
+  width: 64px;
+  height: 64px;
+  flex: none;
+
+  ::ng-deep svg {
+    display: block;
+    width: 64px;
+    height: 64px;
+  }
+}
+
+.dt-print-footer__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.dt-print-footer__label {
+  font-size: var(--dt-text-13);
+  color: var(--dt-ink);
+}
+
+.dt-print-footer__url {
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
+  color: var(--dt-ink);
+  word-break: break-all;
+}

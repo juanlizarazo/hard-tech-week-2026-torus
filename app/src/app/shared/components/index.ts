@@ -17,3 +17,4 @@ export * from './hour-chart/hour-chart.interfaces';
 export * from './hour-chart/hour-chart.types';
 export * from './side-panel/side-panel.interfaces';
 export * from './figure/figure.types';
+export * from './run-log/run-log.component';

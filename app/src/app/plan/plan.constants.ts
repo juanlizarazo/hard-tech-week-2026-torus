@@ -19,3 +19,9 @@ export const planDeltaSettings = {
   MIN_CHANGE: 0.5,
   VISIBLE_MS: 4000
 };
+
+export const planFleetSettings = {
+  STATIONS: 100,
+  KW_PER_MW: 1000,
+  MIN_CUT_KW: 0.5
+};

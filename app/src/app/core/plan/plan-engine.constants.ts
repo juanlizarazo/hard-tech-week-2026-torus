@@ -6,5 +6,9 @@ export const planEngineSettings = {
   TINY_VALUE: 1e-6,
   SPIN_BURST_MIN_KW: 1,
   LP_TERMS_PER_LINE: 8,
-  LP_DECIMALS: 6
+  LP_DECIMALS: 6,
+  REBOUND_HOURS: 3,
+  SOLAR_FUEL_KEY: 'SUN',
+  SOLAR_DAY_MIN_HOURS: 23,
+  MS_PER_HOUR: 3_600_000
 };

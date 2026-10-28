@@ -48,9 +48,19 @@ Move the Wattsmart reserve slider. Say:
 
 > More reserve protects a future grid call, but leaves less energy available for today's bill. That is the operational trade Torus hardware makes visible.
 
-Point at the dispatch orders and press Approve and queue for Lattice. Say:
+Point at D0, tomorrow's route, and read it top to bottom. Say:
 
-> This is what DETOUR hands Lattice for tomorrow. Approve, and Lattice runs it; Wattsmart calls still override it.
+> This is tomorrow's route: a handful of timed turns, each with its reason. Charge in the price trough, cap the grid through the on-peak window, discharge through rush hour, and arrive with 646 kW off PACE's rush hour and 800 kWh still held for Wattsmart.
+
+Read the numbers off the Arrive row; they change when the snapshot re-freezes. If asked whether it runs itself, open the run log in the solver rail ("Ran itself at …"): each cloud step has its real timestamp, and the last row is the re-solve in this browser.
+
+Press Approve and queue for Lattice. Say:
+
+> These are the dispatch orders DETOUR hands Lattice. Approve, and Lattice runs them; Wattsmart calls still override them.
+
+Open Share and choose Download PDF, or Copy link. Hand the judge the printed sheet or point a phone at its QR code. Say:
+
+> Take it home: the link opens this exact plan, re-solved in your browser from the same frozen grid data.
 
 Click See if this pays off beside the Approved stamp; it opens Record. Say that Approve is the only real action, and Record is where the plan is judged. Then, if time allows, go back and switch the rate plan between Schedule 6 and Schedule 8 and say:
 
@@ -80,6 +90,8 @@ Then click July in the ledger and say:
 
 Return to Start here and open How DETOUR works. Say two steps and the record, then:
 
-> DETOUR is a planning layer above a Torus Station's real-time controller: public grid data becomes a forecast, the forecast becomes a constrained dispatch, and the month-by-month replay proves what the strategy earned. Every simulated number is labeled; every public input has a source.
+> DETOUR plans every Torus station for tomorrow's rush hour. At this site it takes 646 kW off PACE's peak (the simple shaver takes 95) and still saves the customer $12,437 a month if that day sets the month's peak. Every simulated number is labeled; every public input has a source.
 
-Timing note: the added Approve then Record click costs about five seconds. the lead sentence, ledger line and Schedule 6/8 beat are required; the info-panel and dotted-term demo on Forecast was cut to make room. The total is estimated from word count, not yet re-timed with a stopwatch.
+Read the kW and dollar figures off Decide on the day; they are today's airport, Schedule 8 defaults and move when the snapshot re-freezes.
+
+Timing note: phase 12 adds the route and Share beats (about 25 seconds); trim the Schedule 6/8 beat first if the run goes over 5 minutes. The added Approve then Record click costs about five seconds. the lead sentence, ledger line and Schedule 6/8 beat are required; the info-panel and dotted-term demo on Forecast was cut to make room. The total is estimated from word count, not yet re-timed with a stopwatch.

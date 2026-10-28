@@ -79,6 +79,7 @@ export interface IPlanViewModel {
   maxReserveKwh: number;
   solveLabel: string;
   answer: string;
+  fleetLine: string;
   lpStatsLine: string;
   billTableCaption: string;
   notices: IPlanNotices;
@@ -124,4 +125,9 @@ export interface IPlanTileDelta {
 export interface IPlanDeltaState {
   deltas: Record<string, IPlanTileDelta>;
   isUnchanged: boolean;
+}
+
+export interface IPlanForecastPeak {
+  hour: number;
+  forecastMw: number;
 }

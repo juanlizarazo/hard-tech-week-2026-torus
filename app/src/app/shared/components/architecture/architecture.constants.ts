@@ -74,3 +74,8 @@ export const architectureNarrowLayout = {
   TITLE_HEIGHT: 22,
   STAGE_GAP: 34
 };
+
+export const architectureLastRun = {
+  STAGE_ID: 'cloud',
+  ITEM_TITLE: 'refreshSnapshot'
+};

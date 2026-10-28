@@ -2,8 +2,10 @@ import {
   IMarginalEmissionsSeries,
   IPlanInterval,
   IPlanRequest,
+  IPlanMetrics,
   IPlanResult,
   IPlanValue,
+  IRushHourWindow,
   ISiteArchetype,
   IStationAssets,
   ITariffSchedule,
@@ -21,6 +23,7 @@ import {
   IBillLineDelta,
   IPlanControls,
   IPlanDateContext,
+  IPlanForecastPeak,
   IPlanHook,
   IPlanHookNumbers,
   IPlanNotices,
@@ -28,7 +31,7 @@ import {
   IPlanTile,
   IPlanViewModel
 } from './plan.interfaces';
-import { planBaseline, planDefaults } from './plan.constants';
+import { planBaseline, planDefaults, planFleetSettings } from './plan.constants';
 import { PeakSoFarMode, PlanDateMode } from './plan.types';
 
 export class PlanHelper {
@@ -207,6 +210,7 @@ export class PlanHelper {
     const site = SitesHelper.getArchetype(controls.siteId) as ISiteArchetype;
     const siteName = PlanHelper.siteShortName(site).toLowerCase();
     const movedKwh = result.metrics?.trafficAvoidedKwh ?? 0;
+    const cutKw = result.metrics?.rushPeakCutKw ?? 0;
     const window = result.metrics?.rushHourWindows[0];
     const windowLabel = window ? TimeLabelHelper.window(window.startLocalHour, window.endLocalHour) : 'rush hour';
 
@@ -214,12 +218,14 @@ export class PlanHelper {
       return `No plan fits these settings for the ${siteName}. Lower the Wattsmart reserve and it will solve again.`;
     }
 
-    const moved = movedKwh > 0.5
-      ? `move ${PlanHelper.formatNumber(movedKwh)} kWh of grid draw out of rush hour (${windowLabel})`
-      : 'keep the grid draw where it is in rush hour';
+    const relief = cutKw > 0.5
+      ? `takes ${PlanHelper.formatNumber(cutKw)} kW off PACE's rush hour (${windowLabel})`
+      : movedKwh > 0.5
+        ? `moves ${PlanHelper.formatNumber(movedKwh)} kWh out of PACE's rush hour (${windowLabel})`
+        : `keeps its grid draw where it is in PACE's rush hour (${windowLabel})`;
 
     return [
-      `Plan for the ${siteName}: ${moved}.`,
+      `Plan for the ${siteName}: ${relief}.`,
       PlanHelper.peakSentence(controls, result.metrics.value, date),
       PlanHelper.flywheelSentence(result, assets),
       PlanHelper.co2Sentence(controls, result)
@@ -329,7 +335,7 @@ export class PlanHelper {
   public static buildViewModel(
     controls: IPlanControls,
     context: IPlanDateContext,
-    result: IPlanResult,
+    solvedResult: IPlanResult,
     assets: IStationAssets,
     mef: IMarginalEmissionsSeries
   ): IPlanViewModel {
@@ -339,6 +345,7 @@ export class PlanHelper {
     const rates = TariffHelper.seasonRatesFor(schedule, context.date);
     const pulseMinSocKwh = assets.pulse.energyKwh * assets.pulse.minSocFraction;
     const isOnPeakBasis = schedule.demandBasis === 'on-peak';
+    const result = PlanEngineHelper.withSolarShares(solvedResult, context.gridHours);
 
     return {
       controls,
@@ -361,6 +368,7 @@ export class PlanHelper {
       maxReserveKwh: PlanHelper.maxReserveKwh(assets),
       solveLabel: result.status === 'optimal' ? `Solved in ${Math.round(result.solveMs)} ms` : 'No feasible plan',
       answer: PlanHelper.answer(controls, result, context.date, assets),
+      fleetLine: PlanHelper.fleetLine(result, context.gridHours),
       lpStatsLine: PlanHelper.lpStatsLine(result),
       billTableCaption: controls.peakSoFarMode === 'fresh'
         ? "Demand and facilities lines are one month's charge at the peak these two days would set, if that peak stands all month. The energy line covers only these 48 hours. The proof has the full-month saving."
@@ -437,14 +445,27 @@ export class PlanHelper {
     const worth = value?.worthPerMonth ?? 0;
     const condition = controls.peakSoFarMode === 'fresh' ? "If the planned day sets the month's peak" : 'Above the peak this month already set';
 
-    return [
+    const rushCutKw = metrics?.rushPeakCutKw ?? 0;
+    const billedPeak = value
+      ? `Billed ${isOnPeakBasis ? 'on-peak' : 'any-hour'} demand ${PlanHelper.formatNumber(value.baselinePeakKw)} → ${PlanHelper.formatNumber(value.plannedPeakKw)} kW`
+      : 'No plan at these settings';
+    const isSameCut = !!value && Math.abs(rushCutKw - peakCutKw) < 1;
+    const movedDetail = `${PlanHelper.formatNumber(metrics?.trafficAvoidedKwh ?? 0)} kWh moved out of ${windowLabel}, both days`;
+
+    const tiles: IPlanTile[] = [
+      {
+        id: 'traffic',
+        label: "Off PACE's rush hour",
+        value: `${PlanHelper.formatNumber(rushCutKw)} kW`,
+        detail: isSameCut ? `${movedDetail}. Also the billed peak cut: ${billedPeak.charAt(0).toLowerCase()}${billedPeak.slice(1)}` : movedDetail,
+        source: window && !window.isAssumption ? "PACE's day-ahead forecast" : 'Assumed window, no PACE forecast yet',
+        tone: rushCutKw > planFleetSettings.MIN_CUT_KW ? 'good' : 'neutral'
+      },
       {
         id: 'peak-cut',
         label: 'Peak cut',
         value: `${PlanHelper.formatNumber(peakCutKw)} kW`,
-        detail: value
-          ? `Billed ${isOnPeakBasis ? 'on-peak' : 'any-hour'} demand ${PlanHelper.formatNumber(value.baselinePeakKw)} → ${PlanHelper.formatNumber(value.plannedPeakKw)} kW`
-          : 'No plan at these settings',
+        detail: billedPeak,
         source: tariffSource,
         tone: peakCutKw > 0.5 ? 'good' : 'neutral'
       },
@@ -475,14 +496,6 @@ export class PlanHelper {
         tone: co2ChangeKg < -0.5 ? 'good' : 'neutral'
       },
       {
-        id: 'traffic',
-        label: 'Moved out of rush hour',
-        value: `${PlanHelper.formatNumber(metrics?.trafficAvoidedKwh ?? 0)} kWh`,
-        detail: `Grid draw shifted out of ${windowLabel}, both days`,
-        source: window && !window.isAssumption ? "PACE's day-ahead forecast" : 'Assumed window, no PACE forecast yet',
-        tone: (metrics?.trafficAvoidedKwh ?? 0) > 0.5 ? 'good' : 'neutral'
-      },
-      {
         id: 'wattsmart',
         label: 'Held for Wattsmart',
         value: `${PlanHelper.formatNumber(metrics?.wattsmartHeldKwh ?? 0)} kWh`,
@@ -494,6 +507,8 @@ export class PlanHelper {
         tone: 'neutral'
       }
     ];
+
+    return isSameCut ? tiles.filter((tile: IPlanTile) => tile.id !== 'peak-cut') : tiles;
   }
 
   public static lpStatsLine(result: IPlanResult): string {
@@ -538,6 +553,54 @@ export class PlanHelper {
     ];
   }
 
+  public static fleetLine(result: IPlanResult, gridHours: Detour.Firestore.Snapshot.IGridHour[]): string {
+    const metrics = result.metrics;
+
+    if (result.status !== 'optimal' || !metrics || metrics.rushPeakCutKw < planFleetSettings.MIN_CUT_KW) {
+      return '';
+    }
+
+    const fleetMw = (metrics.rushPeakCutKw * planFleetSettings.STATIONS) / planFleetSettings.KW_PER_MW;
+    const fleetLabel = fleetMw < 10 ? fleetMw.toFixed(1) : PlanHelper.formatNumber(fleetMw);
+    const peakHour = PlanHelper.rushForecastPeak(metrics.rushHourWindows[0], result.request.date, gridHours);
+    const share = peakHour
+      ? `, ${((fleetMw / peakHour.forecastMw) * 100).toFixed(1)}% of its forecast load at ${TimeLabelHelper.hour(peakHour.hour)}`
+      : '.';
+
+    return `If ${planFleetSettings.STATIONS} stations like this ran DETOUR, about ${fleetLabel} MW would come off PACE's rush hour${share} Illustrative fleet, not Torus's installed base.`;
+  }
+
+  private static rushForecastPeak(
+    window: IRushHourWindow | undefined,
+    date: string,
+    gridHours: Detour.Firestore.Snapshot.IGridHour[]
+  ): IPlanForecastPeak | null {
+    if (!window || window.isAssumption) {
+      return null;
+    }
+
+    let peak: IPlanForecastPeak | null = null;
+
+    for (const gridHour of gridHours) {
+      if (!gridHour.localHourStart.startsWith(date)) {
+        continue;
+      }
+
+      const hour = Number(gridHour.localHourStart.slice(11, 13));
+      const forecastMw = gridHour.dayAheadForecastMw;
+
+      if (hour < window.startLocalHour || hour >= window.endLocalHour || forecastMw === null || !(forecastMw > 0)) {
+        continue;
+      }
+
+      if (!peak || forecastMw > peak.forecastMw) {
+        peak = { hour, forecastMw };
+      }
+    }
+
+    return peak;
+  }
+
   private static co2Detail(co2WeightPerKg: number, co2ChangeKg: number): string {
     const weight = `$${co2WeightPerKg.toFixed(2)}/kg`;
 
@@ -548,12 +611,6 @@ export class PlanHelper {
     return co2WeightPerKg > 0
       ? `Mostly charging losses; the bill outweighs carbon at ${weight}`
       : 'Carbon not valued at $0/kg';
-  }
-
-  public static orderSummary(orderCount: number, dateLabel: string, siteName: string, scheduleLabel: string): string {
-    const day = dateLabel.replace(/,\s*\d{4}$/, '').replace(',', '');
-
-    return `${orderCount} ${orderCount === 1 ? 'order' : 'orders'} · ${day} · ${siteName} · ${scheduleLabel}`;
   }
 
   private static dateLabel(date: string): string {
