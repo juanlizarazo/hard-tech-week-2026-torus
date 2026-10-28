@@ -264,11 +264,11 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
           radius: group.radius,
           extruded: true,
           getPosition: (column) => [column.lon, column.lat],
-          getFillColor: (column) => [...GridSceneHelper.fuelColor(column.fuelKey), GridSceneHelper.alpha(view.opacityByFuel[column.fuelKey] ?? 0)],
+          getFillColor: (column) => [...GridSceneHelper.softColor(column.fuelKey), GridSceneHelper.glassAlpha(GridSceneHelper.relative(view, column.fuelKey))],
           getElevation: (column) => GridSceneHelper.elevation(GridSceneHelper.relative(view, column.fuelKey)),
           material: { ambient: 0.65, diffuse: 0.5, shininess: 24, specularColor: [200, 200, 200] },
           wireframe: true,
-          getLineColor: [...palette.ink, 200],
+          getLineColor: (column) => [...GridSceneHelper.softColor(column.fuelKey), 170],
           lineWidthMinPixels: 1,
           updateTriggers: { getFillColor: hour, getElevation: hour },
           transitions: { getFillColor: transition, getElevation: transition }
@@ -286,9 +286,9 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
           lineWidthUnits: 'pixels',
           getPosition: (column) => [column.lon, column.lat],
           getRadius: group.radius * gridSceneSettings.FOOTPRINT_SCALE,
-          getFillColor: [...palette.panel, 150],
-          getLineColor: [...palette.ink, 230],
-          getLineWidth: 1.5,
+          getFillColor: [...palette.lineStrong, 26],
+          getLineColor: [...palette.lineStrong, 150],
+          getLineWidth: 1.2,
           parameters: { depthWriteEnabled: false }
         })
     );
@@ -307,8 +307,8 @@ export class GridSceneComponent implements AfterViewInit, OnChanges, OnDestroy {
             GridSceneHelper.elevation(GridSceneHelper.relative(view, column.fuelKey))
           ],
           getElevation: gridSceneSettings.CAP_HEIGHT_M,
-          getFillColor: [...palette.ink, 255],
-          getLineColor: [...palette.lineStrong, 255],
+          getFillColor: (column) => [...GridSceneHelper.softColor(column.fuelKey), 120],
+          getLineColor: [255, 255, 255, 200],
           wireframe: true,
           lineWidthMinPixels: 1,
           material: { ambient: 0.9, diffuse: 0.2, shininess: 8 },

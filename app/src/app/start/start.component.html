@@ -48,8 +48,22 @@
           </dd>
         </div>
       </dl>
-      <p class="home__hook" aria-hidden="true">
-        <span>{{ typedHook }}</span><span class="home__caret" [class.home__caret--on]="isTyping"></span>
+      <p class="home__hook" [class.home__hook--charge]="hookPhase === 'in'" aria-hidden="true">
+        <svg class="home__flywheel" [class.home__flywheel--spin-up]="hookPhase === 'out'" [class.home__flywheel--spin-down]="hookPhase === 'in'" viewBox="0 0 32 32" focusable="false">
+          <circle class="home__flywheel-rim" cx="16" cy="16" r="13"></circle>
+          <circle class="home__flywheel-rim home__flywheel-rim--inner" cx="16" cy="16" r="8"></circle>
+          <g class="home__flywheel-spokes">
+            <path d="M16 3v26M3 16h26M6.8 6.8l18.4 18.4M25.2 6.8L6.8 25.2"></path>
+          </g>
+          <circle class="home__flywheel-mass" cx="16" cy="3.2" r="2.1"></circle>
+          <circle class="home__flywheel-mass" cx="16" cy="28.8" r="2.1"></circle>
+          <circle class="home__flywheel-hub" cx="16" cy="16" r="2.6"></circle>
+        </svg>
+        <span class="home__words" [class.home__words--in]="hookPhase === 'in'" [class.home__words--out]="hookPhase === 'out'">
+          @for (word of hookWords; track $index) {
+            <span class="home__word" [style.--i]="$index">{{ word }}</span>
+          }
+        </span>
       </p>
     </div>
 

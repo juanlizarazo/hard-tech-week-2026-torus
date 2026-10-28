@@ -61,6 +61,22 @@ export class GridSceneHelper {
     return GridSceneHelper.hexColor(fuel.color, fallbackScenePalette.muted);
   }
 
+  public static softColor(fuelKey: string): SceneColor {
+    const [red, green, blue] = GridSceneHelper.fuelColor(fuelKey);
+    const mix = gridSceneSettings.SOFT_MIX;
+    const [lightRed, lightGreen, lightBlue] = gridSceneSettings.SOFT_TINT;
+
+    return [
+      Math.round(red + (lightRed - red) * mix),
+      Math.round(green + (lightGreen - green) * mix),
+      Math.round(blue + (lightBlue - blue) * mix)
+    ];
+  }
+
+  public static glassAlpha(relative: number): number {
+    return Math.round(gridSceneSettings.GLASS_MIN_ALPHA + gridSceneSettings.GLASS_ALPHA_RANGE * relative);
+  }
+
   public static relative(hourView: IPlantMapHourView, fuelKey: string): number {
     const opacity = hourView.opacityByFuel[fuelKey] ?? plantMapLayout.MIN_OPACITY;
 
@@ -225,12 +241,12 @@ export class GridSceneHelper {
       const to = edge.points[segment];
       const position: [number, number, number] = [from[0] + (to[0] - from[0]) * mix, from[1] + (to[1] - from[1]) * mix, 0];
       const taper = 1 - index / EDGE_SAMPLES;
-      const alpha = Math.round(120 * taper * taper);
+      const alpha = Math.round(185 * taper * taper);
 
-      dots.push({ position, color: [color[0], color[1], color[2], alpha], size: 0.8 + 1.1 * taper });
+      dots.push({ position, color: [color[0], color[1], color[2], alpha], size: 1.7 + 2.3 * taper });
 
       if (index < 10) {
-        cores.push({ position, color: [255, 255, 255, Math.round(alpha * 0.8 * (1 - index / 10))], size: 0.6 + 0.5 * taper });
+        cores.push({ position, color: [255, 255, 255, Math.round(alpha * 0.8 * (1 - index / 10))], size: 1.1 + 0.9 * taper });
       }
     }
   }

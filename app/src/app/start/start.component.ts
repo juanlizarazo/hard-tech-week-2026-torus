@@ -2,7 +2,7 @@ import { Component, ElementRef, OnDestroy, OnInit, inject } from '@angular/core'
 import { AsyncPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { Observable, Subscription, animationFrames, catchError, combineLatest, distinctUntilChanged, filter, interval, map, of, shareReplay, startWith, takeWhile } from 'rxjs';
+import { Observable, Subscription, animationFrames, catchError, combineLatest, distinctUntilChanged, filter, interval, map, of, shareReplay, startWith, switchMap, takeWhile, tap, timer } from 'rxjs';
 import { BacktestYearService, GridSignalsService, PlanningDayService, SnapshotService } from '@app/core';
 import {
   AlertBannerComponent,
@@ -48,8 +48,6 @@ export class StartComponent implements OnInit, OnDestroy {
   private _fragment: Subscription | null = null;
   private _rotation: Subscription | null = null;
   private _hookIndex = 0;
-  private _rotateMode: 'hold' | 'erase' | 'type' = 'hold';
-  private _holdTicks = 0;
 
   public readonly hook = PlanHelper.hookNumbers();
   public readonly hookSentence = StartHelper.hookSentence(this.hook.roundedKwh);
@@ -57,8 +55,7 @@ export class StartComponent implements OnInit, OnDestroy {
   public readonly architectureId = startSettings.ARCHITECTURE_ID;
   public readonly day$ = this._planningDayService.day$;
   public figureProgress = 0;
-  public typedLength = 0;
-  public isTyping = false;
+  public hookPhase: 'hidden' | 'in' | 'out' = 'hidden';
   public areTilesIn = false;
 
   public readonly state$: Observable<IStartViewState> = combineLatest([
@@ -114,8 +111,8 @@ export class StartComponent implements OnInit, OnDestroy {
     })
   );
 
-  public get typedHook(): string {
-    return this.hookLines[this._hookIndex].slice(0, this.typedLength);
+  public get hookWords(): string[] {
+    return this.hookLines[this._hookIndex].split(' ');
   }
 
   public get peakFigure(): string {
@@ -137,7 +134,6 @@ export class StartComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isTyping = true;
     this._sequence = animationFrames()
       .pipe(takeWhile((frame) => frame.elapsed < startSettings.SEQUENCE_MS, true))
       .subscribe((frame) => this._advanceSequence(frame.elapsed));
@@ -166,9 +162,10 @@ export class StartComponent implements OnInit, OnDestroy {
   private _advanceSequence(elapsed: number): void {
     this.figureProgress = 1 - Math.pow(1 - Math.min(elapsed / startSettings.COUNT_UP_MS, 1), 3);
 
-    const typeProgress = (elapsed - startSettings.TYPE_START_MS) / (startSettings.TYPE_END_MS - startSettings.TYPE_START_MS);
-    this.typedLength = Math.round(this.hookLines[0].length * Math.min(Math.max(typeProgress, 0), 1));
-    this.isTyping = this.typedLength < this.hookLines[0].length;
+    if (elapsed >= startSettings.TYPE_START_MS && this.hookPhase === 'hidden') {
+      this.hookPhase = 'in';
+    }
+
     this.areTilesIn = elapsed >= startSettings.TILES_AT_MS;
 
     if (elapsed >= startSettings.SEQUENCE_MS) {
@@ -179,46 +176,19 @@ export class StartComponent implements OnInit, OnDestroy {
   private _finishSequence(): void {
     this.figureProgress = 1;
     this._hookIndex = 0;
-    this.typedLength = this.hookLines[0].length;
-    this.isTyping = false;
+    this.hookPhase = 'in';
     this.areTilesIn = true;
 
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && !this._rotation) {
-      this._holdTicks = 0;
-      this._rotateMode = 'hold';
-      this._rotation = interval(startSettings.ROTATE_TICK_MS).subscribe(() => this._rotateHook());
-    }
-  }
-
-  private _rotateHook(): void {
-    const line = this.hookLines[this._hookIndex];
-
-    if (this._rotateMode === 'hold') {
-      this._holdTicks += 1;
-      this._rotateMode = this._holdTicks >= startSettings.ROTATE_HOLD_TICKS ? 'erase' : 'hold';
-
-      return;
-    }
-
-    if (this._rotateMode === 'erase') {
-      this.isTyping = true;
-      this.typedLength = Math.max(0, this.typedLength - startSettings.ROTATE_ERASE_STEP);
-
-      if (this.typedLength === 0) {
-        this._hookIndex = (this._hookIndex + 1) % this.hookLines.length;
-        this._rotateMode = 'type';
-      }
-
-      return;
-    }
-
-    this.typedLength += 1;
-
-    if (this.typedLength >= line.length) {
-      this.typedLength = line.length;
-      this.isTyping = false;
-      this._holdTicks = 0;
-      this._rotateMode = 'hold';
+      this._rotation = interval(startSettings.ROTATE_PERIOD_MS)
+        .pipe(
+          tap(() => (this.hookPhase = 'out')),
+          switchMap(() => timer(startSettings.DISSOLVE_OUT_MS))
+        )
+        .subscribe(() => {
+          this._hookIndex = (this._hookIndex + 1) % this.hookLines.length;
+          this.hookPhase = 'in';
+        });
     }
   }
 }
