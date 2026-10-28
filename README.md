@@ -4,9 +4,7 @@
 
 ## Live at [detourgrid.com](https://detourgrid.com)
 
-Also at https://hard-tech-week-2026-torus.web.app
-
-> Built solo by [Juan Lizarazo](https://juanlizarazo.com) for the **Torus bounty (Option 1: Rush Hour for Electrons)** at the Hard Tech Hackathon, Hard Tech Week 2026, Salt Lake City.
+> Built solo by [Juan Lizarazo](https://www.linkedin.com/in/juanlizarazo/) for the **Torus bounty (Option 1: Rush Hour for Electrons)** at the Hard Tech Hackathon, Hard Tech Week 2026, Salt Lake City.
 
 > "Build software that knows when the grid is jammed and stays out of traffic."
 > — the bounty
@@ -24,6 +22,7 @@ On a simulated 2 MW regional airport on Rocky Mountain Power Schedule 8, replaye
 | **Saved Jan 1 to Oct 26, 2026** | **$88,928** vs no storage, 57% of the perfect-hindsight ceiling |
 | Best month | September, $13,000 |
 | July | $11,546, 76% of perfect hindsight, 85% of it from the demand charge, 946 kWh held for Wattsmart |
+| Grid relief, planning day | **646 kW off PACE's rush hour** (the simple shaver takes 95 kW), 3,083 kWh moved out of 6–10 p.m. |
 | Tomorrow's plan | 192 fifteen-minute steps, 1,346 variables, 1,240 constraints, solved in the browser in about 50 ms |
 
 The site load and Torus asset parameters are simulated (seed 42, reproducible anywhere). The grid data, prices and tariffs are real. Perfect hindsight is the same planner told the whole month in advance; no real controller can match it, so it is the 100% mark.
@@ -41,12 +40,16 @@ On top of that, a Wattsmart demand-response call can drain the battery right bef
 ## What DETOUR does
 
 1. **Traffic report.** Reads tomorrow's PACE grid conditions: load forecast, day-ahead prices, marginal CO2 by hour.
-2. **Plan.** Solves an LP in 15-minute steps that decides when the site's flywheel and battery charge and discharge. It cuts the customer's bill, avoids dirty hours and keeps a reserve for Wattsmart.
+2. **Plan.** Solves an LP in 15-minute steps that decides when the site's flywheel and battery charge and discharge. It takes load off PACE's rush hour, cuts the customer's bill, avoids dirty hours and keeps a reserve for Wattsmart. The result reads as a route: timed dispatch orders ending in an Arrive line, shareable as a link or a PDF plan sheet.
 3. **Proof.** Replays every month of 2026 against no storage, a naive peak-shaver and a perfect-hindsight optimum, and reports how much of the possible savings it captured.
 
 | 1 Forecast | 2 Decide | Record |
 |---|---|---|
 | ![Forecast: when is the grid jammed tomorrow](docs/screenshots/forecast.png) | ![Decide: what should the Torus Station do tomorrow](docs/screenshots/decide.png) | ![Record: has DETOUR paid off in 2026](docs/screenshots/record.png) |
+
+**The plan sheet** (Share → Download PDF): the route with its Arrive line, kW off PACE's rush hour, and the site load against the simple shaver.
+
+![DETOUR plan sheet: today's route, 646 kW off PACE's rush hour, site load and grid draw](docs/screenshots/plan-sheet.png)
 
 ## How the plan is decided
 
@@ -73,7 +76,7 @@ The EDAM day-ahead price is a planning signal only. The site is billed on the pu
 
 1. **Start here** (`/start`). "$16.84 vs 3.1¢": one kW of summer on-peak demand costs as much as shifting about 550 kWh. Below it, the three-clocks strip shows the planning day's bill, price and carbon by hour, with rush hour in orange stripes. Hover any dotted word for a definition.
 2. **1 Forecast · tomorrow's grid** (`/traffic`). Opens on a flow map at the rush hour: every PACE plant streams into one schematic grid node and on to the simulated airport, with load, price and CO2 on one hour cursor (Play, drag or arrow keys; "Flow" pauses the animation). Below it: when the grid is jammed, whether price and carbon agree, how our forecast scores against PACE's own, and why marginal and average CO2 rank the hours differently. Open an ⓘ for a how-to-read panel.
-3. **2 Decide · tomorrow's plan** (`/plan`). Pick a site, then move the CO2 weight and Wattsmart reserve dials, or switch Schedule 8/6. Decide plans tomorrow only. The LP re-solves in the browser in milliseconds and each figure shows its change from the last solve. The solver rail turns the latest solve into tomorrow's dispatch orders; Approve stamps them "queued for Lattice" (simulated, no device connected) and Download schedule exports the 15-minute CSV. The LP text is under "Under the hood".
+3. **2 Decide · tomorrow's plan** (`/plan`). Pick a site, then move the CO2 weight and Wattsmart reserve dials, or switch Schedule 8/6. Decide plans tomorrow only. The LP re-solves in the browser in milliseconds and each figure shows its change from the last solve. The plan leads with kW off PACE's rush hour, with an illustrative 100-station fleet line under the figures; the site-load chart shows the simple shaver as a dashed line for comparison. The solver rail's run log ("Ran itself at 3 p.m.") lists the daily batch steps behind the plan. "Tomorrow's route" turns the solve into timed dispatch orders ending in an Arrive line; Approve stamps them "queued for Lattice" (simulated, no device connected). Share copies a link that re-solves the same plan on the same frozen data, downloads a PDF plan sheet with a QR code, or exports the 15-minute CSV. The LP text is under "Under the hood".
 4. **Record · 2026, month by month** (`/backtest`). Not a step: the record of the plan over the year. Leads with the year ledger (saved to date, share of perfect hindsight, best month), then any month replayed day by day: DETOUR against no storage, a simple shaver and perfect hindsight.
 5. **Architecture** (back on `/start`, "How DETOUR works"). The pipeline below, drawn in the app.
 
@@ -83,11 +86,13 @@ Every screen ends with a "Next stop" link, so the demo walks Start → 1 Forecas
 
 | From the bounty card | Where it is |
 |---|---|
+| How would you manage the grid's congestion? | 2 Decide leads with kW off PACE's rush hour (646 kW at the demo site vs 95 kW for a simple shaver), plus an illustrative fleet line in MW and % of PACE's load |
 | Knows when the grid is jammed | 1 Forecast finds tomorrow's PACE rush hour from load, price and marginal CO2 |
 | Stays out of traffic | 2 Decide plans the station's charge and discharge around it |
 | A traffic report for tomorrow's grid | 1 Forecast, refreshed daily at 3 p.m. after the day-ahead market posts |
-| A navigation app for electricity | Start → Forecast → Decide, with a "Next stop" on every screen |
-| Scheduling around clean power | Marginal CO2 is in the objective; dispatch orders are approved and queued for Lattice |
+| A navigation app for electricity | "Tomorrow's route": timed dispatch orders ending in an Arrive line, plus a "Next stop" on every screen |
+| Agents that schedule around clean power | DETOUR runs itself daily at 3 p.m. (run log on 2 Decide); marginal CO2 is in the objective; orders are approved and queued for Lattice |
+| A complete solution | Share link and PDF plan sheet so the plan leaves the screen |
 | Free and open-source data only | EIA-930, EIA-860, CAISO OASIS, Open-Meteo, published RMP tariffs |
 | Simulated data is fine if labeled | Every simulated figure carries a "Simulated · seed 42" badge |
 | Execution | Live site, daily Cloud Function with validate-then-pin, LP solving in the browser, year-long replay |
