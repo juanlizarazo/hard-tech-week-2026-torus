@@ -110,6 +110,7 @@ Every screen ends with a "Next stop" link, so the demo walks Start → 1 Forecas
 
 ## Docs
 
+- [Pitch and demo, 4.5 minutes](docs/pitch.md)
 - [One-page demo script](docs/demo-script.md)
 - [Judge Q&A answer sheet](docs/qa.md)
 
