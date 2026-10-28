@@ -25,10 +25,15 @@ export class BacktestRunnerHelper {
     gridMonth: Detour.Firestore.Snapshot.IGridMonth,
     priceMonth: Detour.Firestore.Snapshot.IPriceMonth | null,
     marginalEmissions: IMarginalEmissionsSeries,
-    month: string = backtestSettings.MONTH,
+    month: string = backtestSettings.DEFAULT_MONTH,
+    throughDate: string | null = null,
   ): IBacktestInput {
-    const intervals = TimeHelper.localMonthIntervals(month);
-    const loadKw = SiteGeneratorHelper.generateMonth(site, month).map((entry) => entry.kw);
+    const intervals = TimeHelper.localMonthIntervals(month).filter(
+      (interval: IInterval) => throughDate === null || interval.localDate <= throughDate,
+    );
+    const loadKw = SiteGeneratorHelper.generateMonth(site, month)
+      .slice(0, intervals.length)
+      .map((entry) => entry.kw);
     const onPeakMask = TariffHelper.onPeakMask(schedule, intervals);
     const isOnPeakBasis = schedule.demandBasis === 'on-peak';
     const energyPricePerKwh = intervals.map((interval: IInterval, index: number) => {
@@ -39,6 +44,7 @@ export class BacktestRunnerHelper {
 
     return {
       month,
+      throughDate,
       site,
       schedule,
       assets,

@@ -1,13 +1,15 @@
 <div class="dt-page">
   <header class="dt-page__head">
-    <p class="dt-page__step"><span class="cdk-visually-hidden">Step 3 of 3: </span><span class="dt-page__step-number" aria-hidden="true">03</span><span class="dt-page__step-name">Prove · July's proof</span></p>
-    <h1 class="dt-question">Would it have paid off last July?</h1>
+    <p class="dt-page__step"><span class="cdk-visually-hidden">Step 3 of 3: </span><span class="dt-page__step-number" aria-hidden="true">03</span><span class="dt-page__step-name">Prove · The proof</span></p>
+    @if (heading$ | async; as heading) {
+      <h1 class="dt-question">{{ heading.question }}</h1>
+    }
     @if (viewModel$ | async; as viewModel) {
       @if (viewModel.model; as model) {
         <p class="dt-answer">{{ model.answer }}</p>
       } @else {
         <p class="dt-answer dt-backtest__answer-pending">
-          July 2026 replayed day by day on a simulated site, against a
+          {{ (heading$ | async)?.monthLabel }} replayed day by day on a simulated site, against a
           <dt-term key="SIMPLE_SHAVER">Simple shaver</dt-term> and <dt-term key="PERFECT_HINDSIGHT">Perfect hindsight</dt-term>.
         </p>
       }
@@ -47,6 +49,28 @@
     </section>
   }
 
+  @if (ledger$ | async; as screen) {
+    <section class="dt-backtest__ledger" aria-label="Year to date, month by month">
+      <dt-chart-frame index="P0" [title]="screen.ledger.title" [notice]="screen.ledger.summary" [simulated]="true">
+        <dt-year-ledger
+          [months]="screen.ledger.months"
+          [selected]="screen.selected"
+          [summerRange]="screen.ledger.summerRange"
+          [partialLabel]="screen.ledger.partialLabel"
+          (monthSelected)="onMonthSelected($event)"
+        ></dt-year-ledger>
+        @if (screen.ledger.note) {
+          <p class="dt-hint dt-backtest__ledger-note">{{ screen.ledger.note }}</p>
+        }
+        <div how-to-read>
+          <p class="dt-backtest__how">Each column is a month of 2026. The green bar is what DETOUR saved on the bill versus no storage, and the dark tick above it is what perfect hindsight saved, so the gap is what a forecast cannot see.</p>
+          <p class="dt-backtest__how">Summer rates (June to September) put a higher price on each kilowatt of peak demand, so a shaved kilowatt is worth more then. October is the month to date, so its demand charge is the peak so far.</p>
+          <p class="dt-backtest__how">Pick any month to replay it below. The site and rate plan above apply to every column.</p>
+        </div>
+      </dt-chart-frame>
+    </section>
+  }
+
   @if (viewModel$ | async; as viewModel) {
     @switch (viewModel.state.status) {
       @case ('loading') {
@@ -67,6 +91,13 @@
       @case ('ready') {
         @if (viewModel.model; as model) {
           @if (viewModel.state.result; as result) {
+            <p class="dt-backtest__replay" role="status">
+              @if (viewModel.isReplaying) {
+                <mat-spinner diameter="14"></mat-spinner>
+                <span>Replaying {{ viewModel.replayingLabel }}…</span>
+              }
+            </p>
+            <div class="dt-backtest__body" [class.dt-backtest__body--replaying]="viewModel.isReplaying" [attr.aria-busy]="viewModel.isReplaying">
             <section class="dt-backtest__verdict" aria-labelledby="backtest-capture-title">
               <div class="dt-backtest__gauge">
                 <div class="dt-backtest__gauge-head">
@@ -114,12 +145,12 @@
                   }
                 </div>
                 <p class="dt-backtest__gauge-foot">
-                  Bill savings vs no storage, July 2026. {{ model.oracleName }} knew the whole month in advance, so it is the 100% mark.
+                  Bill savings vs no storage, {{ model.monthLabel }}. {{ model.oracleName }} knew the whole month in advance, so it is the 100% mark.
                 </p>
               </div>
             </section>
 
-            <section class="dt-backtest__figures" aria-label="July result">
+            <section class="dt-backtest__figures" [attr.aria-label]="model.monthName + ' result'">
               <div class="dt-figures">
                 @for (tile of model.leadTiles; track tile.id) {
                   <dt-figure [value]="tile.value" [label]="tile.id === 'capture' ? '' : tile.label" [detail]="tile.hint" [tone]="tile.tone">
@@ -161,12 +192,12 @@
             </section>
 
             <section class="dt-section" aria-labelledby="backtest-compare-title">
-              <h2 class="dt-section__title" id="backtest-compare-title">July value vs no storage</h2>
+              <h2 class="dt-section__title" id="backtest-compare-title">{{ model.monthName }} value vs no storage</h2>
               <p class="dt-section__lede">{{ model.valueNotice }}</p>
               <p class="dt-hint">Capture rate = DETOUR bill savings ÷ perfect-hindsight bill savings. Total value = bill saved + carbon value − wear cost.</p>
               <div class="dt-table-wrap dt-backtest__compare-table">
                 <table class="dt-table">
-                  <caption class="cdk-visually-hidden">July savings by strategy: bill only and total value</caption>
+                  <caption class="cdk-visually-hidden">{{ model.monthName }} savings by strategy: bill only and total value</caption>
                   <thead>
                     <tr>
                       <th class="dt-table__cell dt-table__cell--head" scope="col">Strategy</th>
@@ -200,7 +231,7 @@
                   </tbody>
                 </table>
               </div>
-              <ul class="dt-backtest__strategies" aria-label="July savings by strategy">
+              <ul class="dt-backtest__strategies" [attr.aria-label]="model.monthName + ' savings by strategy'">
                 @for (row of model.comparisonRows; track row.strategyId) {
                   <li class="dt-backtest__strategy" [class.dt-backtest__strategy--lead]="row.isLead">
                     <p class="dt-backtest__strategy-name">
@@ -356,7 +387,7 @@
                 </p>
                 <dt-component-bars [groups]="model.barGroups" [strategyLegend]="model.legend"></dt-component-bars>
                 <div how-to-read>
-                  <p class="dt-backtest__how">Each group is one line on the Rocky Mountain Power bill. Each bar is how much a strategy saved on that line in July, compared with no storage. Longer is better.</p>
+                  <p class="dt-backtest__how">Each group is one line on the Rocky Mountain Power bill. Each bar is how much a strategy saved on that line in {{ model.monthName }}, compared with no storage. Longer is better.</p>
                   <p class="dt-backtest__how"><strong>{{ model.shaverName }}</strong> (grey) discharges whenever load passes a fixed line. <strong>{{ model.leadName }}</strong> (green) plans each day ahead. <strong>{{ model.oracleName }}</strong> (dark) knew the whole month in advance, so it is the ceiling.</p>
                   <p class="dt-backtest__how">Every line is priced from the tariff sheet named under the title.</p>
                 </div>
@@ -365,7 +396,7 @@
 
             <section class="dt-section" aria-labelledby="backtest-cycles-title">
               <h2 class="dt-section__title" id="backtest-cycles-title">What it cost the machines</h2>
-              <dt-chart-frame index="P5" title="Wear in July" [notice]="model.cyclesNotice" [simulated]="true">
+              <dt-chart-frame index="P5" [title]="'Wear in ' + model.monthName" [notice]="model.cyclesNotice" [simulated]="true">
                 <div class="dt-backtest__cycles">
                   @for (row of model.cycleRows; track row.strategyId; let index = $index) {
                     @if (row.pulseCycles > 0 || row.spinCycles > 0) {
@@ -411,7 +442,7 @@
                 </p>
                 <div how-to-read>
                   <p class="dt-backtest__how">An equivalent full cycle is the energy moved through a machine divided by its usable capacity. Two half discharges make one cycle.</p>
-                  <p class="dt-backtest__how">Each bar shows the share of the machine's rated cycle life used in July. A full bar would be 1% of its life in a single month. Shorter is better.</p>
+                  <p class="dt-backtest__how">Each bar shows the share of the machine's rated cycle life used in {{ model.monthName }}. A full bar would be 1% of its life in a single month. Shorter is better.</p>
                   <p class="dt-backtest__how">Spin (blue) is a flywheel rated for about 25,000 cycles, so it can take many short spikes. Pulse (purple) is a battery rated for about 7,500.</p>
                 </div>
               </dt-chart-frame>
@@ -453,6 +484,7 @@
                 </table>
               </div>
             </dt-under-the-hood>
+            </div>
           }
         }
       }

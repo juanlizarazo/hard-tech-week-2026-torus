@@ -1,0 +1,47 @@
+<div class="dt-year-ledger" [style.--dt-ledger-count]="months.length" [style.--dt-ledger-index]="selectedIndex">
+  <div class="dt-year-ledger__plot" role="radiogroup" aria-label="Month of 2026" (keydown)="onKeydown($event)">
+    <span class="dt-year-ledger__frame" aria-hidden="true"></span>
+    @for (entry of months; track entry.month) {
+      <button
+        type="button"
+        role="radio"
+        class="dt-year-ledger__month"
+        [attr.aria-checked]="entry.month === selected"
+        [attr.aria-label]="entry.ariaLabel"
+        [tabindex]="entry.month === selected ? 0 : -1"
+        (click)="select(entry.month)"
+      >
+        <span class="dt-year-ledger__column" aria-hidden="true">
+          @if (entry.hasData) {
+            <span class="dt-year-ledger__ceiling" [style.bottom.%]="entry.ceilingFraction * 100"></span>
+            <span
+              class="dt-year-ledger__bar"
+              [class.dt-year-ledger__bar--partial]="entry.isPartial"
+              [style.height.%]="entry.savedFraction * 100"
+            ></span>
+          }
+        </span>
+        <span class="dt-year-ledger__value" aria-hidden="true">{{ entry.valueLabel }}</span>
+        <span class="dt-year-ledger__name" aria-hidden="true">
+          <span class="dt-year-ledger__name-full">{{ entry.shortLabel }}</span>
+          <span class="dt-year-ledger__name-initial">{{ entry.initialLabel }}</span>
+        </span>
+      </button>
+    }
+  </div>
+  <div class="dt-year-ledger__brackets" aria-hidden="true">
+    @if (summerRange; as range) {
+      <span class="dt-year-ledger__bracket" [style.grid-column]="range[0] + 1 + ' / ' + (range[1] + 2)">Summer rates</span>
+    }
+    @if (partialLabel) {
+      <span class="dt-year-ledger__bracket dt-year-ledger__bracket--partial" [style.grid-column]="months.length + ' / ' + (months.length + 1)">To date</span>
+    }
+  </div>
+  <ul class="dt-year-ledger__key">
+    <li class="dt-year-ledger__key-item"><span class="dt-year-ledger__key-bar" aria-hidden="true"></span>DETOUR saved vs no storage</li>
+    <li class="dt-year-ledger__key-item"><span class="dt-year-ledger__key-tick" aria-hidden="true"></span>Perfect-foresight ceiling</li>
+    @if (partialLabel) {
+      <li class="dt-year-ledger__key-item">{{ partialLabel }}</li>
+    }
+  </ul>
+</div>

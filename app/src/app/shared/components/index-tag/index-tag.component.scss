@@ -1,0 +1,41 @@
+:host {
+  display: inline-flex;
+  flex: none;
+  align-self: center;
+}
+
+.dt-index-tag {
+  padding: 4px 6px 3px;
+  border: 0;
+  border-radius: var(--dt-radius-tag);
+  background: var(--dt-ink);
+  color: var(--dt-panel);
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  cursor: help;
+}
+
+.dt-index-tag--tag {
+  cursor: help;
+}
+
+.dt-index-tag:focus-visible {
+  outline: 2px solid var(--dt-clear);
+  outline-offset: 2px;
+}
+
+.dt-index-tag__popover {
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--dt-ink);
+  border-radius: var(--dt-radius-control);
+  background: var(--dt-panel);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--dt-ink) 14%, transparent);
+  font-family: var(--dt-font);
+  font-size: var(--dt-text-13);
+  line-height: 1.45;
+  color: var(--dt-ink);
+}

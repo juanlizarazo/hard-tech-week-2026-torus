@@ -363,7 +363,7 @@ export class PlanHelper {
       answer: PlanHelper.answer(controls, result, context.date, assets),
       lpStatsLine: PlanHelper.lpStatsLine(result),
       billTableCaption: controls.peakSoFarMode === 'fresh'
-        ? "Demand and facilities lines are one month's charge at the peak these two days would set, if that peak stands all month. The energy line covers only these 48 hours. July's proof has the full-month saving."
+        ? "Demand and facilities lines are one month's charge at the peak these two days would set, if that peak stands all month. The energy line covers only these 48 hours. The proof has the full-month saving."
         : `Demand and facilities lines are one month's charge at the higher of this plan's peak and the peak ${PlanHelper.monthName(context.date)} already set. The energy line covers only these 48 hours.`,
       notices: PlanHelper.notices(controls, result, `${isOnPeakBasis ? 'On-peak demand' : 'Demand'}`)
     };

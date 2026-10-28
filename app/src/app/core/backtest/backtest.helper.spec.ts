@@ -232,3 +232,29 @@ describe('Backtest view states', () => {
     expect(first.status).toBe('loading');
   });
 });
+
+describe('Any-month backtest', () => {
+  const airport = Object.values(siteArchetypes).find((archetype) => archetype.id === 'airport')!;
+  const assets = SitesHelper.getAssets('airport')!;
+
+  it('trims a month to date when a throughDate is given', () => {
+    const input = BacktestRunnerHelper.buildInput(airport, tariffSchedules.SCHEDULE_8, assets, gridMonth, null, syntheticMef, '2026-10', '2026-10-26');
+
+    expect(input.intervals.length).toBe(26 * 96);
+    expect(input.intervals[input.intervals.length - 1].localDate).toBe('2026-10-26');
+    expect(input.loadKw.length).toBe(input.intervals.length);
+    expect(input.throughDate).toBe('2026-10-26');
+  });
+
+  it('replays a winter month with a finite bill on Schedule 8', async () => {
+    const input = BacktestRunnerHelper.buildInput(airport, tariffSchedules.SCHEDULE_8, assets, gridMonth, null, syntheticMef, '2026-01');
+    const result = await BacktestRunnerHelper.run(
+      { ...input, marginalKgCo2PerKwh: input.intervals.map(() => 0.4), rushHourMask: input.intervals.map(() => false) },
+      strategies,
+    );
+
+    expect(Number.isFinite(result.baseline.bill.total)).toBe(true);
+    expect(result.baseline.bill.total).toBeGreaterThan(0);
+    expect(result.summary.month).toBe('2026-01');
+  });
+});

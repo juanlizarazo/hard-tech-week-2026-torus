@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, combineLatest, defer, from, map, shareReplay } from 'rxjs';
-import { backtestSettings } from '../backtest/backtest.constants';
-import { IBacktestResult, IBacktestSnapshotSources, IBacktestStrategy } from '../backtest/backtest.interfaces';
+import { Observable, combineLatest, defer, from, map, of, shareReplay, tap } from 'rxjs';
+import { IBacktestCalendar, IBacktestResult, IBacktestSnapshotSources, IBacktestStrategy } from '../backtest/backtest.interfaces';
+import { BacktestMonthsHelper } from '../backtest/backtest-months.helper';
 import { BacktestRunnerHelper } from '../backtest/backtest-runner.helper';
 import { LpStrategyHelper } from '../backtest/lp-strategy.helper';
 import { NaiveShaverHelper } from '../backtest/naive-shaver.helper';
@@ -26,23 +26,51 @@ export class BacktestService {
     LpStrategyHelper.oracle(this._planSolverService),
   ];
 
-  public readonly sources$: Observable<IBacktestSnapshotSources> = combineLatest([
-    this._snapshotService.manifest$,
-    this._snapshotService.getGridMonth(backtestSettings.MONTH),
-    this._snapshotService.getPriceMonth(backtestSettings.MONTH),
-    this._gridSignalsService.marginalEmissions$,
-  ]).pipe(
-    map(
-      ([manifest, gridMonth, priceMonth, seriesList]): IBacktestSnapshotSources => ({
-        manifest,
-        gridMonth,
-        priceMonth,
-        marginalEmissions:
-          seriesList.find((series: IMarginalEmissionsSeries) => series.method === 'fossil-generation') ?? null,
-      }),
-    ),
+  private readonly _sourcesCache = new Map<string, Observable<IBacktestSnapshotSources>>();
+
+  private readonly _resultCache = new Map<string, IBacktestResult>();
+
+  public readonly calendar$: Observable<IBacktestCalendar | null> = this._snapshotService.manifest$.pipe(
+    map((manifest) => {
+      if (!manifest) {
+        return null;
+      }
+
+      const throughDate = BacktestMonthsHelper.throughDate(manifest.pulledAt.toDate());
+
+      return { snapshotId: manifest.id, months: BacktestMonthsHelper.availableMonths(manifest.gridMonths, throughDate), throughDate };
+    }),
     shareReplay(1),
   );
+
+  public sourcesFor(month: string): Observable<IBacktestSnapshotSources> {
+    const cached = this._sourcesCache.get(month);
+
+    if (cached) {
+      return cached;
+    }
+
+    const sources$ = combineLatest([
+      this._snapshotService.manifest$,
+      this._snapshotService.getGridMonth(month),
+      this._snapshotService.getPriceMonth(month),
+      this._gridSignalsService.marginalEmissions$,
+    ]).pipe(
+      map(
+        ([manifest, gridMonth, priceMonth, seriesList]): IBacktestSnapshotSources => ({
+          manifest,
+          gridMonth,
+          priceMonth,
+          marginalEmissions:
+            seriesList.find((series: IMarginalEmissionsSeries) => series.method === 'fossil-generation') ?? null,
+        }),
+      ),
+      shareReplay(1),
+    );
+    this._sourcesCache.set(month, sources$);
+
+    return sources$;
+  }
 
   public run(
     sources: IBacktestSnapshotSources,
@@ -60,6 +88,13 @@ export class BacktestService {
         throw new Error('The backtest is missing a site, tariff, grid month or marginal emissions series.');
       }
 
+      const month = sources.gridMonth.month;
+      const throughDate = sources.manifest
+        ? BacktestMonthsHelper.partialThrough(
+            month,
+            BacktestMonthsHelper.throughDate(sources.manifest.pulledAt.toDate()),
+          )
+        : null;
       const input = BacktestRunnerHelper.buildInput(
         site,
         schedule,
@@ -67,9 +102,20 @@ export class BacktestService {
         sources.gridMonth,
         sources.priceMonth,
         sources.marginalEmissions,
+        month,
+        throughDate,
       );
 
-      return from(BacktestRunnerHelper.run(input, this.strategies));
+      const key = `${month}|${siteId}|${scheduleId}`;
+      const cached = this._resultCache.get(key);
+
+      if (cached) {
+        return of(cached);
+      }
+
+      return from(BacktestRunnerHelper.run(input, this.strategies)).pipe(
+        tap((result: IBacktestResult) => this._resultCache.set(key, result)),
+      );
     });
   }
 }

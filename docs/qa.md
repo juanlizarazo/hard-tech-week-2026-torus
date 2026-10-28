@@ -16,9 +16,17 @@ Average carbon describes the existing mix. Marginal carbon estimates the extra e
 
 PACE's carbon signal barely varies by hour in this snapshot. The dial is still in the objective, but the demand charge and rush-hour constraints dominate the decision. The UI says this plainly rather than implying carbon creates a large effect that the data does not support.
 
-## Why is the Plan's monthly number larger than July's result?
+## Why is the Plan's monthly number larger than a month's proof result?
 
-The Plan screen annualizes the peak from the selected 48-hour scenario: it asks what that peak would cost if it held for a full month. July's proof uses the actual month and charges only the single peak that occurred, so its realized saving can be smaller.
+The Plan screen annualizes the peak from the selected 48-hour scenario: it asks what that peak would cost if it held for a full month. The proof uses the actual month and charges only the single peak that occurred, so its realized saving can be smaller.
+
+## Why July? Did you cherry-pick it?
+
+July is only the opening view. The year ledger at the top of Prove replays every month of 2026 from the same frozen snapshot, site and rate plan. July is not the strongest month for every site, and the winter months still earn; the ledger shows each month's saving and capture rate side by side.
+
+## Why is October partial?
+
+The snapshot was pulled on October 27, so October is replayed through the last complete day, October 26. Its demand charge is the peak so far, not the month's final peak, and the ledger marks it as month to date.
 
 ## What does the Wattsmart reserve mean?
 

@@ -1,6 +1,6 @@
 # DETOUR demo script
 
-Target length: 4 minutes 30 seconds. Keep the app on the pinned snapshot and use the airport / Schedule 8 defaults unless a judge asks for another site.
+Target length: 4 minutes 35 seconds. Keep the app on the pinned snapshot and use the airport / Schedule 8 defaults unless a judge asks for another site.
 
 ## 0:00–0:30 — The hook
 
@@ -50,18 +50,24 @@ Point at the dispatch orders in the solver rail and press Approve plan. Say:
 
 Switch Schedule 6 / 8 if time allows. Open Under the hood and show the LP stats line, then the generated LP text for ten seconds.
 
-## 3:10–4:10 — July's proof (3 Prove)
+## 3:10–4:15 — The proof, month by month (3 Prove)
 
 Open 3 Prove. Say:
 
 > This is the honest backtest: a simple shaver, DETOUR planning one day ahead, and perfect hindsight as the ceiling. The capture rate is how much of that ceiling DETOUR reaches.
 
-Point to the calendar and the peak note:
+Point to the year ledger at the top, then the calendar and the peak note:
 
-> One 15-minute interval sets the month's demand charge. The component bars show where the saving comes from, and the cycle bars show that July uses only a small fraction of either machine's life.
+> Here is every month this year, not just the best one. July is not even the peak; DETOUR still captures about two-thirds of perfect hindsight in winter. October is the month to date.
 
-## 4:10–4:30 — Close
+Then click July in the ledger and say:
+
+> One 15-minute interval sets the month's demand charge. The component bars show where the saving comes from, and the cycle bars show that a month uses only a small fraction of either machine's life.
+
+## 4:15–4:35 — Close
 
 Return to Start here and open How DETOUR works. Say:
 
-> DETOUR is a planning layer above a Torus Station's real-time controller: public grid data becomes a forecast, the forecast becomes a constrained dispatch, and the July replay proves what the strategy earned. Every simulated number is labeled; every public input has a source.
+> DETOUR is a planning layer above a Torus Station's real-time controller: public grid data becomes a forecast, the forecast becomes a constrained dispatch, and the month-by-month replay proves what the strategy earned. Every simulated number is labeled; every public input has a source.
+
+Timing note: the ledger line adds about five seconds (about 40 spoken words); the total is estimated from word count, not yet re-timed with a stopwatch.

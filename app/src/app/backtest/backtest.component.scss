@@ -646,3 +646,34 @@
     grid-area: track;
   }
 }
+
+.dt-backtest__ledger {
+  min-width: 0;
+}
+
+.dt-backtest__ledger-note {
+  margin: 12px 0 0;
+}
+
+.dt-backtest__replay {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 20px;
+  margin: -24px 0 0;
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-13);
+  color: var(--dt-muted);
+}
+
+.dt-backtest__body {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  min-width: 0;
+  transition: opacity var(--dt-motion-2) var(--dt-ease);
+}
+
+.dt-backtest__body--replaying {
+  opacity: 0.55;
+}

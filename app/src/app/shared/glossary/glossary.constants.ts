@@ -184,7 +184,7 @@ export const glossary = {
   PERFECT_HINDSIGHT: {
     term: 'Perfect hindsight',
     short: 'The best plan possible if the whole month were known in advance.',
-    long: 'Also called the oracle. It solves the same LP over the real July loads at once. No real controller can reach it.',
+    long: 'Also called the oracle. It solves the same LP over the real loads of the month at once. No real controller can reach it.',
     whyItMatters: 'It is the ceiling that the capture rate is measured against.'
   },
   CAPTURE_RATE: {

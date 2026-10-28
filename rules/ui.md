@@ -6,7 +6,7 @@ Global classes and component selectors use the `dt-` prefix. Keep it consistent.
 
 - `[UI-16]` Page step: `<p class="dt-page__step"><span class="cdk-visually-hidden">Step N of 3: </span><span class="dt-page__step-number" aria-hidden="true">0N</span><span class="dt-page__step-name">Name</span></p>`. Start is the unnumbered cover; the others are 1 Forecast, 2 Decide, 3 Prove, everywhere (nav, step tags, next-stop signs, Start)
 - `[UI-17]` Rectangular nameplate tags: `.dt-tag` plus `--ink`, `--rush` (rush hour only), `--sim` (simulated) or `--clear`. Use them for evidence labels instead of pills
-- `[UI-18]` Every chart sits in `dt-chart-frame` with an `index` nameplate per screen: F1… on Forecast, D1… on Decide, P1… on Prove
+- `[UI-18]` Every chart sits in `dt-chart-frame` with an `index` nameplate per screen: F1… on Forecast, D1… on Decide, P0 (the year ledger) and P1… on Prove. The index is a focusable `dt-index-tag` that explains F/D/P on focus or hover. The P0 year ledger is a month radiogroup: bar height is savings, a tick is the perfect-foresight ceiling, selection slides a frame with `transform`
 - `[UI-19]` Sections are open and ruled (`.dt-section`, an ink tick on a rule), not generic cards. Use `.dt-panel` only for real instruments
 - `[UI-20]` Motion answers an action. The one ambient exception is the Traffic flow map, which has a visible "Flow" pause control and stops under reduced motion
 

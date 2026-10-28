@@ -1,0 +1,184 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.dt-year-ledger {
+  --dt-ledger-plot-height: 132px;
+
+  min-width: 0;
+  color: var(--dt-ink);
+}
+
+.dt-year-ledger__plot {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--dt-ledger-count), minmax(0, 1fr));
+  border-bottom: 1px solid var(--dt-line-strong);
+}
+
+.dt-year-ledger__frame {
+  position: absolute;
+  top: 0;
+  bottom: -1px;
+  left: 0;
+  width: calc(100% / var(--dt-ledger-count));
+  border: 2px solid var(--dt-ink);
+  border-radius: var(--dt-radius-frame);
+  pointer-events: none;
+  transform: translateX(calc(var(--dt-ledger-index) * 100%));
+  transition: transform var(--dt-motion-2) var(--dt-ease);
+}
+
+.dt-year-ledger__month {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 6px 3px 4px;
+  border: 0;
+  border-radius: var(--dt-radius-frame);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dt-year-ledger__month:hover .dt-year-ledger__column {
+  background: var(--dt-paper-rule);
+}
+
+.dt-year-ledger__month:focus-visible {
+  outline: 2px solid var(--dt-clear);
+  outline-offset: -3px;
+}
+
+.dt-year-ledger__column {
+  position: relative;
+  height: var(--dt-ledger-plot-height);
+  background: var(--dt-paper);
+  border-radius: var(--dt-radius-tag);
+}
+
+.dt-year-ledger__bar {
+  position: absolute;
+  right: 18%;
+  bottom: 0;
+  left: 18%;
+  min-height: 2px;
+  background: var(--dt-clear);
+  border-radius: var(--dt-radius-tag) var(--dt-radius-tag) 0 0;
+}
+
+.dt-year-ledger__bar--partial {
+  background: repeating-linear-gradient(135deg, var(--dt-clear) 0 3px, var(--dt-clear-wash) 3px 6px);
+  border: 1px solid var(--dt-clear);
+}
+
+.dt-year-ledger__ceiling {
+  position: absolute;
+  right: 6%;
+  left: 6%;
+  height: 0;
+  border-top: 2px solid var(--dt-ink);
+}
+
+.dt-year-ledger__value,
+.dt-year-ledger__name {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--dt-muted);
+}
+
+.dt-year-ledger__name {
+  margin-top: 2px;
+  font-size: var(--dt-text-13);
+  font-weight: 700;
+  color: var(--dt-ink);
+}
+
+.dt-year-ledger__name-initial {
+  display: none;
+}
+
+.dt-year-ledger__brackets {
+  display: grid;
+  grid-template-columns: repeat(var(--dt-ledger-count), minmax(0, 1fr));
+  margin-top: 8px;
+}
+
+.dt-year-ledger__bracket {
+  padding-top: 3px;
+  border-top: 1px solid var(--dt-ink);
+  font-family: var(--dt-mono);
+  font-size: var(--dt-text-11);
+  text-align: center;
+  color: var(--dt-muted);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.dt-year-ledger__bracket--partial {
+  border-top-style: dashed;
+  overflow: visible;
+  text-align: right;
+}
+
+.dt-year-ledger__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--dt-text-13);
+  color: var(--dt-muted);
+}
+
+.dt-year-ledger__key-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dt-year-ledger__key-bar {
+  width: 10px;
+  height: 14px;
+  background: var(--dt-clear);
+  border-radius: var(--dt-radius-tag) var(--dt-radius-tag) 0 0;
+}
+
+.dt-year-ledger__key-tick {
+  width: 16px;
+  border-top: 2px solid var(--dt-ink);
+}
+
+@media (max-width: 599px) {
+  .dt-year-ledger {
+    --dt-ledger-plot-height: 104px;
+  }
+
+  .dt-year-ledger__month {
+    padding-inline: 1px;
+  }
+
+  .dt-year-ledger__value {
+    display: none;
+  }
+
+  .dt-year-ledger__name-full {
+    display: none;
+  }
+
+  .dt-year-ledger__name-initial {
+    display: inline;
+  }
+
+  .dt-year-ledger__bracket {
+    font-size: 10px;
+  }
+}

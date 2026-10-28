@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "deploy": "yarn build && firebase deploy --only hosting"
+    "deploy": "yarn build && firebase deploy --only hosting",
+    "precompute:year": "../functions/node_modules/.bin/tsx scripts/precompute-year.ts"
   },
   "private": true,
   "dependencies": {

@@ -14,6 +14,7 @@ import { BacktestStrategyRole } from './backtest.types';
 
 export interface IBacktestInput {
   month: string;
+  throughDate: string | null;
   site: ISiteArchetype;
   schedule: ITariffSchedule;
   assets: IStationAssets;
@@ -111,6 +112,7 @@ export interface IBacktestDay {
 
 export interface IBacktestInputSummary {
   month: string;
+  throughDate: string | null;
   siteId: string;
   siteName: string;
   nominalPeakKw: number;
@@ -155,6 +157,29 @@ export interface IBacktestResult {
   days: IBacktestDay[];
   provenance: IProvenance[];
   sources: IBacktestSources;
+}
+
+export interface IBacktestYearRow {
+  month: string;
+  siteId: string;
+  scheduleId: string;
+  savedUsd: number;
+  captureRate: number | null;
+  demandShare: number;
+  peakKw: number;
+  wattsmartKwh: number;
+}
+
+export interface IBacktestYear {
+  snapshotId: string;
+  throughDate: string;
+  rows: IBacktestYearRow[];
+}
+
+export interface IBacktestCalendar {
+  snapshotId: string;
+  months: string[];
+  throughDate: string;
 }
 
 export interface ILpSolver {

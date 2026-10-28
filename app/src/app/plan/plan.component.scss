@@ -654,3 +654,12 @@
     justify-self: end;
   }
 }
+
+.plan__reserve-rack {
+  min-height: 520px;
+}
+
+.plan__reserve-workspace {
+  min-height: 720px;
+  align-items: flex-start;
+}

@@ -35,7 +35,7 @@ export const architectureStages: IArchitectureStage[] = [
       { title: 'Ridge forecast', detail: 'PACE load with P10–P90' },
       { title: 'Site generator', detail: 'Simulated loads, seed 42' },
       { title: 'LP text + HiGHS WASM', detail: 'The plan, solved live' },
-      { title: 'July replay', detail: 'Day by day, real-time cap' }
+      { title: 'Month replay', detail: 'Day by day, real-time cap' }
     ]
   },
   {
@@ -46,7 +46,7 @@ export const architectureStages: IArchitectureStage[] = [
       { title: 'Start here', detail: 'Three clocks' },
       { title: '① Grid', detail: 'When is it jammed?' },
       { title: '② Plan', detail: 'What should it do?' },
-      { title: "③ July's proof", detail: 'Would it have paid off?' }
+      { title: '③ The proof', detail: 'Would it have paid off?' }
     ]
   }
 ];

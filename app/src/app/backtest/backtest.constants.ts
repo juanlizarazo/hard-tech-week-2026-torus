@@ -4,8 +4,8 @@ import { IBacktestScheduleOption } from './backtest.interfaces';
 
 export const backtestScreenSettings = {
   DEFAULT_SCHEDULE_ID: 'schedule-8' as TariffScheduleId,
-  MONTH_LABEL: 'July 2026',
   CALENDAR_SCALE_STEP_KW: 100,
+  REPLAY_DEBOUNCE_MS: 200,
   CAPTURE_TICKS: [0, 25, 50, 75, 100],
   LOAD_COLOR: 'var(--dt-ink)',
   GRID_COLOR: 'var(--dt-clear-mark)',
@@ -13,8 +13,8 @@ export const backtestScreenSettings = {
   PULSE_COLOR: 'var(--dt-pulse)',
   ON_PEAK_BAND_COLOR: 'var(--dt-muted)',
   EMPTY_MESSAGE: "Grid data isn't loaded yet. Refresh in a minute.",
-  ERROR_MESSAGE: 'We could not replay July 2026 from the grid data. Check your connection and refresh the page.',
-  LOADING_MESSAGE: 'Replaying July 2026 day by day. This takes about ten seconds…',
+  ERROR_MESSAGE: 'We could not replay this month from the grid data. Check your connection and refresh the page.',
+  LOADING_MESSAGE: 'Replaying the month day by day. This takes about ten seconds…',
 };
 
 export const backtestStrategyNames: Record<BacktestStrategyRole, string> = {
